@@ -1,5 +1,10 @@
-"""Start the AutoPocket web app: python run.py [--port 8765] [--no-browser]"""
+"""Start the AutoPocket web app: python run.py [--port 8765] [--no-browser]
+
+The port defaults to $PORT when set (the desktop app's preview passes one when
+8765 is busy), else 8765.
+"""
 import argparse
+import os
 import threading
 import webbrowser
 
@@ -7,7 +12,7 @@ import uvicorn
 
 if __name__ == "__main__":
     ap = argparse.ArgumentParser()
-    ap.add_argument("--port", type=int, default=8765)
+    ap.add_argument("--port", type=int, default=int(os.environ.get("PORT", 8765)))
     ap.add_argument("--no-browser", action="store_true")
     a = ap.parse_args()
     url = f"http://127.0.0.1:{a.port}"
