@@ -48,8 +48,10 @@ if __name__ == "__main__":
     cadio.save_step(side_plate(), OUT / "side_plate.step")
     cadio.save_3mf(side_plate(), OUT / "side_plate.3mf")
     cadio.save_step(round_plate(), OUT / "round_plate.step")
-    for name in ["example", "example1", "example2"]:
-        src = OUT.parent / "examples" / f"blank_{name}.step"
+    blanks = {"example": "example", "example1": "example1", "example2": "example2",
+              "ref_kiwi": "kiwi", "ref_top": "top", "ref_supes": "supes"}
+    for src_name, dst_name in blanks.items():  # run examples/make_blanks.py first
+        src = OUT.parent / "examples" / f"blank_{src_name}.step"
         if src.exists():
-            shutil.copy(src, OUT / f"blank_{name}.step")
+            shutil.copy(src, OUT / f"blank_{dst_name}.step")
     print("samples written")

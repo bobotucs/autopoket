@@ -35,22 +35,30 @@ These match the example plates in `examples/` (8.0 mm ribs, R2 corners).
 
 ## How it works
 
-1. **Plate** â€“ the largest flat face gives the 2D profile (outline + holes) and the
+1. **Plate** – the largest flat face gives the 2D profile (outline + holes) and the
    thickness (`autopocket/pocketer.py`).
-2. **Truss** â€“ nodes go on hole centres, along the frame line (not into outside
-   corners) and on a sparse interior lattice; a Delaunay triangulation joins them.
-   Symmetric plates are laid out on one half (or quarter) and mirrored.
-3. **Pockets** â€“ the space left between the frame rib, hole rings and 8 mm truss
-   ribs, opened with the 2 mm tool radius, dropping pockets narrower than 8 mm.
-   Outlines are built with true arcs and cut through the plate with OpenCascade.
-4. **Structure** â€“ `autopocket/fea.py` rasterises the blank and pocketed profiles
-   and solves a plate FEA (clamped at one end of the long side; out-of-plane
-   bending, in-plane bending, torsion). `autopocket/runner.py` tries truss spacings
-   from 32 to 72 mm and keeps the lightest layout that holds the stiffness target
-   (default 33%, about what the example plates keep).
+2. **Features** – every hole, bearing, slot or cutout gets an 8 mm keep-out band.
+   Overlapping bands merge, so a bearing with its bolt circle or a bolt cluster is one
+   feature; bands that reach the plate edge become bumps on the frame.
+3. **Symmetry** – if the outline and most holes are mirror-symmetric, the layout is
+   built on one half and mirrored (holes missing their twin still steer the ribs).
+4. **Truss** – the space between the frame and the big features is meshed with a
+   constrained quality triangulation (small holes are fixed nodes), then ribs are
+   pruned wherever two cells can merge into one compact pocket. Oversized pockets are
+   split, and any feature a pocket wraps more than 120° around gets an extra strut,
+   so every hole is held from several sides.
+5. **Pockets** – what is left between 8 mm ribs, opened with the 2 mm tool radius and
+   cut through the plate with true arcs (OpenCascade).
+6. **Structure** – `autopocket/fea.py` runs a plate FEA on the blank and pocketed
+   profiles (out-of-plane bending, in-plane bending, torsion); `autopocket/runner.py`
+   tries truss spacings from 32 to 72 mm and keeps the lightest layout that holds the
+   stiffness target (default 33%, about what the example plates keep).
 
-The FEA is a relative estimate with a generic load case â€“ check critical parts
+The FEA is a relative estimate with a generic load case – check critical parts
 against your real loads.
+
+`examples/` holds the hand-pocketed reference plates; `examples/classify.py` separates
+their pockets from real features and `examples/make_blanks.py` rebuilds the blanks.
 
 ## Materials
 

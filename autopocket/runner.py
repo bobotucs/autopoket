@@ -6,9 +6,7 @@ import time
 from shapely.ops import unary_union
 
 from . import cadio, fea
-from shapely.geometry import Polygon
-
-from .pocketer import MAX_GAP_DEG, PlateRules, find_plate, hole_support, pocket_outlines, pocket_plate
+from .pocketer import PlateRules, find_plate, pocket_outlines, pocket_plate, support_report
 
 # density g/cm^3, Young's modulus GPa, yield / tensile strength MPa (typical values)
 MATERIALS = {
@@ -55,10 +53,9 @@ def plan(shape, material="Aluminum 6061-T6", target_stiffness=0.33, rules: Plate
         for p, b in zip(plates, baselines):
             outlines, lines, nodes = pocket_outlines(p.profile, r)
             prof = _pocketed_profile(p.profile, outlines, r.tool_radius)
-            void = Polygon(p.profile.exterior).difference(prof.buffer(0.01))
-            for h in p.profile.interiors:
-                holes += 1
-                holes_ok += int(hole_support(Polygon(h), void, r)[1] <= MAX_GAP_DEG + 1e-6)
+            ok_n, all_n = support_report(p.profile, outlines, r)
+            holes_ok += ok_n
+            holes += all_n
             v0 += p.profile.area * p.thickness
             v1 += prof.area * p.thickness
             n += len(outlines)

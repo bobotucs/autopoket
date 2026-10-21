@@ -6,3 +6,4 @@ pyamg
 fastapi
 uvicorn
 python-multipart
+triangle

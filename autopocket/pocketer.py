@@ -1,17 +1,18 @@
 """Truss-style through-pockets for flat plates (FTC style).
 
-The plate profile is taken from its largest flat face. A rib network is laid out
-like a hand-drawn truss:
+The plate profile is taken from its largest flat face. Then:
 
-  * a frame rib runs around the outline, its centre line `offset` inside the edge;
-  * every hole/cutout gets a ring rib, its centre line `offset` outside the hole;
-  * nodes are placed at hole centres, along the frame line and on a sparse interior
-    lattice, then joined by a Delaunay triangulation (mirrored for symmetric plates);
-  * every rib is `rib` wide.
-
-What is left between the ribs becomes the pockets. They are opened with the tool
-radius so an end mill of that radius can cut every corner, then cut all the way
-through the plate.
+  * every hole/cutout gets a keep-out band (`offset` + half a rib); bands that overlap
+    merge into one blob, so a bearing with its bolt circle or a bolt cluster is
+    treated as a single feature, and bands that reach the frame become bumps on it;
+  * the area between the frame line and the big features' band lines is meshed with a
+    constrained quality triangulation; small holes and clusters are fixed mesh nodes;
+  * mesh edges are pruned where two cells can merge into one still-compact pocket, so
+    narrow gaps between features become whole pockets instead of scraps;
+  * symmetric plates (outline and most holes) are laid out on one half and mirrored;
+  * oversized pockets are split, and any feature that a pocket wraps around too far
+    gets an extra strut, so every hole is held from several sides;
+  * every rib is `rib` wide; pockets are opened with the tool radius and cut through.
 """
 from __future__ import annotations
 
@@ -20,11 +21,11 @@ from dataclasses import asdict, dataclass
 
 import numpy as np
 import shapely
-from scipy.spatial import Delaunay
+import triangle
 from shapely import affinity
 from shapely.geometry import LineString, MultiPolygon, Point, Polygon
 from shapely.geometry.polygon import orient
-from shapely.ops import unary_union
+from shapely.ops import polylabel, unary_union
 
 from OCP.BRep import BRep_Tool
 from OCP.BRepAdaptor import BRepAdaptor_Surface
@@ -157,53 +158,25 @@ def find_plate(solid) -> Plate:
 
 # --------------------------------------------------------------------------- 2D truss layout
 
-def _ring_nodes(ring: Polygon, spacing, skip_convex=False):
-    """Nodes along a polygon boundary: every real corner plus evenly spaced points between."""
-    c = np.array(ring.exterior.coords)[:-1]
-    n = len(c)
-    turn = np.zeros(n)
-    for i in range(n):
-        a, b = c[i] - c[i - 1], c[(i + 1) % n] - c[i]
-        na, nb = np.linalg.norm(a), np.linalg.norm(b)
-        if na > 1e-9 and nb > 1e-9:
-            turn[i] = math.degrees(math.acos(np.clip(a @ b / (na * nb), -1, 1)))
-    corners = [i for i in range(n) if turn[i] > 25]
-    ccw = ring.exterior.is_ccw
-    convex = set()
-    for i in corners:
-        a, b = c[i] - c[i - 1], c[(i + 1) % n] - c[i]
-        if (a[0] * b[1] - a[1] * b[0] > 0) == ccw:
-            convex.add(i)
-    line = ring.exterior
-    if not corners:  # smooth outline (circle, oval): even spacing
-        k = max(3, round(line.length / spacing))
-        return [np.array(line.interpolate(line.length * j / k).coords[0]) for j in range(k)]
-    nodes = []
-    dist = [line.project(Point(c[i])) for i in corners]
-    for j, i in enumerate(corners):
-        d0 = dist[j]
-        d1 = dist[(j + 1) % len(corners)] + (line.length if j + 1 == len(corners) else 0)
-        if i not in convex or not skip_convex:  # ribs never run into outside corners
-            nodes.append(c[i])
-        k = max(1, round((d1 - d0) / spacing))
-        for m in range(1, k):
-            nodes.append(np.array(line.interpolate((d0 + (d1 - d0) * m / k) % line.length).coords[0]))
-    return nodes
+def _reflect_matrix(c, d):
+    m = np.array([[2 * d[0] ** 2 - 1, 2 * d[0] * d[1]], [2 * d[0] * d[1], 2 * d[1] ** 2 - 1]])
+    return [*m.ravel(), *(c - m @ c)]
 
 
-def _mirror_axes(profile: Polygon):
-    """Mirror axes (point, direction) the profile is symmetric about."""
-    c = np.array(profile.envelope.centroid.coords[0])
-    rect = profile.minimum_rotated_rectangle
+def _reflect_geom(g, c, d):
+    return affinity.affine_transform(g, _reflect_matrix(c, d))
+
+
+def _mirror_axes(outline: Polygon):
+    """Mirror axes (point, direction) the plate outline is symmetric about."""
+    c = np.array(outline.envelope.centroid.coords[0])
+    rect = outline.minimum_rotated_rectangle
     rc = np.array(rect.exterior.coords)
     th = math.atan2(*(rc[1] - rc[0])[::-1])
     axes = []
     for ang in [0.0, math.pi / 2, th % math.pi, (th + math.pi / 2) % math.pi]:
         d = np.array([math.cos(ang), math.sin(ang)])
-        # reflection across the line through c with direction d
-        m = np.array([[2 * d[0] ** 2 - 1, 2 * d[0] * d[1]], [2 * d[0] * d[1], 2 * d[1] ** 2 - 1]])
-        mirrored = affinity.affine_transform(profile, [*m.ravel(), *(c - m @ c)])
-        if profile.symmetric_difference(mirrored).area < 2e-3 * profile.area:
+        if outline.symmetric_difference(_reflect_geom(outline, c, d)).area < 5e-3 * outline.area:
             # a second axis must be perpendicular to the first (half -> quarter)
             if not axes or abs(d @ axes[0][1]) < 1e-6:
                 axes.append((c, d))
@@ -216,100 +189,220 @@ def _reflect(pts, c, d):
     return c + 2 * np.outer(v @ d, d) - v
 
 
+SMALL_FEATURE_R = 6.0  # holes up to this radius may be mirrored as phantom holes
+MIRROR_MATCH = 0.6     # share of holes that must have a mirror twin to use an axis
+
+
+def _same(a: Polygon, b: Polygon, tol=0.15):
+    return a.symmetric_difference(b).area < tol * max(a.area, b.area)
+
+
+def plan_features(profile: Polygon):
+    """Features to lay the truss around, and the mirror axes to use.
+
+    If the outline is symmetric and every larger feature (bearing, slot, cutout) has a
+    mirror twin, the layout is mirrored. Small holes without a twin are mirrored as
+    "phantom" holes: they steer the ribs so both halves match, but get no boss.
+    """
+    outline = Polygon(profile.exterior)
+    feats = [Polygon(h) for h in profile.interiors]
+    axes = []
+    for c, d in _mirror_axes(outline):
+        twin = [any(_same(_reflect_geom(f, c, d), g) for g in feats) for f in feats]
+        big_ok = all(t for t, f in zip(twin, feats) if math.sqrt(f.area / math.pi) > SMALL_FEATURE_R)
+        # mirror only when the holes really are (mostly) symmetric about this axis too
+        if big_ok and (not feats or sum(twin) >= MIRROR_MATCH * len(feats)):
+            axes.append((c, d))
+    for c, d in axes:
+        extra = []
+        for f in feats:
+            m = _reflect_geom(f, c, d)
+            if not any(_same(m, g) for g in feats + extra):
+                extra.append(m)
+        feats = feats + extra
+    return outline, feats, axes
+
+
+def real_features(profile: Polygon):
+    return [Polygon(h) for h in profile.interiors]
+
+
+def _blobs(feats, r):
+    """Keep-out bands around features; overlapping bands merge into one blob (a hole cluster)."""
+    keep = unary_union([f.buffer(r.offset + r.rib / 2, quad_segs=32) for f in feats])
+    return [g for g in getattr(keep, "geoms", [keep]) if isinstance(g, Polygon) and not g.is_empty]
+
+
+def _region(outline, r):
+    return outline.buffer(-(r.offset + r.rib / 2), join_style="mitre", mitre_limit=10)
+
+
+def _on_frame(blob, region):
+    """True when a blob runs into the frame band (a hole near the edge)."""
+    return blob.difference(region).area > 1.0
+
+
+def _resample_ring(coords, step, min_pts=3, corner_turn=25.0):
+    """Points along a closed ring: every real corner, plus even spacing (<= step) between."""
+    c = np.array(coords)[:-1] if np.allclose(coords[0], coords[-1]) else np.array(coords)
+    n = len(c)
+    turn = np.zeros(n)
+    for i in range(n):
+        a, b = c[i] - c[i - 1], c[(i + 1) % n] - c[i]
+        na, nb = np.linalg.norm(a), np.linalg.norm(b)
+        if na > 1e-9 and nb > 1e-9:
+            turn[i] = math.degrees(math.acos(np.clip(a @ b / (na * nb), -1, 1)))
+    line = LineString(np.vstack([c, c[:1]]))
+    corners = [i for i in range(n) if turn[i] > corner_turn]
+    if not corners:
+        k = max(min_pts, round(line.length / step))
+        return [np.array(line.interpolate(line.length * j / k).coords[0]) for j in range(k)]
+    out = []
+    dist = [line.project(Point(c[i])) for i in corners]
+    for j, i in enumerate(corners):
+        d0 = dist[j]
+        d1 = dist[(j + 1) % len(corners)] + (line.length if j + 1 == len(corners) else 0)
+        out.append(c[i])
+        k = max(1, math.ceil((d1 - d0) / step - 0.25))
+        for m in range(1, k):
+            out.append(np.array(line.interpolate((d0 + (d1 - d0) * m / k) % line.length).coords[0]))
+    if len(out) < min_pts:
+        k = min_pts
+        out = [np.array(line.interpolate(line.length * j / k).coords[0]) for j in range(k)]
+    return out
+
+
+def _half_plane(c, d, size):
+    """Polygon covering the side of the axis (c, d) that has (p - c) . n >= 0."""
+    nrm = np.array([-d[1], d[0]])
+    return Polygon([c - d * size, c + d * size, c + d * size + nrm * size, c - d * size + nrm * size])
+
+
+def _prune_mesh(V, T, r: PlateRules):
+    """Drop interior mesh edges whose two cells may merge into one still-compact pocket.
+
+    Open areas keep their triangles (merging two would make a pocket too big), while
+    narrow gaps between bearing bands and hole clusters become whole pockets instead
+    of being chopped into scraps too small to cut. Returns the kept edges (index pairs).
+    """
+    S, half = r.spacing, r.rib / 2
+    max_inr = MERGE_INRADIUS * S + half      # measured on rib centre lines
+    max_len = MAX_POCKET_LENGTH * S + 2 * half
+    tri_of = {}
+    for k, t in enumerate(T):
+        for i, j in ((0, 1), (1, 2), (2, 0)):
+            tri_of.setdefault(tuple(sorted((int(t[i]), int(t[j])))), []).append(k)
+    parent = list(range(len(T)))
+    poly = {k: Polygon(V[t]) for k, t in enumerate(T)}
+
+    def find(k):
+        while parent[k] != k:
+            parent[k] = parent[parent[k]]
+            k = parent[k]
+        return k
+
+    def compact(g):
+        if not isinstance(g, Polygon) or g.area < 1e-6:
+            return False
+        if g.area < 0.8 * g.convex_hull.area:
+            return False
+        rect = np.array(g.minimum_rotated_rectangle.exterior.coords)
+        if max(np.linalg.norm(rect[1] - rect[0]), np.linalg.norm(rect[2] - rect[1])) > max_len:
+            return False
+        return g.exterior.distance(polylabel(g, tolerance=0.5)) <= max_inr
+
+    removed = set()
+    interior = [e for e, ts in tri_of.items() if len(ts) == 2]
+    for e in sorted(interior, key=lambda e: np.linalg.norm(V[e[0]] - V[e[1]])):
+        a, b = find(tri_of[e][0]), find(tri_of[e][1])
+        if a == b:
+            removed.add(e)
+            continue
+        merged = unary_union([poly[a], poly[b]]).buffer(1e-6).buffer(-1e-6)
+        if compact(merged):
+            parent[b] = a
+            poly[a] = merged
+            removed.add(e)
+    return [e for e in tri_of if e not in removed]
+
+
 def truss_edges(profile: Polygon, r: PlateRules):
-    """Rib centre lines (list of LineStrings) for a plate profile."""
-    S = r.spacing
-    outer = Polygon(profile.exterior)
-    frame = outer.buffer(-r.offset, join_style="mitre", mitre_limit=10)
+    """Rib centre lines and truss nodes for a plate profile.
+
+    The space the ribs may use (inside the frame line, outside every big feature's band
+    line) is meshed with a constrained quality triangulation, so triangles come out
+    evenly sized, nothing crosses a feature and no area is left without ribs. Small
+    holes and tight hole clusters are fixed mesh nodes, so ribs run into them from
+    several sides. Symmetric plates are meshed on one half (or quarter) and mirrored.
+    """
+    S, half = r.spacing, r.rib / 2
+    outline, feats, axes = plan_features(profile)
+    frame = outline.buffer(-r.offset, join_style="mitre", mitre_limit=10)
     if frame.is_empty:
-        return [], []
+        return [], np.zeros((0, 2))
     if isinstance(frame, MultiPolygon):
         frame = max(frame.geoms, key=lambda g: g.area)
-    cutouts = [Polygon(h) for h in profile.interiors]
+    region = _region(outline, r)
 
-    # nodes, highest priority first
-    nodes = []
-
-    def add(p, min_d):
-        if frame.buffer(1e-6).contains(Point(p)) and all(np.linalg.norm(p - q) >= min_d for q in nodes):
-            nodes.append(np.asarray(p, float))
-
-    for h in cutouts:
-        eq_r = math.sqrt(h.area / math.pi)
-        if eq_r < 0.35 * S:
-            add(np.array(h.centroid.coords[0]), 0.0)
-        else:  # large cutout: nodes around its ring rib
-            for p in _ring_nodes(h.buffer(r.offset), S):
-                add(p, 0.4 * S)
-    for p in _ring_nodes(frame, 1.25 * S, skip_convex=True):  # fewer ribs meet the frame: bigger edge pockets
-        add(p, 0.55 * S)
-    # sparse interior lattice
-    inner = frame.buffer(-0.45 * S)
-    if not inner.is_empty:
-        minx, miny, maxx, maxy = inner.bounds
-        cx, cy = np.array(frame.envelope.centroid.coords[0])
-        h = S * math.sqrt(3) / 2
-        for j in range(-int((cy - miny) / h) - 1, int((maxy - cy) / h) + 2):
-            for i in range(-int((cx - minx) / S) - 2, int((maxx - cx) / S) + 3):
-                p = np.array([cx + i * S + (S / 2 if j % 2 else 0), cy + j * h])
-                if inner.contains(Point(p)):
-                    add(p, 0.7 * S)
-    nodes = np.array(nodes)
-
-    axes = _mirror_axes(profile)
-    if axes:
-        # work on one half (or quarter) and mirror, so the truss is symmetric
-        for c, d in axes:
-            nrm = np.array([-d[1], d[0]])
-            s = (nodes - c) @ nrm
-            near = np.abs(s) < 0.2 * S
-            nodes[near] -= np.outer(s[near], nrm)        # snap onto the axis
-            # make sure the axis meets the frame with a node at both ends
-            for sgn in (-1, 1):
-                far = c - d * 1e4 * sgn
-                hit = LineString([far, c]).intersection(frame.exterior)
-                if not hit.is_empty:
-                    pts = [np.array(g.coords[0]) for g in getattr(hit, "geoms", [hit])]
-                    p = min(pts, key=lambda q: np.linalg.norm(q - far))
-                    if np.linalg.norm(nodes - p, axis=1).min() >= 0.4 * S:
-                        nodes = np.vstack([nodes, p])
-        keep = np.ones(len(nodes), bool)
-        for c, d in axes:  # one half (or quarter), axis nodes included
-            keep &= ((nodes - c) @ np.array([-d[1], d[0]])) >= -1e-6
-        half = nodes[keep]
-        half = np.unique(np.round(half, 6), axis=0)
-        edges = _delaunay_edges(half)
-        for c, d in axes:
-            edges = edges + [(_reflect(a, c, d)[0], _reflect(b, c, d)[0]) for a, b in edges]
-        nodes = np.vstack([half] + [_reflect(half, c, d) for c, d in axes])
-    else:
-        edges = _delaunay_edges(nodes)
+    big, points = [], []
+    for b in _blobs(feats, r):
+        rect = np.array(b.minimum_rotated_rectangle.exterior.coords)
+        size = max(np.linalg.norm(rect[1] - rect[0]), np.linalg.norm(rect[2] - rect[1]))
+        if size > 0.9 * S:
+            big.append(b.buffer(-half))  # the band's centre line becomes a mesh boundary
+        elif not _on_frame(b, region):  # small hole / cluster: one fixed node in the middle
+            ctr = b.centroid if b.contains(b.centroid) else b.representative_point()
+            points.append(np.array(ctr.coords[0]))
+        # small blobs merged into the frame band are just bumps on the frame
+    # merge hole nodes that sit almost on top of each other (e.g. a hole and its mirror twin)
+    merged = []
+    for p in points:
+        for k, (q, n) in enumerate(merged):
+            if np.linalg.norm(p - q / n) < 0.4 * S:
+                merged[k] = (q + p, n + 1)
+                break
+        else:
+            merged.append((p.copy(), 1))
+    points = [q / n for q, n in merged]
+    domain = frame.difference(unary_union(big)) if big else frame
+    extent = 4 * max(outline.bounds[2] - outline.bounds[0], outline.bounds[3] - outline.bounds[1])
+    for c, d in axes:
+        domain = domain.intersection(_half_plane(c, d, extent))
+        points = [p for p in points if (p - c) @ np.array([-d[1], d[0]]) >= -1e-6]
+    max_area = math.sqrt(3) / 4 * S * S * 2.0  # a cap, not a target: typical triangles come out ~half of it
+    edges = []
+    for poly in getattr(domain, "geoms", [domain]):
+        if not isinstance(poly, Polygon) or poly.area < 1.0:
+            continue
+        verts, segs, holes = [], [], []
+        for k, ring in enumerate([poly.exterior, *poly.interiors]):
+            pts = _resample_ring(list(ring.coords), S if k == 0 else 0.8 * S, min_pts=3 if k == 0 else 4)
+            base = len(verts)
+            verts += pts
+            segs += [(base + i, base + (i + 1) % len(pts)) for i in range(len(pts))]
+            if k:
+                holes.append(np.array(Polygon(ring).representative_point().coords[0]))
+        inner = poly.buffer(-0.3 * S)
+        verts += [p for p in points if inner.contains(Point(p))]
+        data = {"vertices": np.array(verts, float), "segments": np.array(segs, int)}
+        if holes:
+            data["holes"] = np.array(holes)
+        try:
+            mesh = triangle.triangulate(data, f"pq20a{max_area:.3f}")
+        except Exception:
+            continue
+        V = mesh["vertices"]
+        edges += [(V[i], V[j]) for i, j in _prune_mesh(V, mesh["triangles"], r)]
+    for c, d in axes:
+        edges = edges + [(_reflect(a, c, d)[0], _reflect(b, c, d)[0]) for a, b in edges]
     lines = [LineString([a, b]) for a, b in edges if np.linalg.norm(a - b) > 1e-6]
-    # drop ribs that run outside the plate (concave outlines)
-    lines = [ln for ln in lines if frame.buffer(0.5).contains(ln.interpolate(0.5, normalized=True))]
+    nodes = np.unique(np.round(np.array([q for e in edges for q in e]), 6), axis=0) if edges else np.zeros((0, 2))
     return lines, nodes
 
 
-def _delaunay_edges(pts):
-    if len(pts) < 3:
-        return [(pts[0], pts[1])] if len(pts) == 2 else []
-    tri = Delaunay(pts)
-    es = set()
-    for s in tri.simplices:
-        # skip sliver triangles along straight boundaries
-        a, b, c = pts[s]
-        u, v = b - a, c - a
-        area = abs(u[0] * v[1] - u[1] * v[0]) / 2
-        longest = max(np.linalg.norm(b - a), np.linalg.norm(c - b), np.linalg.norm(a - c))
-        if area < 0.08 * longest ** 2:
-            continue
-        for i, j in ((0, 1), (1, 2), (2, 0)):
-            es.add(tuple(sorted((int(s[i]), int(s[j])))))
-    return [(pts[i], pts[j]) for i, j in es]
-
-
-MAX_GAP_DEG = 120.0  # no pocket may wrap more than this far around a hole, so every hole
-                     # is held by material on at least three sides
+MAX_GAP_DEG = 120.0        # no pocket may wrap more than this far around a feature, so every
+                           # hole is held by material on at least three sides
+MAX_GAP_FRAME_DEG = 180.0  # features merged into the frame band are held along that side
 
 
 def _cut_pockets(region, ribs, r: PlateRules):
@@ -332,26 +425,25 @@ def _cut_pockets(region, ribs, r: PlateRules):
     return out, unary_union(rounded) if rounded else Polygon()
 
 
-def hole_support(hole: Polygon, void, r: PlateRules, samples=120):
-    """(struts, largest unsupported gap in degrees, gap centre angle) around one hole.
+def hole_support(blob: Polygon, void, r=None, samples=144):
+    """(struts, largest unsupported gap in degrees, gap centre point) around a feature.
 
-    Walks a ring just outside the hole's keep-out band; every stretch that is solid
-    material (a rib, the frame, another hole's ring) counts as one strut.
+    `blob` is the feature's keep-out band (a hole cluster counts as one blob). Walks a
+    ring just outside it; every stretch of solid material (a rib, the frame, another
+    feature's band) counts as one strut. Gaps are measured as a share of the ring, in
+    degrees, so they also work for slots and odd-shaped clusters.
     """
-    ring = hole.buffer(r.offset + r.rib / 2 + 0.75, quad_segs=32).exterior
-    c = np.array(hole.centroid.coords[0])
+    ring = blob.buffer(0.75, quad_segs=32).exterior
     pts = np.array([ring.interpolate(t, normalized=True).coords[0]
                     for t in np.linspace(0, 1, samples, endpoint=False)])
-    ang = np.degrees(np.arctan2(pts[:, 1] - c[1], pts[:, 0] - c[0])) % 360
-    order = np.argsort(ang)
-    ang, pts = ang[order], pts[order]
     sup = ~shapely.contains_xy(void, pts[:, 0], pts[:, 1]) if not void.is_empty else np.ones(len(pts), bool)
     if sup.all():
         return 99, 0.0, None
     if not sup.any():
-        return 0, 360.0, 0.0
+        return 0, 360.0, pts[0]
     start = int(np.argmax(sup & ~np.roll(sup, 1)))  # first sample of some supported run
-    sup, ang = np.roll(sup, -start), np.roll(ang, -start)
+    sup, pts = np.roll(sup, -start), np.roll(pts, -start, axis=0)
+    step = 360.0 / samples
     struts, gaps, i, n = 0, [], 0, len(sup)
     while i < n:
         j = i
@@ -360,30 +452,37 @@ def hole_support(hole: Polygon, void, r: PlateRules, samples=120):
         if sup[i]:
             struts += 1
         else:
-            a0, a1 = ang[i - 1] if i else ang[i], ang[(j + 1) % n]
-            width = (a1 - a0) % 360
-            gaps.append((width, (a0 + width / 2) % 360))
+            gaps.append(((j - i + 2) * step, pts[(i + j) // 2]))
         i = j + 1
-    width, mid = max(gaps)
+    width, mid = max(gaps, key=lambda g: g[0])
     return struts, width, mid
 
 
-def _add_strut(c, mid_deg, lines, nodes, frame, keep_r, S):
-    """A short rib from hole centre c into the gap at angle mid_deg.
+def _max_gap(blob, region):
+    # a feature merged into the frame band is held along the whole frame side
+    return MAX_GAP_FRAME_DEG if _on_frame(blob, region) else MAX_GAP_DEG
 
-    Runs straight out to the nearest rib or the frame; falls back to a nearby node.
-    """
-    u = np.array([math.cos(math.radians(mid_deg)), math.sin(math.radians(mid_deg))])
-    ray = LineString([c + u * keep_r, c + u * 3 * S])
+
+def _add_strut(blob: Polygon, mid_pt, lines, nodes, frame, S):
+    """A short rib from the feature into its biggest gap, out to the nearest rib or the frame."""
+    c = np.array(blob.centroid.coords[0]) if blob.contains(blob.centroid) else np.array(
+        blob.representative_point().coords[0])
+    u = np.asarray(mid_pt) - c
+    if np.linalg.norm(u) < 1e-9:
+        return None
+    u = u / np.linalg.norm(u)
+    ray = LineString([c, c + u * (np.linalg.norm(np.asarray(mid_pt) - c) + 3 * S)])
     hit = ray.intersection(unary_union([frame.exterior] + lines))
+    inner = blob.buffer(-0.5)
     pts = [np.array(xy) for g in getattr(hit, "geoms", [hit]) if not g.is_empty for xy in g.coords]
+    pts = [q for q in pts if not inner.contains(Point(q))]
     if pts:
         return LineString([c, min(pts, key=lambda q: np.linalg.norm(q - c))])
     best, best_score = None, 1e9
     for q in nodes:
         v = q - c
         d = np.linalg.norm(v)
-        if d < keep_r + 4 or d > 2.5 * S:
+        if blob.buffer(4).contains(Point(q)) or d > 2.5 * S:
             continue
         off = math.degrees(math.acos(np.clip(v @ u / d, -1, 1)))
         if off <= 35 and off / 30 + d / S < best_score:
@@ -391,35 +490,125 @@ def _add_strut(c, mid_deg, lines, nodes, frame, keep_r, S):
     return None if best is None else LineString([c, best])
 
 
+MAX_POCKET_INRADIUS = 0.36  # x spacing: fatter pockets get a node in the middle
+MERGE_INRADIUS = 0.30       # x spacing: two mesh cells merge only while the result stays this slim
+MAX_POCKET_LENGTH = 2.0     # x spacing: longer pockets get a cross rib
+
+
+def _cell_corners(cell: Polygon, min_turn=35.0):
+    """Convex corners of a pocket cell (where its bounding ribs meet)."""
+    c = np.array(orient(cell, 1.0).exterior.coords)[:-1]
+    out = []
+    for i in range(len(c)):
+        a, b = c[i] - c[i - 1], c[(i + 1) % len(c)] - c[i]
+        na, nb = np.linalg.norm(a), np.linalg.norm(b)
+        if na < 1e-9 or nb < 1e-9:
+            continue
+        cross = a[0] * b[1] - a[1] * b[0]
+        turn = math.degrees(math.acos(np.clip(a @ b / (na * nb), -1, 1)))
+        if cross > 0 and turn > min_turn:
+            out.append(c[i])
+    return out
+
+
+def _split_cell(cell: Polygon, r: PlateRules):
+    """Ribs that break an oversized pocket cell into truss-like pieces (or [] if it is fine)."""
+    S, half = r.spacing, r.rib / 2
+    pole = polylabel(cell, tolerance=0.5)
+    p = np.array(pole.coords[0])
+    inrad = cell.exterior.distance(pole)
+    rect = np.array(cell.minimum_rotated_rectangle.exterior.coords)
+    e1, e2 = rect[1] - rect[0], rect[2] - rect[1]
+    long_e = e1 if np.linalg.norm(e1) >= np.linalg.norm(e2) else e2
+    length = np.linalg.norm(long_e)
+    if inrad > MAX_POCKET_INRADIUS * S:
+        # node in the middle, ribs out to the cell's corners (spread around it)
+        corners = sorted(_cell_corners(cell), key=lambda q: math.atan2(q[1] - p[1], q[0] - p[0]))
+        if len(corners) < 3:
+            ring = cell.exterior
+            corners = [np.array(ring.interpolate(t, normalized=True).coords[0]) for t in (0, 1 / 3, 2 / 3)]
+        picked = []
+        for q in sorted(corners, key=lambda q: -np.linalg.norm(q - p)):
+            ang = math.atan2(q[1] - p[1], q[0] - p[0])
+            if all(abs((ang - a + math.pi) % (2 * math.pi) - math.pi) > math.radians(70) for a, _ in picked):
+                picked.append((ang, q))
+        lines = []
+        for _, q in picked[:5]:
+            u = (q - p) / max(np.linalg.norm(q - p), 1e-9)
+            lines.append(LineString([p, q + u * (half + 1.0)]))  # reach into the ribs at the corner
+        return lines
+    if length > MAX_POCKET_LENGTH * S:
+        # long, slim pocket: one rib straight across the middle
+        u = long_e / length
+        nrm = np.array([-u[1], u[0]])
+        c = np.array(cell.centroid.coords[0]) if cell.contains(cell.centroid) else p
+        span = np.linalg.norm(e1) + np.linalg.norm(e2)
+        cut = LineString([c - nrm * span, c + nrm * span]).intersection(cell.buffer(half + 1.0))
+        segs = [g for g in getattr(cut, "geoms", [cut]) if g.geom_type == "LineString" and not g.is_empty]
+        return [max(segs, key=lambda g: g.length)] if segs else []
+    return []
+
+
 def pocket_outlines(profile: Polygon, r: PlateRules):
     """2D pocket polygons (sharp-cornered, to be rounded with r.tool_radius)."""
     half = r.rib / 2
-    outer = Polygon(profile.exterior)
-    region = outer.buffer(-(r.offset + half), join_style="mitre", mitre_limit=10)
-    frame = outer.buffer(-r.offset, join_style="mitre", mitre_limit=10)
-    holes = [Polygon(h) for h in profile.interiors]
-    keepouts = [h.buffer(r.offset + half, quad_segs=32) for h in holes]
+    outline, _, axes = plan_features(profile)
+    region = _region(outline, r)
+    frame = outline.buffer(-r.offset, join_style="mitre", mitre_limit=10)
+    if isinstance(frame, MultiPolygon):
+        frame = max(frame.geoms, key=lambda g: g.area)
+    blobs = _blobs(real_features(profile), r)
     lines, nodes = truss_edges(profile, r)
-    ribs = unary_union([ln.buffer(half, quad_segs=16) for ln in lines] + keepouts)
+    ribs = unary_union([ln.buffer(half, quad_segs=16) for ln in lines] + blobs)
+    # break up oversized pockets the triangulation left open (one half on symmetric plates)
+    for _ in range(6):
+        cells = region.difference(ribs)
+        added = []
+        for cell in getattr(cells, "geoms", [cells]):
+            if not isinstance(cell, Polygon) or cell.area < r.min_pocket_area:
+                continue
+            ctr = np.array(cell.centroid.coords[0])
+            if any((ctr - c) @ np.array([-d[1], d[0]]) < -1e-6 for c, d in axes):
+                continue
+            added += _split_cell(cell, r)
+        if not added:
+            break
+        for c, d in axes:
+            added = added + [LineString(_reflect(np.array(ln.coords), c, d)) for ln in added]
+        lines = lines + added
+        ribs = unary_union([ribs] + [ln.buffer(half, quad_segs=16) for ln in added])
     out, void = _cut_pockets(region, ribs, r)
-    # make sure no hole hangs off one or two ribs: add struts into the biggest gaps
+    # make sure no feature hangs off one or two ribs: add struts into the biggest gaps
     for _ in range(6):
         added = []
-        for h in holes:
-            struts, gap, mid = hole_support(h, void, r)
-            if gap <= MAX_GAP_DEG:
+        for b in blobs:
+            struts, gap, mid = hole_support(b, void)
+            if gap <= _max_gap(b, region):
                 continue
-            c = np.array(h.centroid.coords[0])
-            keep_r = math.sqrt(h.area / math.pi) + r.offset + half
-            ln = _add_strut(c, mid, lines + added, nodes, frame, keep_r, r.spacing)
+            ln = _add_strut(b, mid, lines + added, nodes, frame, r.spacing)
             if ln is not None and ln.length > 1e-3:
                 added.append(ln)
         if not added:
             break
+        for c, d in axes:  # keep symmetric plates symmetric
+            added = added + [LineString(_reflect(np.array(ln.coords), c, d)) for ln in added]
         lines = lines + added
         ribs = unary_union([ribs] + [ln.buffer(half, quad_segs=16) for ln in added])
         out, void = _cut_pockets(region, ribs, r)
     return out, lines, nodes
+
+
+def support_report(profile: Polygon, outlines, r: PlateRules):
+    """(features held well, total features) for a finished layout."""
+    region = _region(Polygon(profile.exterior), r)
+    void = unary_union([o.buffer(-r.tool_radius).buffer(r.tool_radius) for o in outlines]) if outlines else Polygon()
+    real = real_features(profile)
+    ok = 0
+    for b in _blobs(real, r):
+        n = sum(1 for h in real if b.contains(h.representative_point()))
+        if n and hole_support(b, void)[1] <= _max_gap(b, region) + 1e-6:
+            ok += n
+    return ok, len(real)
 
 
 # --------------------------------------------------------------------------- 3D
@@ -476,9 +665,9 @@ def _merge_arcs(segs, max_turn=12.0):
             L = np.linalg.norm(segs[i][-1] - segs[i][1])
             t0 = None
             while (j + 1 < n and segs[j + 1][0] == "line"
-                   and abs(np.linalg.norm(segs[j + 1][-1] - segs[j + 1][1]) - L) < 0.05 * L + 1e-6):
+                   and abs(np.linalg.norm(segs[j + 1][-1] - segs[j + 1][1]) - L) < 0.4 * L + 1e-6):
                 t = turn(segs[j], segs[j + 1])
-                if not 0.3 < abs(t) < max_turn or (t0 is not None and abs(t - t0) > 0.2 * abs(t0) + 0.05):
+                if not 0.3 < abs(t) < max_turn or (t0 is not None and (t > 0) != (t0 > 0)):
                     break
                 t0 = t if t0 is None else t0
                 j += 1
@@ -560,8 +749,13 @@ def pocket_plate(plate: Plate, r: PlateRules, outlines=None):
     for poly in outlines:
         try:
             face = make_face(poly, fr, 0.5, r.tool_radius)
-        except Exception:
-            face = make_face(poly, fr, 0.5)
+            if not BRepCheck_Analyzer(face).IsValid():
+                raise ValueError("invalid outline")
+        except Exception:  # fall back to the tool-radius opening as a plain polygon
+            rounded = poly.buffer(-r.tool_radius).buffer(r.tool_radius, quad_segs=8).simplify(0.01)
+            if not isinstance(rounded, Polygon) or rounded.is_empty:
+                continue
+            face = make_face(orient(rounded, 1.0), fr, 0.5)
         tools.append(BRepPrimAPI_MakePrism(face, gp_Vec(*(-fr.n * (t + 1.0)))).Shape())
     if not tools:
         return plate.solid, 0, (outlines, lines, nodes)
