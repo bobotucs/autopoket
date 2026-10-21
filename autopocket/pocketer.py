@@ -1,48 +1,47 @@
-"""Automatic lightening pockets for planar faces of a B-rep solid.
+"""Truss-style through-pockets for flat plates (FTC style).
 
-For every eligible planar face:
-  1. The face outline is projected to 2D and inset by `wall` (holes grow by `wall`,
-     so bolt holes keep a ring of material around them).
-  2. A rib pattern (isogrid triangles or a rectangular grid) splits the inset
-     region into pocket cells; cells too small for the cutter are dropped.
-  3. The material under each cell is measured with rays. Thin, uniform plates get
-     through-pockets; everything else gets blind pockets leaving `floor` material.
-  4. Each pocket is checked against the *current* solid with a slightly enlarged
-     test volume so it never breaks into holes, other pockets or outer walls.
-  5. Pocket outlines get corner fillets of `corner_radius` (≈ end-mill radius)
-     and are cut from the solid.
+The plate profile is taken from its largest flat face. A rib network is laid out
+like a hand-drawn truss:
+
+  * a frame rib runs around the outline, its centre line `offset` inside the edge;
+  * every hole/cutout gets a ring rib, its centre line `offset` outside the hole;
+  * nodes are placed at hole centres, along the frame line and on a sparse interior
+    lattice, then joined by a Delaunay triangulation (mirrored for symmetric plates);
+  * every rib is `rib` wide.
+
+What is left between the ribs becomes the pockets. They are opened with the tool
+radius so an end mill of that radius can cut every corner, then cut all the way
+through the plate.
 """
 from __future__ import annotations
 
 import math
-from dataclasses import asdict, dataclass, field
+from dataclasses import asdict, dataclass
 
 import numpy as np
-import shapely
+from scipy.spatial import Delaunay
 from shapely import affinity
-from shapely.geometry import LineString, MultiPolygon, Polygon, box as sbox
+from shapely.geometry import LineString, MultiPolygon, Point, Polygon
 from shapely.geometry.polygon import orient
 from shapely.ops import unary_union
 
 from OCP.BRep import BRep_Tool
 from OCP.BRepAdaptor import BRepAdaptor_Surface
-from OCP.BRepAlgoAPI import BRepAlgoAPI_Common, BRepAlgoAPI_Cut
+from OCP.BRepAlgoAPI import BRepAlgoAPI_Cut
 from OCP.BRepBuilderAPI import (
     BRepBuilderAPI_MakeEdge,
     BRepBuilderAPI_MakeFace,
     BRepBuilderAPI_MakeVertex,
     BRepBuilderAPI_MakeWire,
 )
-from OCP.GC import GC_MakeArcOfCircle
 from OCP.BRepCheck import BRepCheck_Analyzer
-from OCP.BRepExtrema import BRepExtrema_DistShapeShape
 from OCP.BRepMesh import BRepMesh_IncrementalMesh
 from OCP.BRepPrimAPI import BRepPrimAPI_MakePrism
+from OCP.GC import GC_MakeArcOfCircle
 from OCP.GeomAbs import GeomAbs_Plane
 from OCP.IntCurvesFace import IntCurvesFace_ShapeIntersector
 from OCP.TopAbs import TopAbs_REVERSED
 from OCP.TopLoc import TopLoc_Location
-from OCP.TopoDS import TopoDS
 from OCP.collections import List_TopoDS_Shape
 from OCP.gp import gp_Ax3, gp_Dir, gp_Lin, gp_Pln, gp_Pnt, gp_Vec
 
@@ -50,24 +49,12 @@ from . import cadio
 
 
 @dataclass
-class PocketParams:
-    pattern: str = "triangle"        # "triangle" (isogrid), "grid", or "single"
-    cell_size: float = 35.0          # pattern pitch, mm
-    rib_width: float = 3.0           # material between neighbouring pockets, mm
-    wall: float = 4.0                # material kept along face edges and around holes, mm
-    floor: float = 1.5               # material left under blind pockets, mm
-    corner_radius: float = 2.0       # inside corner radius (>= end-mill radius), mm
-    through: bool = True             # allow through-pockets on thin uniform plates
-    through_max_thickness: float = 13.0
-    min_depth: float = 0.8           # skip blind pockets shallower than this, mm
-    min_pocket_area: float = 25.0    # mm^2
-    min_face_area: float = 300.0     # mm^2
-    excluded_faces: list = field(default_factory=list)  # face indices (cadio.faces order)
-
-    @classmethod
-    def from_dict(cls, d):
-        names = set(cls.__dataclass_fields__)
-        return cls(**{k: v for k, v in (d or {}).items() if k in names})
+class PlateRules:
+    rib: float = 8.0           # width of every rib, mm
+    offset: float = 4.0        # rib centre line distance from plate edges and hole edges, mm
+    tool_radius: float = 2.0   # end-mill radius = minimum inside corner radius, mm
+    spacing: float = 55.0      # target distance between truss nodes, mm
+    min_pocket_area: float = 150.0  # mm^2, smaller pockets are not worth the machining
 
     def to_dict(self):
         return asdict(self)
@@ -92,10 +79,23 @@ class FaceFrame:
         return gp_Ax3(gp_Pnt(*o), gp_Dir(*z), gp_Dir(*self.x))
 
 
-# --------------------------------------------------------------------------- face analysis
+@dataclass
+class Plate:
+    solid: object
+    frame: FaceFrame
+    profile: Polygon      # outline with holes, in frame coordinates
+    thickness: float
+    warnings: list
+
+
+def _np(p):
+    return np.array([p.X(), p.Y(), p.Z()])
+
+
+# --------------------------------------------------------------------------- plate detection
 
 def planar_faces(shape, lin_defl):
-    """Collect planar faces with their 2D outline in a local frame."""
+    """Planar faces with their 2D outline in a local frame."""
     BRepMesh_IncrementalMesh(shape, lin_defl, False, 0.2, True)
     out = []
     for i, f in enumerate(cadio.faces(shape)):
@@ -103,9 +103,7 @@ def planar_faces(shape, lin_defl):
         if surf.GetType() != GeomAbs_Plane:
             continue
         pos = surf.Plane().Position()
-        o = _np(pos.Location())
-        x = _np(pos.XDirection())
-        y = _np(pos.YDirection())
+        o, x, y = _np(pos.Location()), _np(pos.XDirection()), _np(pos.YDirection())
         n = np.cross(x, y)
         if f.Orientation() == TopAbs_REVERSED:
             n = -n
@@ -117,8 +115,7 @@ def planar_faces(shape, lin_defl):
         pts = np.array([_np(tri.Node(k).Transformed(trsf)) for k in range(1, tri.NbNodes() + 1)])
         uv = np.c_[(pts - o) @ x, (pts - o) @ y]
         idx = np.array([tri.Triangle(k).Get() for k in range(1, tri.NbTriangles() + 1)]) - 1
-        polys = [Polygon(uv[t]) for t in idx]
-        polys = [p for p in polys if p.area > 1e-9]
+        polys = [p for p in (Polygon(uv[t]) for t in idx) if p.area > 1e-9]
         if not polys:
             continue
         outline = unary_union(polys).buffer(1e-4, join_style="mitre").buffer(-1e-4, join_style="mitre")
@@ -126,128 +123,222 @@ def planar_faces(shape, lin_defl):
     return out
 
 
-def _np(p):
-    return np.array([p.X(), p.Y(), p.Z()])
+def thickness_at(shape, p, n):
+    ix = IntCurvesFace_ShapeIntersector()
+    ix.Load(shape, 1e-6)
+    ix.Perform(gp_Lin(gp_Pnt(*(p - n * 1e-3)), gp_Dir(*(-n))), 0.0, 1e9)
+    ws = [ix.WParameter(i) for i in range(1, ix.NbPnt() + 1)]
+    ws = [w for w in ws if w > 1e-4]
+    return min(ws) if ws else None
 
 
-# --------------------------------------------------------------------------- 2D pattern
-
-def _main_angle(region):
-    rect = region.minimum_rotated_rectangle
-    c = np.array(rect.exterior.coords)
-    e1, e2 = c[1] - c[0], c[2] - c[1]
-    e = e1 if np.hypot(*e1) >= np.hypot(*e2) else e2
-    return math.atan2(e[1], e[0])
-
-
-def _lines(center, normal_angle, spacing, extent, offset=0.0):
-    """Parallel lines (as LineStrings) with given normal direction, spaced `spacing` apart."""
-    n = np.array([math.cos(normal_angle), math.sin(normal_angle)])
-    d = np.array([-n[1], n[0]])
-    k = int(extent / spacing) + 2
-    out = []
-    for j in range(-k, k + 1):
-        p = center + n * (offset + j * spacing)
-        out.append(LineString([p - d * extent, p + d * extent]))
-    return out
-
-
-def rib_network(region, p: PocketParams):
-    if p.pattern == "single":
-        return None
-    minx, miny, maxx, maxy = region.bounds
-    extent = math.hypot(maxx - minx, maxy - miny) + p.cell_size
-    c = np.array(region.centroid.coords[0])
-    th = _main_angle(region)
-    if p.pattern == "grid":
-        # fit a whole number of cells along each principal direction
-        rot = affinity.rotate(region, -th, origin=tuple(c), use_radians=True)
-        rx0, ry0, rx1, ry1 = rot.bounds
-        lines = []
-        for axis, (a0, a1) in enumerate([(rx0, rx1), (ry0, ry1)]):
-            L = a1 - a0
-            n = max(1, round(L / p.cell_size))
-            for i in range(1, n):
-                v = a0 + L * i / n
-                if axis == 0:
-                    lines.append(LineString([(v, ry0 - 1), (v, ry1 + 1)]))
-                else:
-                    lines.append(LineString([(rx0 - 1, v), (rx1 + 1, v)]))
-        if not lines:
-            return None
-        net = unary_union([ln.buffer(p.rib_width / 2, cap_style="flat") for ln in lines])
-        return affinity.rotate(net, th, origin=tuple(c), use_radians=True)
-    # isogrid: three line families 60 deg apart, all passing through the centroid
-    h = p.cell_size * math.sqrt(3) / 2
-    lines = []
-    for k in range(3):
-        lines += _lines(c, th + math.pi / 2 + k * 2 * math.pi / 3, h, extent)
-    return unary_union([ln.buffer(p.rib_width / 2, cap_style="flat") for ln in lines])
+def find_plate(solid) -> Plate:
+    lo, hi = cadio.bbox(solid)
+    lin = max(0.01, float(np.linalg.norm(hi - lo)) * 1e-4)
+    frames = planar_faces(solid, lin)
+    if not frames:
+        raise ValueError("No flat face found - AutoPocket only works on flat plates")
+    fr = max(frames, key=lambda f: f.outline.area)
+    profile = fr.outline
+    if isinstance(profile, MultiPolygon):
+        profile = max(profile.geoms, key=lambda g: g.area)
+    warnings = []
+    t = thickness_at(solid, fr.to3d(profile.representative_point().coords[0])[0], fr.n)
+    if t is None:
+        raise ValueError("Could not measure the plate thickness")
+    size = np.array(profile.bounds[2:]) - np.array(profile.bounds[:2])
+    if abs(cadio.volume(solid) - profile.area * t) > 0.03 * profile.area * t:
+        warnings.append("Part is not a uniform flat plate; pockets are cut through the whole profile anyway.")
+    if size.max() > 18 * 25.4 + 0.5:
+        warnings.append(f"Plate is {size.max() / 25.4:.1f} in long - bigger than the 18 in FTC sizing box.")
+    return Plate(solid, fr, orient(profile, 1.0), t, warnings)
 
 
-def pocket_cells(outline, p: PocketParams):
-    region = outline.buffer(-p.wall, join_style="mitre", mitre_limit=5)
-    if region.is_empty:
-        return []
-    ribs = rib_network(region, p)
-    cells = region.difference(ribs) if ribs is not None else region
-    out = []
-    r = max(p.corner_radius, 0.05)
-    for c in _polys(cells):
-        # must fit the cutter with some margin, and be big enough to matter
-        if c.buffer(-1.15 * r).is_empty or c.area < p.min_pocket_area:
+# --------------------------------------------------------------------------- 2D truss layout
+
+def _ring_nodes(ring: Polygon, spacing, skip_convex=False):
+    """Nodes along a polygon boundary: every real corner plus evenly spaced points between."""
+    c = np.array(ring.exterior.coords)[:-1]
+    n = len(c)
+    turn = np.zeros(n)
+    for i in range(n):
+        a, b = c[i] - c[i - 1], c[(i + 1) % n] - c[i]
+        na, nb = np.linalg.norm(a), np.linalg.norm(b)
+        if na > 1e-9 and nb > 1e-9:
+            turn[i] = math.degrees(math.acos(np.clip(a @ b / (na * nb), -1, 1)))
+    corners = [i for i in range(n) if turn[i] > 25]
+    ccw = ring.exterior.is_ccw
+    convex = set()
+    for i in corners:
+        a, b = c[i] - c[i - 1], c[(i + 1) % n] - c[i]
+        if (a[0] * b[1] - a[1] * b[0] > 0) == ccw:
+            convex.add(i)
+    line = ring.exterior
+    if not corners:  # smooth outline (circle, oval): even spacing
+        k = max(3, round(line.length / spacing))
+        return [np.array(line.interpolate(line.length * j / k).coords[0]) for j in range(k)]
+    nodes = []
+    dist = [line.project(Point(c[i])) for i in corners]
+    for j, i in enumerate(corners):
+        d0 = dist[j]
+        d1 = dist[(j + 1) % len(corners)] + (line.length if j + 1 == len(corners) else 0)
+        if i not in convex or not skip_convex:  # ribs never run into outside corners
+            nodes.append(c[i])
+        k = max(1, round((d1 - d0) / spacing))
+        for m in range(1, k):
+            nodes.append(np.array(line.interpolate((d0 + (d1 - d0) * m / k) % line.length).coords[0]))
+    return nodes
+
+
+def _mirror_axes(profile: Polygon):
+    """Mirror axes (point, direction) the profile is symmetric about."""
+    c = np.array(profile.envelope.centroid.coords[0])
+    rect = profile.minimum_rotated_rectangle
+    rc = np.array(rect.exterior.coords)
+    th = math.atan2(*(rc[1] - rc[0])[::-1])
+    axes = []
+    for ang in [0.0, math.pi / 2, th % math.pi, (th + math.pi / 2) % math.pi]:
+        d = np.array([math.cos(ang), math.sin(ang)])
+        # reflection across the line through c with direction d
+        m = np.array([[2 * d[0] ** 2 - 1, 2 * d[0] * d[1]], [2 * d[0] * d[1], 2 * d[1] ** 2 - 1]])
+        mirrored = affinity.affine_transform(profile, [*m.ravel(), *(c - m @ c)])
+        if profile.symmetric_difference(mirrored).area < 2e-3 * profile.area:
+            # a second axis must be perpendicular to the first (half -> quarter)
+            if not axes or abs(d @ axes[0][1]) < 1e-6:
+                axes.append((c, d))
+    return axes[:2]
+
+
+def _reflect(pts, c, d):
+    pts = np.atleast_2d(pts)
+    v = pts - c
+    return c + 2 * np.outer(v @ d, d) - v
+
+
+def truss_edges(profile: Polygon, r: PlateRules):
+    """Rib centre lines (list of LineStrings) for a plate profile."""
+    S = r.spacing
+    outer = Polygon(profile.exterior)
+    frame = outer.buffer(-r.offset, join_style="mitre", mitre_limit=10)
+    if frame.is_empty:
+        return [], []
+    if isinstance(frame, MultiPolygon):
+        frame = max(frame.geoms, key=lambda g: g.area)
+    cutouts = [Polygon(h) for h in profile.interiors]
+
+    # nodes, highest priority first
+    nodes = []
+
+    def add(p, min_d):
+        if frame.buffer(1e-6).contains(Point(p)) and all(np.linalg.norm(p - q) >= min_d for q in nodes):
+            nodes.append(np.asarray(p, float))
+
+    for h in cutouts:
+        eq_r = math.sqrt(h.area / math.pi)
+        if eq_r < 0.35 * S:
+            add(np.array(h.centroid.coords[0]), 0.0)
+        else:  # large cutout: nodes around its ring rib
+            for p in _ring_nodes(h.buffer(r.offset), S):
+                add(p, 0.4 * S)
+    for p in _ring_nodes(frame, 1.25 * S, skip_convex=True):  # fewer ribs meet the frame: bigger edge pockets
+        add(p, 0.55 * S)
+    # sparse interior lattice
+    inner = frame.buffer(-0.45 * S)
+    if not inner.is_empty:
+        minx, miny, maxx, maxy = inner.bounds
+        cx, cy = np.array(frame.envelope.centroid.coords[0])
+        h = S * math.sqrt(3) / 2
+        for j in range(-int((cy - miny) / h) - 1, int((maxy - cy) / h) + 2):
+            for i in range(-int((cx - minx) / S) - 2, int((maxx - cx) / S) + 3):
+                p = np.array([cx + i * S + (S / 2 if j % 2 else 0), cy + j * h])
+                if inner.contains(Point(p)):
+                    add(p, 0.7 * S)
+    nodes = np.array(nodes)
+
+    axes = _mirror_axes(profile)
+    if axes:
+        # work on one half (or quarter) and mirror, so the truss is symmetric
+        for c, d in axes:
+            nrm = np.array([-d[1], d[0]])
+            s = (nodes - c) @ nrm
+            near = np.abs(s) < 0.2 * S
+            nodes[near] -= np.outer(s[near], nrm)        # snap onto the axis
+            # make sure the axis meets the frame with a node at both ends
+            for sgn in (-1, 1):
+                far = c - d * 1e4 * sgn
+                hit = LineString([far, c]).intersection(frame.exterior)
+                if not hit.is_empty:
+                    pts = [np.array(g.coords[0]) for g in getattr(hit, "geoms", [hit])]
+                    p = min(pts, key=lambda q: np.linalg.norm(q - far))
+                    if np.linalg.norm(nodes - p, axis=1).min() >= 0.4 * S:
+                        nodes = np.vstack([nodes, p])
+        keep = np.ones(len(nodes), bool)
+        for c, d in axes:  # one half (or quarter), axis nodes included
+            keep &= ((nodes - c) @ np.array([-d[1], d[0]])) >= -1e-6
+        half = nodes[keep]
+        half = np.unique(np.round(half, 6), axis=0)
+        edges = _delaunay_edges(half)
+        for c, d in axes:
+            edges = edges + [(_reflect(a, c, d)[0], _reflect(b, c, d)[0]) for a, b in edges]
+        nodes = np.vstack([half] + [_reflect(half, c, d) for c, d in axes])
+    else:
+        edges = _delaunay_edges(nodes)
+    lines = [LineString([a, b]) for a, b in edges if np.linalg.norm(a - b) > 1e-6]
+    # drop ribs that run outside the plate (concave outlines)
+    lines = [ln for ln in lines if frame.buffer(0.5).contains(ln.interpolate(0.5, normalized=True))]
+    return lines, nodes
+
+
+def _delaunay_edges(pts):
+    if len(pts) < 3:
+        return [(pts[0], pts[1])] if len(pts) == 2 else []
+    tri = Delaunay(pts)
+    es = set()
+    for s in tri.simplices:
+        # skip sliver triangles along straight boundaries
+        a, b, c = pts[s]
+        u, v = b - a, c - a
+        area = abs(u[0] * v[1] - u[1] * v[0]) / 2
+        longest = max(np.linalg.norm(b - a), np.linalg.norm(c - b), np.linalg.norm(a - c))
+        if area < 0.08 * longest ** 2:
             continue
-        opened = c.buffer(-r, join_style="mitre", mitre_limit=5).buffer(r, join_style="mitre", mitre_limit=5)
-        for q in _polys(opened):
-            q = orient(q.simplify(0.01), 1.0)
-            if q.area >= p.min_pocket_area and not q.buffer(-r).is_empty:
-                out.append(q)
-    return out
+        for i, j in ((0, 1), (1, 2), (2, 0)):
+            es.add(tuple(sorted((int(s[i]), int(s[j])))))
+    return [(pts[i], pts[j]) for i, j in es]
 
 
-def _polys(g):
-    if g is None or g.is_empty:
-        return []
-    if isinstance(g, Polygon):
-        return [g]
-    return [x for x in getattr(g, "geoms", []) if isinstance(x, Polygon) and not x.is_empty]
+def pocket_outlines(profile: Polygon, r: PlateRules):
+    """2D pocket polygons (sharp-cornered, to be rounded with r.tool_radius)."""
+    half = r.rib / 2
+    outer = Polygon(profile.exterior)
+    region = outer.buffer(-(r.offset + half), join_style="mitre", mitre_limit=10)
+    keepouts = [Polygon(h).buffer(r.offset + half, quad_segs=32) for h in profile.interiors]
+    lines, nodes = truss_edges(profile, r)
+    ribs = unary_union([ln.buffer(half, quad_segs=16) for ln in lines] + keepouts)
+    cells = region.difference(ribs)
+    rt = r.tool_radius
+    out = []
+    for cell in getattr(cells, "geoms", [cells]):
+        if not isinstance(cell, Polygon) or cell.is_empty:
+            continue
+        eroded = cell.buffer(-rt, quad_segs=16)
+        for e in getattr(eroded, "geoms", [eroded]):
+            if not isinstance(e, Polygon) or e.is_empty or e.buffer(-(4.0 - rt)).is_empty:  # >= 8 mm wide
+                continue
+            sharp = e.buffer(rt, join_style="mitre", mitre_limit=10).simplify(0.005)
+            if not isinstance(sharp, Polygon):
+                continue
+            if e.buffer(rt, quad_segs=16).area >= r.min_pocket_area:
+                out.append(orient(sharp, 1.0))
+    return out, lines, nodes
 
 
-# --------------------------------------------------------------------------- 3D helpers
-
-class Thickness:
-    """Ray-cast material thickness below a face."""
-
-    def __init__(self, shape):
-        self.ix = IntCurvesFace_ShapeIntersector()
-        self.ix.Load(shape, 1e-6)
-
-    def at(self, p, n):
-        start = p - n * 1e-3
-        self.ix.Perform(gp_Lin(gp_Pnt(*start), gp_Dir(*(-n))), 0.0, 1e9)
-        ws = [self.ix.WParameter(i) for i in range(1, self.ix.NbPnt() + 1)]
-        ws = [w for w in ws if w > 1e-4]
-        return min(ws) if ws else None
-
-
-def sample_points(poly, n=24):
-    inner = poly.buffer(-0.3)
-    if inner.is_empty:
-        inner = poly
-    minx, miny, maxx, maxy = inner.bounds
-    k = max(2, int(math.sqrt(n * (maxx - minx) * (maxy - miny) / max(inner.area, 1e-9))))
-    xs, ys = np.meshgrid(np.linspace(minx, maxx, k), np.linspace(miny, maxy, k))
-    pts = [pt for pt in zip(xs.ravel(), ys.ravel()) if inner.contains(shapely.Point(pt))]
-    pts.append(inner.representative_point().coords[0])
-    for g in _polys(inner):
-        pts += list(g.exterior.coords)[:-1:max(1, len(g.exterior.coords) // 16)]
-    return np.array(pts)
-
+# --------------------------------------------------------------------------- 3D
 
 def _rounded_ring(c, r):
-    """Closed 2D ring -> list of segments ('line', p, q) / ('arc', p, mid, q) with corners of radius r."""
+    """Closed 2D ring -> segments ('line', p, q) / ('arc', p, mid, q) with corners rounded to r."""
     n = len(c)
-    corners = []  # (p_in, mid, p_out) or (vertex,)
+    corners = []
     for i in range(n):
         a, b, d = c[i - 1], c[i], c[(i + 1) % n]
         la, ld = np.linalg.norm(a - b), np.linalg.norm(d - b)
@@ -256,14 +347,17 @@ def _rounded_ring(c, r):
             continue
         u1, u2 = (a - b) / la, (d - b) / ld
         half = math.acos(np.clip(u1 @ u2, -1, 1)) / 2
-        if half > math.radians(84):  # nearly straight: no fillet needed
+        if half > math.radians(84):  # nearly straight: no rounding needed
             corners.append((b,))
             continue
-        rr = min(r, 0.49 * min(la, ld) * math.tan(half))
+        rr = r
+        t = rr / math.tan(half)
+        if t > min(la, ld) + 1e-6:  # not enough room: shrink (only happens at material-side corners)
+            rr = 0.49 * min(la, ld) * math.tan(half)
+            t = rr / math.tan(half)
         if rr < 0.05:
             corners.append((b,))
             continue
-        t = rr / math.tan(half)
         w = (u1 + u2) / np.linalg.norm(u1 + u2)
         centre = b + w * rr / math.sin(half)
         corners.append((b + u1 * t, centre - w * rr, b + u2 * t))
@@ -273,11 +367,48 @@ def _rounded_ring(c, r):
         if len(cur) == 3:
             segs.append(("arc", *cur))
         segs.append(("line", cur[-1], nxt[0]))
-    return segs
+    return _merge_arcs(segs)
+
+
+def _merge_arcs(segs, max_turn=12.0):
+    """Replace runs of short, evenly turning line segments (polygonised arcs) with true arcs."""
+    def direction(sg):
+        d = sg[-1] - sg[1]
+        return d / max(np.linalg.norm(d), 1e-12)
+
+    def turn(a, b):
+        da, db = direction(a), direction(b)
+        return math.degrees(math.atan2(da[0] * db[1] - da[1] * db[0], da @ db))
+
+    out, i, n = [], 0, len(segs)
+    while i < n:
+        j = i
+        if segs[i][0] == "line":
+            L = np.linalg.norm(segs[i][-1] - segs[i][1])
+            t0 = None
+            while (j + 1 < n and segs[j + 1][0] == "line"
+                   and abs(np.linalg.norm(segs[j + 1][-1] - segs[j + 1][1]) - L) < 0.05 * L + 1e-6):
+                t = turn(segs[j], segs[j + 1])
+                if not 0.3 < abs(t) < max_turn or (t0 is not None and abs(t - t0) > 0.2 * abs(t0) + 0.05):
+                    break
+                t0 = t if t0 is None else t0
+                j += 1
+        if j - i >= 2:  # at least three segments in the run
+            pts = [segs[k][1] for k in range(i, j + 1)] + [segs[j][-1]]
+            if np.linalg.norm(pts[0] - pts[-1]) < 1e-6:  # whole circle: two half arcs
+                h = len(pts) // 2
+                out.append(("arc", pts[0], pts[h // 2], pts[h]))
+                out.append(("arc", pts[h], pts[(h + len(pts) - 1) // 2], pts[-1]))
+            else:
+                out.append(("arc", pts[0], pts[len(pts) // 2], pts[-1]))
+        else:
+            out.extend(segs[i:j + 1])
+        i = j + 1
+    return out
 
 
 def make_face(poly: Polygon, frame: FaceFrame, offset=0.0, radius=0.0):
-    """Planar face from a 2D polygon, with sharp corners rounded to `radius` (true arcs)."""
+    """Planar face from a 2D polygon with sharp corners rounded to `radius` (true arcs)."""
     pln = gp_Pln(frame.ax3(offset))
 
     def P(q):
@@ -310,19 +441,6 @@ def make_face(poly: Polygon, frame: FaceFrame, offset=0.0, radius=0.0):
     return mf.Face()
 
 
-def prism(face, frame: FaceFrame, depth):
-    return BRepPrimAPI_MakePrism(face, gp_Vec(*(-frame.n * depth))).Shape()
-
-
-def fully_inside(solid, tools, tol=0.998):
-    """True when the union of tool volumes lies inside `solid`."""
-    tv = sum(cadio.volume(t) for t in tools)
-    if tv <= 0:
-        return True
-    common = BRepAlgoAPI_Common(solid, cadio.make_compound(tools))
-    return common.IsDone() and cadio.volume(common.Shape()) >= tol * tv
-
-
 def boolean_cut(solid, tools):
     args, tl = List_TopoDS_Shape(), List_TopoDS_Shape()
     args.Append(solid)
@@ -336,134 +454,34 @@ def boolean_cut(solid, tools):
     op.Build()
     if not op.IsDone():
         return None
-    res = op.Shape()
-    sols = cadio.solids(res)
+    sols = cadio.solids(op.Shape())
     if not sols:
         return None
-    res = max(sols, key=cadio.volume) if len(sols) > 1 else sols[0]
+    res = max(sols, key=cadio.volume)
     return res if BRepCheck_Analyzer(res).IsValid() else None
 
 
-# --------------------------------------------------------------------------- main
-
-@dataclass
-class Pocket:
-    face: int
-    depth: float
-    through: bool
-    area: float
-
-
-def pocket_solid(solid, p: PocketParams, face_offset=0, progress=None):
-    """Return (pocketed_solid, [Pocket]) for one solid."""
-    lo, hi = cadio.bbox(solid)
-    lin = max(0.01, float(np.linalg.norm(hi - lo)) * 2e-4)
-    frames = [f for f in planar_faces(solid, lin)
-              if f.index + face_offset not in set(p.excluded_faces) and f.outline.area >= p.min_face_area]
-    frames.sort(key=lambda f: -f.outline.area)
-    excluded = set(p.excluded_faces)
-    protected = [f for i, f in enumerate(cadio.faces(solid)) if i + face_offset in excluded]
-    protected = cadio.make_compound(protected) if protected else None
-    current, made = solid, []
-    for fi, fr in enumerate(frames):
-        if progress:
-            progress(f"Face {fi + 1}/{len(frames)}", fi / max(len(frames), 1))
-        cells = pocket_cells(fr.outline, p)
-        if not cells:
-            continue
-        thick = Thickness(current)
-        margin = 0.45 * min(p.wall, p.rib_width)
-        accepted = []  # (poly, depth, through)
-        for cell in cells:
-            ts = [thick.at(fr.to3d(uv)[0], fr.n) for uv in sample_points(cell)]
-            if not ts or any(t is None for t in ts):
-                continue  # part of this cell is already void (e.g. a pocket cut from the other side)
-            tmin, tmax = min(ts), max(ts)
-            through = (p.through and tmin <= p.through_max_thickness
-                       and tmax - tmin <= 0.02 * tmax + 0.05)
-            if through and protected is not None:
-                # a through-pocket must not break out through a protected face
-                tool = prism(make_face(cell, fr, 0.0), fr, tmin + 0.5)
-                if BRepExtrema_DistShapeShape(tool, protected).Value() < 1e-3:
-                    through = False
-            depth = tmin if through else tmin - p.floor
-            if not through and depth < p.min_depth:
-                continue
-            accepted.append([cell, depth, through])
-        if not accepted:
-            continue
-
-        def test_tool(cell, depth, through):
-            test_depth = depth - 0.1 if through else depth + 0.9 * p.floor - 0.05
-            f = make_face(orient(cell.buffer(margin, join_style="mitre", mitre_limit=5), 1.0), fr, -0.05)
-            return prism(f, fr, test_depth)
-
-        # validate: quick group check, then per pocket with depth back-off
-        if not fully_inside(current, [test_tool(*a) for a in accepted]):
-            ok = []
-            for cell, depth, through in accepted:
-                for _ in range(4):
-                    if fully_inside(current, [test_tool(cell, depth, through)]):
-                        ok.append([cell, depth, through])
-                        break
-                    if through:
-                        through, depth = False, depth - p.floor
-                    else:
-                        depth *= 0.6
-                    if depth < p.min_depth:
-                        break
-            accepted = ok
-        tools = []
-        for cell, depth, through in accepted:
-            top = 0.02
-            try:
-                filleted = make_face(cell, fr, top, p.corner_radius)
-            except Exception:
-                filleted = make_face(cell, fr, top)
-            cut_depth = depth + top + (0.5 if through else 0.0)
-            tools.append(prism(filleted, fr, cut_depth))
-            made.append(Pocket(fr.index + face_offset, round(depth, 3), through, round(cell.area, 2)))
-        if not tools:
-            continue
-        res = boolean_cut(current, tools)
-        if res is None:  # fall back to one pocket at a time
-            n_before = len(made) - len(tools)
-            kept, res = [], current
-            for t, m in zip(tools, made[n_before:]):
-                r2 = boolean_cut(res, [t])
-                if r2 is not None:
-                    res = r2
-                    kept.append(m)
-            made[n_before:] = kept
-        current = res
-    return current, made
-
-
-def pocket_shape(shape, p: PocketParams, progress=None):
-    """Pocket every solid of a shape. Face indices refer to cadio.faces(shape)."""
-    all_faces = cadio.faces(shape)
-    sols = cadio.solids(shape)
-    results, pockets = [], []
-    for si, s in enumerate(sols):
-        # face index offset so that excluded_faces map to faces of the whole shape
-        local = cadio.faces(s)
-        mapping = {}
-        for li, lf in enumerate(local):
-            for gi, gf in enumerate(all_faces):
-                if lf.IsSame(gf):
-                    mapping[li] = gi
-                    break
-        q = PocketParams.from_dict(p.to_dict())
-        q.excluded_faces = [li for li, gi in mapping.items() if gi in set(p.excluded_faces)]
-
-        def prog(msg, frac, si=si):
-            if progress:
-                progress(f"Solid {si + 1}/{len(sols)} · {msg}", (si + frac) / len(sols))
-
-        res, made = pocket_solid(s, q, 0, prog)
-        for m in made:
-            m.face = mapping.get(m.face, m.face)
-        results.append(res)
-        pockets += made
-    out = results[0] if len(results) == 1 else cadio.make_compound(results)
-    return out, pockets
+def pocket_plate(plate: Plate, r: PlateRules, outlines=None):
+    """Cut the truss pockets through the plate. Returns (solid, n_pockets, layout)."""
+    lines = nodes = None
+    if outlines is None:
+        outlines, lines, nodes = pocket_outlines(plate.profile, r)
+    fr, t = plate.frame, plate.thickness
+    tools = []
+    for poly in outlines:
+        try:
+            face = make_face(poly, fr, 0.5, r.tool_radius)
+        except Exception:
+            face = make_face(poly, fr, 0.5)
+        tools.append(BRepPrimAPI_MakePrism(face, gp_Vec(*(-fr.n * (t + 1.0)))).Shape())
+    if not tools:
+        return plate.solid, 0, (outlines, lines, nodes)
+    res = boolean_cut(plate.solid, tools)
+    if res is None:  # fall back to one pocket at a time
+        res, n = plate.solid, 0
+        for tool in tools:
+            r2 = boolean_cut(res, [tool])
+            if r2 is not None:
+                res, n = r2, n + 1
+        return res, n, (outlines, lines, nodes)
+    return res, len(tools), (outlines, lines, nodes)

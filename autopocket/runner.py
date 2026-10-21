@@ -1,116 +1,131 @@
-"""Pocket a part, check it with FEA, and back off until the stiffness target is met."""
+"""Try a range of truss spacings, check each with FEA, keep the lightest that stays stiff enough."""
 from __future__ import annotations
 
 import time
 
-from . import cadio, fea
-from .pocketer import PocketParams, pocket_shape
+from shapely.ops import unary_union
 
-MATERIALS = {  # density, g/cm^3
-    "Aluminum 6061": 2.70,
-    "Aluminum 7075": 2.81,
-    "Steel": 7.85,
-    "Stainless steel": 8.00,
-    "Titanium Ti-6Al-4V": 4.43,
-    "Polycarbonate": 1.20,
-    "PLA": 1.24,
-    "PETG": 1.27,
-    "Nylon / PA12": 1.01,
-    "ABS": 1.04,
+from . import cadio, fea
+from .pocketer import PlateRules, find_plate, pocket_outlines, pocket_plate
+
+# density g/cm^3, Young's modulus GPa, yield / tensile strength MPa (typical values)
+MATERIALS = {
+    "Aluminum 6061-T6": {"density": 2.70, "E": 68.9, "strength": 276,
+                         "note": "Yield strength"},
+    "Delrin (acetal)": {"density": 1.41, "E": 3.1, "strength": 72,
+                        "note": "Delrin 150 homopolymer, tensile yield"},
+    "Polycarbonate": {"density": 1.20, "E": 2.4, "strength": 62,
+                      "note": "Tensile yield"},
+    "PLA (3D printed)": {"density": 1.24, "E": 3.5, "strength": 50,
+                         "note": "Printed parts vary with infill and layer direction"},
+    "PETG (3D printed)": {"density": 1.27, "E": 2.1, "strength": 50,
+                          "note": "Printed parts vary with infill and layer direction"},
+    "Carbon fiber sheet": {"density": 1.55, "E": 55.0, "strength": 500,
+                           "note": "Woven twill, quasi-isotropic; varies with layup"},
 }
 
-# successively more conservative variants tried when the stiffness target is missed
-LADDER = [
-    {},
-    {"rib_width": 1.5, "wall": 1.25},
-    {"rib_width": 2.0, "wall": 1.5, "cell_size": 0.85},
-    {"rib_width": 2.0, "wall": 1.5, "cell_size": 0.85, "floor": 1.5, "through": False},
-    {"rib_width": 2.8, "wall": 2.0, "cell_size": 0.75, "floor": 2.5, "through": False},
-]
+SPACINGS = [32, 36, 40, 44, 48, 53, 58, 64, 72]  # truss node spacing candidates, mm
 
 
-def _variant(base: PocketParams, step: dict) -> PocketParams:
-    p = PocketParams.from_dict(base.to_dict())
-    for k, v in step.items():
-        if isinstance(v, bool):
-            setattr(p, k, v and getattr(p, k))
-        else:
-            setattr(p, k, round(getattr(p, k) * v, 3))
-    return p
+def _pocketed_profile(profile, outlines, tool_radius):
+    rounded = [o.buffer(-tool_radius, quad_segs=8).buffer(tool_radius, quad_segs=8) for o in outlines]
+    return profile.difference(unary_union(rounded)) if rounded else profile
 
 
-def run(shape, params: PocketParams, material="Aluminum 6061", target_stiffness=0.5,
-        check_structure=True, progress=None):
-    """Returns dict(shape=..., report=...)."""
-    t0 = time.time()
+def plan(shape, material="Aluminum 6061-T6", target_stiffness=0.33, rules: PlateRules | None = None,
+         progress=None):
+    """Lay out and FEA-check every candidate spacing. Returns (plates, variants, best_index)."""
     say = progress or (lambda msg, frac: None)
-    density = MATERIALS.get(material, 2.70)
-    v0 = cadio.volume(shape)
-    baseline = None
-    if check_structure:
-        say("Analysing original part", 0.02)
-        baseline = fea.Baseline(shape)
-    ladder = LADDER if (check_structure and target_stiffness > 0) else LADDER[:1]
-    attempts, best = [], None
-    n_steps = len(ladder) + 1
+    base = rules or PlateRules()
+    sols = cadio.solids(shape)
+    if not sols:
+        raise ValueError("No solid bodies found in the file")
+    plates = [find_plate(s) for s in sols]
+    density = MATERIALS.get(material, MATERIALS["Aluminum 6061-T6"])["density"]
+    say("Analysing the blank plate", 0.02)
+    baselines = [fea.Baseline(p.profile, p.thickness) for p in plates]
+    variants = []
+    for k, S in enumerate(SPACINGS):
+        say(f"Trying {S} mm truss spacing", 0.05 + 0.9 * k / len(SPACINGS))
+        r = PlateRules(**{**base.to_dict(), "spacing": S})
+        layouts, structure, v0, v1, n = [], None, 0.0, 0.0, 0
+        for p, b in zip(plates, baselines):
+            outlines, lines, nodes = pocket_outlines(p.profile, r)
+            prof = _pocketed_profile(p.profile, outlines, r.tool_radius)
+            v0 += p.profile.area * p.thickness
+            v1 += prof.area * p.thickness
+            n += len(outlines)
+            layouts.append(outlines)
+            s = b.evaluate(prof) if outlines else None
+            if s and (structure is None or s["worst_stiffness_retained"] < structure["worst_stiffness_retained"]):
+                structure = s
+        if n == 0:
+            continue
+        # same pocket set as a smaller spacing gives nothing new
+        if variants and variants[-1]["pockets"] == n and abs(variants[-1]["mass_saved_pct"] - 100 * (1 - v1 / v0)) < 0.05:
+            continue
+        variants.append({
+            "spacing": S, "rules": r.to_dict(), "pockets": n, "layouts": layouts,
+            "mass_saved_pct": 100 * (1 - v1 / v0),
+            "mass_g": [v0 * density / 1000, v1 * density / 1000],
+            "structure": structure,
+            "meets_target": structure["worst_stiffness_retained"] >= target_stiffness,
+        })
+    if not variants:
+        raise ValueError("No pockets fit - the plate is too small for 8 mm ribs and 4 mm offsets")
+    ok = [i for i, v in enumerate(variants) if v["meets_target"]]
+    if ok:
+        best = max(ok, key=lambda i: variants[i]["mass_saved_pct"])
+    else:
+        best = max(range(len(variants)), key=lambda i: variants[i]["structure"]["worst_stiffness_retained"])
+    return plates, variants, best
 
-    def attempt(p, k):
-        lo = 0.05 + 0.9 * k / n_steps
-        span = 0.9 / n_steps
 
-        def sub(msg, frac):
-            say(f"Attempt {k + 1}: {msg}", lo + span * 0.6 * frac)
+def build(plates, variant):
+    """Cut the chosen variant's pockets into the plates. Returns (shape, n_pockets)."""
+    r = PlateRules(**variant["rules"])
+    out, n = [], 0
+    for p, outlines in zip(plates, variant["layouts"]):
+        res, k, _ = pocket_plate(p, r, outlines)
+        out.append(res)
+        n += k
+    return (out[0] if len(out) == 1 else cadio.make_compound(out)), n
 
-        res, pockets = pocket_shape(shape, p, sub)
-        v1 = cadio.volume(res)
-        structure = None
-        if baseline is not None and pockets:
-            say(f"Attempt {k + 1}: structural check", lo + span * 0.65)
-            structure = baseline.evaluate(res)
-        ok = structure is None or structure["worst_stiffness_retained"] >= target_stiffness
-        info = {"params": p.to_dict(), "pockets": len(pockets),
-                "mass_saved_pct": 100 * (1 - v1 / v0), "structure": structure, "meets_target": ok}
-        attempts.append(info)
-        return res, pockets, info
 
-    def retained(c):
-        return c[2]["structure"]["worst_stiffness_retained"] if c[2]["structure"] else 1.0
-
-    for k, step in enumerate(ladder):
-        cand = attempt(_variant(params, step), k)
-        if cand[2]["meets_target"]:
-            best = cand
-            prev = ladder[k - 1] if k else None
-            # the ladder is coarse: try halfway between the last miss and this pass
-            if prev is not None and prev.get("through", True) == step.get("through", True):
-                mid = {key: (step.get(key, 1.0) * prev.get(key, 1.0)) ** 0.5
-                       for key in set(step) | set(prev) if key != "through"}
-                if "through" in step:
-                    mid["through"] = step["through"]
-                c2 = attempt(_variant(params, mid), k + 1)
-                if c2[2]["meets_target"] and c2[2]["mass_saved_pct"] > cand[2]["mass_saved_pct"]:
-                    best = c2
-            break
-        if best is None or retained(cand) > retained(best):
-            best = cand
-    res, pockets, chosen = best
-    v1 = cadio.volume(res)
-    say("Done", 1.0)
-    report = {
+def report(plates, variants, chosen, material, target_stiffness, shape_out, t0):
+    density = MATERIALS[material]["density"]
+    v0 = sum(cadio.volume(p.solid) for p in plates)
+    v1 = cadio.volume(shape_out)
+    v = variants[chosen]
+    return {
         "material": material,
-        "density_g_cm3": density,
+        "material_props": MATERIALS[material],
+        "thickness_mm": [round(p.thickness, 3) for p in plates],
         "volume_mm3": [v0, v1],
         "mass_g": [v0 * density / 1000, v1 * density / 1000],
         "mass_saved_g": (v0 - v1) * density / 1000,
         "mass_saved_pct": 100 * (1 - v1 / v0),
-        "pockets": len(pockets),
-        "through_pockets": sum(1 for p in pockets if p.through),
-        "faces_pocketed": sorted({p.face for p in pockets}),
-        "structure": chosen["structure"],
+        "pockets": v["pockets"],
+        "spacing": v["spacing"],
+        "structure": v["structure"],
         "target_stiffness": target_stiffness,
-        "meets_target": chosen["meets_target"],
-        "params_used": chosen["params"],
-        "attempts": attempts,
+        "meets_target": v["meets_target"],
+        "rules": v["rules"],
+        "chosen": chosen,
+        "variants": [{k: x[k] for k in ("spacing", "pockets", "mass_saved_pct", "meets_target")}
+                     | {"stiffness": x["structure"]["worst_stiffness_retained"]} for x in variants],
+        "warnings": sorted({w for p in plates for w in p.warnings}),
         "seconds": time.time() - t0,
     }
-    return {"shape": res, "report": report}
+
+
+def run(shape, material="Aluminum 6061-T6", target_stiffness=0.33, progress=None, variant=None):
+    """Plan, pick the best (or the requested) variant, cut it. Returns dict(shape, report, ...)."""
+    t0 = time.time()
+    plates, variants, best = plan(shape, material, target_stiffness, progress=progress)
+    chosen = best if variant is None else variant
+    if progress:
+        progress("Cutting pockets", 0.97)
+    out, _ = build(plates, variants[chosen])
+    return {"shape": out, "plates": plates, "variants": variants, "best": best,
+            "report": report(plates, variants, chosen, material, target_stiffness, out, t0)}

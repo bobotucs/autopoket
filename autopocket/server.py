@@ -1,23 +1,22 @@
-"""Local web app: upload a STEP/3MF part, pocket it, inspect and download the result."""
+"""Local web app: upload a flat STEP/3MF plate, pocket it, inspect and download the result."""
 from __future__ import annotations
 
 import base64
 import shutil
 import tempfile
 import threading
+import time
 import traceback
 import uuid
 from pathlib import Path
 
 import numpy as np
+import shapely
 from fastapi import FastAPI, File, HTTPException, UploadFile
 from fastapi.responses import FileResponse, HTMLResponse
-from OCP.BRepClass3d import BRepClass3d_SolidClassifier
-from OCP.TopAbs import TopAbs_ON
-from OCP.gp import gp_Pnt
 
 from . import cadio, runner
-from .pocketer import PocketParams
+from .pocketer import PlateRules, find_plate
 
 STATIC = Path(__file__).parent / "static"
 SAMPLES = Path(__file__).resolve().parents[1] / "samples"
@@ -37,25 +36,24 @@ def mesh_payload(shape, pocket_faces=()):
             "pocketFaces": list(pocket_faces)}
 
 
-def find_pocket_faces(original, result):
-    """Faces of `result` that lie inside the original material, i.e. pocket walls/floors."""
+def find_pocket_faces(plates, result):
+    """Faces of `result` that are pocket walls: side faces lying inside the blank profile."""
     v, t, f = cadio.tessellate(result)
     tri = v[t]
     area = np.linalg.norm(np.cross(tri[:, 1] - tri[:, 0], tri[:, 2] - tri[:, 0]), axis=1)
     cent = tri.mean(axis=1)
-    sols = cadio.solids(original)
     out = []
     for fi in np.unique(f):
         idx = np.nonzero(f == fi)[0]
         c = cent[idx[np.argmax(area[idx])]]
-        on = False
-        for s in sols:
-            cl = BRepClass3d_SolidClassifier(s, gp_Pnt(*map(float, c)), 1e-3)
-            if cl.State() == TopAbs_ON:
-                on = True
-                break
-        if not on:
-            out.append(int(fi))
+        for p in plates:
+            fr = p.frame
+            h = (c - fr.origin) @ fr.n
+            if -p.thickness + 1e-3 < h < -1e-3 or abs(h) > 1e-3 and abs(h + p.thickness) > 1e-3:
+                uv = shapely.Point((c - fr.origin) @ fr.x, (c - fr.origin) @ fr.y)
+                if p.profile.boundary.distance(uv) > 0.05 and p.profile.buffer(0.05).contains(uv):
+                    out.append(int(fi))
+                    break
     return out
 
 
@@ -71,6 +69,11 @@ def index():
     return (STATIC / "index.html").read_text(encoding="utf-8")
 
 
+@app.get("/api/defaults")
+def defaults():
+    return {"rules": PlateRules().to_dict(), "materials": runner.MATERIALS}
+
+
 @app.get("/api/samples")
 def samples():
     return sorted(p.name for p in SAMPLES.glob("*") if p.suffix.lower() in (".step", ".stp", ".3mf"))
@@ -84,14 +87,9 @@ def sample_file(name: str):
     return FileResponse(path)
 
 
-@app.get("/api/defaults")
-def defaults():
-    return {"params": PocketParams().to_dict(), "materials": runner.MATERIALS}
-
-
 @app.post("/api/upload")
 def upload(file: UploadFile = File(...)):
-    name = Path(file.filename or "part.step").name
+    name = Path(file.filename or "plate.step").name
     if Path(name).suffix.lower() not in (".step", ".stp", ".3mf"):
         raise HTTPException(400, "Please upload a .step, .stp or .3mf file")
     sid = uuid.uuid4().hex[:12]
@@ -102,16 +100,31 @@ def upload(file: UploadFile = File(...)):
         shutil.copyfileobj(file.file, fh)
     try:
         shape = cadio.load_any(path)
+        sols = cadio.solids(shape)
+        if not sols:
+            raise ValueError("No solid bodies found (is it a closed, watertight model?)")
+        plates = [find_plate(s) for s in sols]
     except Exception as e:
-        raise HTTPException(400, f"Could not read the file: {e}")
-    sols = cadio.solids(shape)
-    if not sols:
-        raise HTTPException(400, "No solid bodies found in the file (is it a closed, watertight model?)")
-    lo, hi = cadio.bbox(shape)
+        raise HTTPException(400, f"Could not read the plate: {e}")
+    info = []
+    for p in plates:
+        b = p.profile.bounds
+        info.append({"size": [round(b[2] - b[0], 2), round(b[3] - b[1], 2)],
+                     "thickness": round(p.thickness, 3),
+                     "holes": len(p.profile.interiors)})
     SESSIONS[sid] = {"dir": d, "name": name, "shape": shape, "state": "idle"}
-    return {"id": sid, "name": name, "solids": len(sols), "faces": len(cadio.faces(shape)),
-            "size": (hi - lo).round(3).tolist(), "volume": cadio.volume(shape),
+    return {"id": sid, "name": name, "plates": info,
+            "warnings": sorted({w for p in plates for w in p.warnings}),
             "mesh": mesh_payload(shape)}
+
+
+def _finish(s, shape_out, chosen):
+    s["result"] = shape_out
+    s["pocket_faces"] = find_pocket_faces(s["plates"], shape_out)
+    s["report"] = runner.report(s["plates"], s["variants"], chosen, s["material"],
+                                s["target"], shape_out, s["t0"])
+    for ext in ("step", "3mf", "stl"):
+        (s["dir"] / f"result.{ext}").unlink(missing_ok=True)
 
 
 @app.post("/api/pocket/{sid}")
@@ -119,23 +132,21 @@ def pocket(sid: str, body: dict):
     s = _session(sid)
     if s.get("state") == "running":
         raise HTTPException(409, "Already running")
-    params = PocketParams.from_dict(body.get("params"))
-    s.update(state="running", progress=0.0, message="Starting", report=None, error=None, result=None)
+    material = body.get("material", "Aluminum 6061-T6")
+    if material not in runner.MATERIALS:
+        material = "Aluminum 6061-T6"
+    s.update(state="running", progress=0.0, message="Starting", report=None, error=None, result=None,
+             material=material, target=float(body.get("target_stiffness", 0.33)), t0=time.time())
 
     def prog(msg, frac):
         s["message"], s["progress"] = msg, float(frac)
 
     def work():
         try:
-            out = runner.run(s["shape"], params, body.get("material", "Aluminum 6061"),
-                             float(body.get("target_stiffness", 0.5)),
-                             bool(body.get("check_structure", True)), prog)
+            out = runner.run(s["shape"], material, s["target"], prog)
+            s["plates"], s["variants"] = out["plates"], out["variants"]
             prog("Preparing preview", 0.99)
-            s["result"] = out["shape"]
-            s["pocket_faces"] = find_pocket_faces(s["shape"], out["shape"])
-            s["report"] = out["report"]
-            for ext in ("step", "3mf", "stl"):
-                (s["dir"] / f"result.{ext}").unlink(missing_ok=True)
+            _finish(s, out["shape"], out["best"])
             s["state"] = "done"
         except Exception as e:  # report to the UI
             traceback.print_exc()
@@ -143,6 +154,18 @@ def pocket(sid: str, body: dict):
 
     threading.Thread(target=work, daemon=True).start()
     return {"ok": True}
+
+
+@app.post("/api/variant/{sid}/{k}")
+def variant(sid: str, k: int):
+    """Switch to another spacing the planner already evaluated."""
+    s = _session(sid)
+    if s.get("state") != "done" or not (0 <= k < len(s.get("variants", []))):
+        raise HTTPException(400, "No such option")
+    s["t0"] = time.time()
+    shape_out, _ = runner.build(s["plates"], s["variants"][k])
+    _finish(s, shape_out, k)
+    return {"report": s["report"], "mesh": mesh_payload(shape_out, s["pocket_faces"])}
 
 
 @app.get("/api/status/{sid}")
