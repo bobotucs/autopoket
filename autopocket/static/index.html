@@ -49,6 +49,7 @@
   .err { font-size: 13px; margin-top: 10px; display: none; white-space: pre-wrap; border-left: 2px solid var(--ink); padding-left: 8px; }
   main { position: relative; background: var(--viewer); min-width: 0; }
   #viewer { position: absolute; inset: 0; }
+  #cube { position: absolute; top: 8px; right: 8px; width: 120px; height: 120px; cursor: pointer; }
   .toolbar { position: absolute; top: 14px; left: 14px; right: 14px; display: flex; gap: 8px; align-items: center; flex-wrap: wrap; pointer-events: none; }
   .toolbar > * { pointer-events: auto; }
   .seg { display: inline-flex; background: var(--panel); border: 1px solid var(--line); border-radius: 8px; padding: 3px; gap: 3px; }
@@ -149,6 +150,7 @@
 
   <main>
     <div id="viewer"></div>
+    <canvas id="cube" title="Click a face, edge or corner to snap the view"></canvas>
     <div class="empty" id="empty"><div>Upload a flat plate to start<br><small>STEP (.step, .stp) or 3MF</small></div></div>
     <div class="toolbar">
       <div class="seg" id="viewmode"><button data-v="orig" class="on">Original</button><button data-v="result" disabled>Pocketed</button></div>
@@ -193,6 +195,7 @@ renderer.setPixelRatio(window.devicePixelRatio);
 viewerEl.appendChild(renderer.domElement);
 const scene = new THREE.Scene();
 const camera = new THREE.PerspectiveCamera(35, 1, 0.1, 1e6);
+camera.up.set(0, 0, 1);  // CAD convention: Z up, front looks along +Y
 const controls = new OrbitControls(camera, renderer.domElement);
 controls.enableDamping = true;
 scene.add(new THREE.HemisphereLight(0xffffff, 0x777777, 1.7));
@@ -205,9 +208,96 @@ function resize() {
   renderer.setSize(w, h); camera.aspect = w / h; camera.updateProjectionMatrix();
 }
 new ResizeObserver(resize).observe(viewerEl);
-(function loop() { requestAnimationFrame(loop); controls.update();
+function loop() {
+  requestAnimationFrame(loop);
+  stepViewAnimation();
+  controls.update();
   sun.position.copy(camera.position).add(camera.up.clone().multiplyScalar(camera.position.length() * 0.5));
-  renderer.render(scene, camera); })();
+  renderer.render(scene, camera);
+  renderCube();
+}
+
+// ------------------------------------------------------------------ view cube
+const cubeCanvas = $("cube");
+const cubeRenderer = new THREE.WebGLRenderer({ canvas: cubeCanvas, antialias: true, alpha: true });
+cubeRenderer.setPixelRatio(window.devicePixelRatio);
+cubeRenderer.setSize(120, 120, false);
+const cubeScene = new THREE.Scene();
+const cubeCam = new THREE.OrthographicCamera(-1.85, 1.85, 1.85, -1.85, 0.1, 20);
+function faceTexture(label, hot) {
+  const c = document.createElement("canvas"); c.width = c.height = 256;
+  const g = c.getContext("2d");
+  g.fillStyle = hot ? (dark ? "#ffffff" : "#000000") : (dark ? "#1b1b1b" : "#fafafa");
+  g.fillRect(0, 0, 256, 256);
+  g.strokeStyle = dark ? "#5a5a5a" : "#b5b5b5"; g.lineWidth = 6; g.strokeRect(3, 3, 250, 250);
+  g.fillStyle = hot ? (dark ? "#000000" : "#ffffff") : (dark ? "#ffffff" : "#000000");
+  g.font = "600 44px system-ui, -apple-system, Segoe UI, sans-serif";
+  g.textAlign = "center"; g.textBaseline = "middle"; g.fillText(label, 128, 130);
+  const t = new THREE.CanvasTexture(c); t.anisotropy = 4; return t;
+}
+// BoxGeometry material order is +x, -x, +y, -y, +z, -z. Labels are laid out Y-up,
+// then the cube is turned 90° about X so TOP = +Z and FRONT = -Y (Z-up CAD frame).
+const CUBE_LABELS = ["RIGHT", "LEFT", "TOP", "BOTTOM", "FRONT", "BACK"];
+const cubeMats = CUBE_LABELS.map(l => new THREE.MeshBasicMaterial({ map: faceTexture(l, false) }));
+const cubeHot = CUBE_LABELS.map(l => faceTexture(l, true));
+const cubeNormal = CUBE_LABELS.map((_, i) => cubeMats[i].map);
+const cube = new THREE.Mesh(new THREE.BoxGeometry(2, 2, 2), cubeMats);
+cube.rotation.x = Math.PI / 2;
+cube.add(new THREE.LineSegments(new THREE.EdgesGeometry(cube.geometry),
+  new THREE.LineBasicMaterial({ color: dark ? 0x8a8a8a : 0x333333 })));
+cubeScene.add(cube);
+
+function renderCube() {
+  const d = camera.position.clone().sub(controls.target).normalize();
+  cubeCam.position.copy(d.multiplyScalar(6));
+  cubeCam.up.copy(camera.up);
+  cubeCam.lookAt(0, 0, 0);
+  cubeRenderer.render(cubeScene, cubeCam);
+}
+
+// which face / edge / corner of the cube was hit -> view direction (e.g. (0,-1,0) = front, (1,-1,1) = iso)
+const cubeRay = new THREE.Raycaster();
+function cubeDirection(ev) {
+  const r = cubeCanvas.getBoundingClientRect();
+  cubeRay.setFromCamera(new THREE.Vector2(((ev.clientX - r.left) / r.width) * 2 - 1,
+    -((ev.clientY - r.top) / r.height) * 2 + 1), cubeCam);
+  const hit = cubeRay.intersectObject(cube, false)[0];
+  if (!hit) return null;
+  const p = hit.point, dir = new THREE.Vector3();
+  for (const k of ["x", "y", "z"]) dir[k] = Math.abs(p[k]) > 0.62 ? Math.sign(p[k]) : 0;
+  return { dir, face: hit.face.materialIndex };
+}
+let hotFace = -1;
+function setHot(i) {
+  if (i === hotFace) return;
+  if (hotFace >= 0) { cubeMats[hotFace].map = cubeNormal[hotFace]; cubeMats[hotFace].needsUpdate = true; }
+  if (i >= 0) { cubeMats[i].map = cubeHot[i]; cubeMats[i].needsUpdate = true; }
+  hotFace = i;
+}
+cubeCanvas.addEventListener("pointermove", e => { const h = cubeDirection(e); setHot(h ? h.face : -1); });
+cubeCanvas.addEventListener("pointerleave", () => setHot(-1));
+cubeCanvas.addEventListener("click", e => { const h = cubeDirection(e); if (h) viewFrom(h.dir); });
+
+// smooth turn of the camera around the orbit target
+let viewAnim = null;
+function viewFrom(dir, animate = true) {
+  const to = dir.clone();
+  if (to.x === 0 && to.y === 0) to.y = -1e-3;  // top/bottom: nudge so the Z-up camera stays stable
+  to.normalize();
+  const offset = camera.position.clone().sub(controls.target);
+  const from = offset.clone().normalize();
+  if (!animate) { camera.position.copy(controls.target).add(to.multiplyScalar(offset.length())); return; }
+  viewAnim = { q: new THREE.Quaternion().setFromUnitVectors(from, to), from, len: offset.length(), t0: performance.now() };
+}
+function stepViewAnimation() {
+  if (!viewAnim) return;
+  const t = Math.min(1, (performance.now() - viewAnim.t0) / 350), e = t * t * (3 - 2 * t);
+  const q = new THREE.Quaternion().slerp(viewAnim.q, e);
+  camera.position.copy(controls.target).add(viewAnim.from.clone().applyQuaternion(q).multiplyScalar(viewAnim.len));
+  camera.lookAt(controls.target);
+  if (t >= 1) viewAnim = null;
+}
+requestAnimationFrame(loop);
 
 const dec = (b64, T) => { const s = atob(b64), u = new Uint8Array(s.length);
   for (let i = 0; i < s.length; i++) u[i] = s.charCodeAt(i); return new T(u.buffer); };
@@ -234,20 +324,19 @@ function buildModel(mesh) {
   return grp;
 }
 
-// look straight down on the plate (its thinnest axis) with a slight tilt
+// frame the part, looking face-on at the plate (front, top or right view, whichever faces it)
 function fit() {
   const m = models[view] || models.orig; if (!m) return;
   const box = new THREE.Box3().setFromObject(m), c = box.getCenter(new THREE.Vector3()), s = box.getSize(new THREE.Vector3());
   const thin = ["x", "y", "z"].reduce((a, k) => s[k] < s[a] ? k : a, "x");
-  const n = new THREE.Vector3(); n[thin] = 1;
-  const long = ["x", "y", "z"].filter(k => k !== thin).reduce((a, k) => s[k] > s[a] ? k : a);
-  const other = ["x", "y", "z"].find(k => k !== thin && k !== long);
-  camera.up.set(0, 0, 0); camera.up[other] = 1;
+  const dir = { x: new THREE.Vector3(1, 0, 0), y: new THREE.Vector3(0, -1, 0), z: new THREE.Vector3(0, 0, 1) }[thin];
   const r = s.length() / 2, d = r / Math.sin(THREE.MathUtils.degToRad(camera.fov / 2)) * 0.95;
-  const dir = n.clone().add(camera.up.clone().multiplyScalar(-0.35)).normalize();
-  camera.position.copy(c).add(dir.multiplyScalar(d));
+  viewAnim = null;
+  controls.target.copy(c);
+  camera.position.copy(c).add(new THREE.Vector3(0, -1, 0).multiplyScalar(d));
+  viewFrom(dir, false);
   camera.near = d / 100; camera.far = d * 100; camera.updateProjectionMatrix();
-  controls.target.copy(c); controls.update();
+  camera.lookAt(c); controls.update();
 }
 $("fit").onclick = fit;
 
@@ -340,6 +429,7 @@ function showReport(r) {
     <span>Weight saved</span><span>${grams(r.mass_saved_g)} (${(r.mass_saved_g / 453.6).toFixed(3)} lb)</span>
     <span>Pockets</span><span>${r.pockets}</span>
     <span>Truss spacing</span><span>${r.spacing} mm</span>
+    <span>Holes held on 3+ sides</span><span>${r.holes_supported} of ${r.holes}</span>
     <span>Material</span><span>${r.material}</span>`;
   $("r-badge").innerHTML = r.meets_target
     ? `<span class="badge ok">Keeps ≥ ${pct(r.target_stiffness)} stiffness in every load case</span>`

@@ -19,6 +19,7 @@ import math
 from dataclasses import asdict, dataclass
 
 import numpy as np
+import shapely
 from scipy.spatial import Delaunay
 from shapely import affinity
 from shapely.geometry import LineString, MultiPolygon, Point, Polygon
@@ -307,17 +308,15 @@ def _delaunay_edges(pts):
     return [(pts[i], pts[j]) for i, j in es]
 
 
-def pocket_outlines(profile: Polygon, r: PlateRules):
-    """2D pocket polygons (sharp-cornered, to be rounded with r.tool_radius)."""
-    half = r.rib / 2
-    outer = Polygon(profile.exterior)
-    region = outer.buffer(-(r.offset + half), join_style="mitre", mitre_limit=10)
-    keepouts = [Polygon(h).buffer(r.offset + half, quad_segs=32) for h in profile.interiors]
-    lines, nodes = truss_edges(profile, r)
-    ribs = unary_union([ln.buffer(half, quad_segs=16) for ln in lines] + keepouts)
-    cells = region.difference(ribs)
+MAX_GAP_DEG = 120.0  # no pocket may wrap more than this far around a hole, so every hole
+                     # is held by material on at least three sides
+
+
+def _cut_pockets(region, ribs, r: PlateRules):
+    """Pocket polygons (sharp, to be rounded with the tool radius) and their rounded union."""
     rt = r.tool_radius
-    out = []
+    out, rounded = [], []
+    cells = region.difference(ribs)
     for cell in getattr(cells, "geoms", [cells]):
         if not isinstance(cell, Polygon) or cell.is_empty:
             continue
@@ -326,10 +325,100 @@ def pocket_outlines(profile: Polygon, r: PlateRules):
             if not isinstance(e, Polygon) or e.is_empty or e.buffer(-(4.0 - rt)).is_empty:  # >= 8 mm wide
                 continue
             sharp = e.buffer(rt, join_style="mitre", mitre_limit=10).simplify(0.005)
-            if not isinstance(sharp, Polygon):
-                continue
-            if e.buffer(rt, quad_segs=16).area >= r.min_pocket_area:
+            rnd = e.buffer(rt, quad_segs=16)
+            if isinstance(sharp, Polygon) and rnd.area >= r.min_pocket_area:
                 out.append(orient(sharp, 1.0))
+                rounded.append(rnd)
+    return out, unary_union(rounded) if rounded else Polygon()
+
+
+def hole_support(hole: Polygon, void, r: PlateRules, samples=120):
+    """(struts, largest unsupported gap in degrees, gap centre angle) around one hole.
+
+    Walks a ring just outside the hole's keep-out band; every stretch that is solid
+    material (a rib, the frame, another hole's ring) counts as one strut.
+    """
+    ring = hole.buffer(r.offset + r.rib / 2 + 0.75, quad_segs=32).exterior
+    c = np.array(hole.centroid.coords[0])
+    pts = np.array([ring.interpolate(t, normalized=True).coords[0]
+                    for t in np.linspace(0, 1, samples, endpoint=False)])
+    ang = np.degrees(np.arctan2(pts[:, 1] - c[1], pts[:, 0] - c[0])) % 360
+    order = np.argsort(ang)
+    ang, pts = ang[order], pts[order]
+    sup = ~shapely.contains_xy(void, pts[:, 0], pts[:, 1]) if not void.is_empty else np.ones(len(pts), bool)
+    if sup.all():
+        return 99, 0.0, None
+    if not sup.any():
+        return 0, 360.0, 0.0
+    start = int(np.argmax(sup & ~np.roll(sup, 1)))  # first sample of some supported run
+    sup, ang = np.roll(sup, -start), np.roll(ang, -start)
+    struts, gaps, i, n = 0, [], 0, len(sup)
+    while i < n:
+        j = i
+        while j + 1 < n and sup[j + 1] == sup[i]:
+            j += 1
+        if sup[i]:
+            struts += 1
+        else:
+            a0, a1 = ang[i - 1] if i else ang[i], ang[(j + 1) % n]
+            width = (a1 - a0) % 360
+            gaps.append((width, (a0 + width / 2) % 360))
+        i = j + 1
+    width, mid = max(gaps)
+    return struts, width, mid
+
+
+def _add_strut(c, mid_deg, lines, nodes, frame, keep_r, S):
+    """A short rib from hole centre c into the gap at angle mid_deg.
+
+    Runs straight out to the nearest rib or the frame; falls back to a nearby node.
+    """
+    u = np.array([math.cos(math.radians(mid_deg)), math.sin(math.radians(mid_deg))])
+    ray = LineString([c + u * keep_r, c + u * 3 * S])
+    hit = ray.intersection(unary_union([frame.exterior] + lines))
+    pts = [np.array(xy) for g in getattr(hit, "geoms", [hit]) if not g.is_empty for xy in g.coords]
+    if pts:
+        return LineString([c, min(pts, key=lambda q: np.linalg.norm(q - c))])
+    best, best_score = None, 1e9
+    for q in nodes:
+        v = q - c
+        d = np.linalg.norm(v)
+        if d < keep_r + 4 or d > 2.5 * S:
+            continue
+        off = math.degrees(math.acos(np.clip(v @ u / d, -1, 1)))
+        if off <= 35 and off / 30 + d / S < best_score:
+            best, best_score = q, off / 30 + d / S
+    return None if best is None else LineString([c, best])
+
+
+def pocket_outlines(profile: Polygon, r: PlateRules):
+    """2D pocket polygons (sharp-cornered, to be rounded with r.tool_radius)."""
+    half = r.rib / 2
+    outer = Polygon(profile.exterior)
+    region = outer.buffer(-(r.offset + half), join_style="mitre", mitre_limit=10)
+    frame = outer.buffer(-r.offset, join_style="mitre", mitre_limit=10)
+    holes = [Polygon(h) for h in profile.interiors]
+    keepouts = [h.buffer(r.offset + half, quad_segs=32) for h in holes]
+    lines, nodes = truss_edges(profile, r)
+    ribs = unary_union([ln.buffer(half, quad_segs=16) for ln in lines] + keepouts)
+    out, void = _cut_pockets(region, ribs, r)
+    # make sure no hole hangs off one or two ribs: add struts into the biggest gaps
+    for _ in range(6):
+        added = []
+        for h in holes:
+            struts, gap, mid = hole_support(h, void, r)
+            if gap <= MAX_GAP_DEG:
+                continue
+            c = np.array(h.centroid.coords[0])
+            keep_r = math.sqrt(h.area / math.pi) + r.offset + half
+            ln = _add_strut(c, mid, lines + added, nodes, frame, keep_r, r.spacing)
+            if ln is not None and ln.length > 1e-3:
+                added.append(ln)
+        if not added:
+            break
+        lines = lines + added
+        ribs = unary_union([ribs] + [ln.buffer(half, quad_segs=16) for ln in added])
+        out, void = _cut_pockets(region, ribs, r)
     return out, lines, nodes
 
 
