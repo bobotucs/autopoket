@@ -1,0 +1,25 @@
+2025-2026
+  skipped: 403 forbidden: {
+  "moreInfoUrl" : "",
+  "message" : "Resource does not exist, or you do not have permission to access it.",
+  "status" : 403,
+  "code" : 0
+}
+PEGASUS 1.2
+  Part Studio 1
+    pocketed plate: PEGASUS 1.2_Part Studio 1_3  {'name': 'PEGASUS 1.2_Part Studio 1_3', 'pockets': 24, 'holes': 8, 'thickness': 3.174, 'removed_pct': 46.3, 'stiffness_kept_pct': 26.4}
+    pocketed plate: PEGASUS 1.2_Part Studio 1_7  {'name': 'PEGASUS 1.2_Part Studio 1_7', 'pockets': 18, 'holes': 11, 'thickness': 3.174, 'removed_pct': 37.9, 'stiffness_kept_pct': 35.6}
+    pocketed plate: PEGASUS 1.2_Part Studio 1_8  {'name': 'PEGASUS 1.2_Part Studio 1_8', 'pockets': 5, 'holes': 12, 'thickness': 3.174, 'removed_pct': 16.7, 'stiffness_kept_pct': 57.7}
+    pocketed plate: PEGASUS 1.2_Part Studio 1_9  {'name': 'PEGASUS 1.2_Part Studio 1_9', 'pockets': 22, 'holes': 16, 'thickness': 3.174, 'removed_pct': 33.3, 'stiffness_kept_pct': 35.2}
+  safa can touch
+    pocketed plate: PEGASUS 1.2_safa can touch_8  {'name': 'PEGASUS 1.2_safa can touch_8', 'pockets': 5, 'holes': 12, 'thickness': 3.174, 'removed_pct': 16.7, 'stiffness_kept_pct': 57.7}
+    pocketed plate: PEGASUS 1.2_safa can touch_9  {'name': 'PEGASUS 1.2_safa can touch_9', 'pockets': 22, 'holes': 16, 'thickness': 3.174, 'removed_pct': 34.3, 'stiffness_kept_pct': 32.4}
+  Part Studio 2
+  Color-Rangefinder
+  Assembly 2 (1) parts
+  wheel Copy 1
+  wheel
+Rotundia II: kudos to john jlc
+  Master Sketch: export failed (HTTP Error 400: Bad Request)
+  but she's always had my back: export failed (HTTP Error 400: Bad Request)
+  Plates

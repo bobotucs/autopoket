@@ -1,0 +1,1335 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>AutoPocket</title>
+<style>
+  :root {
+    --bg: #ffffff; --panel: #ffffff; --ink: #111111; --muted: #8a8a8a; --line: #ececec;
+    --soft: #f6f6f6; --viewer: #f0f0f0; --btn: #111111; --btn-ink: #ffffff; --accent: #0a84ff;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --bg: #0a0a0a; --panel: #0e0e0e; --ink: #f2f2f2; --muted: #7d7d7d; --line: #1f1f1f;
+      --soft: #161616; --viewer: #121212; --btn: #f2f2f2; --btn-ink: #0a0a0a; --accent: #3d9bff;
+    }
+  }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; height: 100%; background: var(--bg); color: var(--ink);
+    font: 13.5px/1.5 Inter, system-ui, -apple-system, "Segoe UI", Roboto, sans-serif; -webkit-font-smoothing: antialiased; }
+  button, input, select, textarea { font: inherit; color: inherit; }
+  .app { display: grid; grid-template-columns: 340px 1fr; height: 100vh; }
+  aside { background: var(--panel); border-right: 1px solid var(--line); display: flex; flex-direction: column; min-height: 0; }
+  .scroll { overflow-y: auto; padding: 20px 20px 12px; flex: 1; }
+  .brand { display: flex; align-items: baseline; gap: 6px; margin-bottom: 16px; }
+  .brand h1 { font-size: 17px; margin: 0; font-weight: 650; letter-spacing: -0.02em; }
+  .brand small { color: var(--muted); font-size: 11px; }
+  .drop { border: 1px dashed var(--line); border-radius: 10px; padding: 14px; text-align: center; cursor: pointer; color: var(--muted);
+    transition: border-color .15s, color .15s; }
+  .drop:hover, .drop.over { border-color: var(--ink); color: var(--ink); }
+  .drop strong { color: var(--ink); font-weight: 550; }
+  .fileinfo { margin-top: 10px; font-size: 12.5px; color: var(--muted); }
+  .fileinfo b { color: var(--ink); font-weight: 600; }
+  .warn { margin-top: 6px; font-size: 12px; color: var(--muted); }
+  details.sec { border-top: 1px solid var(--line); padding: 4px 0; }
+  details.sec:first-of-type { margin-top: 16px; }
+  details.sec > summary { list-style: none; cursor: pointer; display: flex; justify-content: space-between; align-items: center;
+    padding: 9px 0; font-size: 11px; letter-spacing: .07em; text-transform: uppercase; color: var(--muted); font-weight: 600; }
+  details.sec > summary::-webkit-details-marker { display: none; }
+  details.sec > summary::after { content: "+"; font-size: 15px; font-weight: 400; color: var(--muted); }
+  details.sec[open] > summary::after { content: "–"; }
+  details.sec > summary .val { text-transform: none; letter-spacing: 0; font-weight: 500; color: var(--ink); margin-left: auto; margin-right: 10px; font-size: 12px; }
+  .sec-body { padding: 2px 0 12px; }
+  .field { display: flex; align-items: center; justify-content: space-between; gap: 10px; padding: 5px 0; }
+  .field > span { color: var(--muted); }
+  .field input[type=number] { width: 70px; padding: 5px 7px; border: 1px solid var(--line); border-radius: 7px; background: var(--bg); text-align: right; }
+  .field .unit { color: var(--muted); margin-left: 4px; font-size: 12px; }
+  select { padding: 6px 8px; border-radius: 7px; border: 1px solid var(--line); background: var(--bg); }
+  .field select { max-width: 170px; }
+  .props { font-size: 11.5px; color: var(--muted); margin-top: 4px; }
+  input[type=range] { width: 100%; accent-color: var(--ink); }
+  .hint { font-size: 12px; color: var(--muted); }
+  textarea { width: 100%; resize: vertical; padding: 8px; border: 1px solid var(--line); border-radius: 8px; background: var(--bg); font-size: 13px; }
+  .foot { padding: 12px 20px 16px; border-top: 1px solid var(--line); background: var(--panel); }
+  .btn { width: 100%; padding: 11px; border: 0; border-radius: 9px; background: var(--btn); color: var(--btn-ink); font-weight: 600; cursor: pointer; }
+  .btn:disabled { opacity: .3; cursor: not-allowed; }
+  .progress { margin-top: 10px; display: none; }
+  .bar { height: 3px; background: var(--soft); border-radius: 2px; overflow: hidden; }
+  .bar > div { height: 100%; width: 0; background: var(--ink); transition: width .3s; }
+  .pmsg { font-size: 11.5px; color: var(--muted); margin-top: 5px; }
+  .err { font-size: 12.5px; margin-top: 8px; display: none; white-space: pre-wrap; color: #e5484d; }
+  main { position: relative; background: var(--viewer); min-width: 0; }
+  #viewer { position: absolute; inset: 0; }
+  #cube { position: absolute; top: 10px; right: 10px; width: 96px; height: 96px; cursor: pointer; opacity: .9; }
+  .toolbar { position: absolute; top: 14px; left: 14px; right: 120px; display: flex; gap: 8px; align-items: center; flex-wrap: wrap; pointer-events: none; }
+  .toolbar > * { pointer-events: auto; }
+  .seg { display: inline-flex; background: var(--panel); border: 1px solid var(--line); border-radius: 9px; padding: 3px; gap: 2px; }
+  .seg button { border: 0; background: transparent; padding: 5px 12px; border-radius: 6px; cursor: pointer; font-size: 12.5px; }
+  .seg button.on { background: var(--btn); color: var(--btn-ink); }
+  .seg button:disabled { opacity: .3; cursor: not-allowed; }
+  .tbtn { border: 1px solid var(--line); background: var(--panel); padding: 6px 11px; border-radius: 9px; font-size: 12.5px; cursor: pointer; }
+  .tbtn.primary { background: var(--btn); color: var(--btn-ink); border-color: var(--btn); font-weight: 600; }
+  .tbtn:disabled { opacity: .35; cursor: not-allowed; }
+  .empty { position: absolute; inset: 0; display: grid; place-items: center; color: var(--muted); text-align: center; pointer-events: none; }
+  .results { display: none; padding-top: 16px; border-top: 1px solid var(--line); margin-top: 8px; }
+  .big { display: flex; align-items: baseline; gap: 6px; }
+  .big .v { font-size: 30px; font-weight: 650; letter-spacing: -0.03em; font-variant-numeric: tabular-nums; }
+  .big .u { color: var(--muted); }
+  .kv { display: grid; grid-template-columns: 1fr auto; gap: 2px 10px; font-size: 12.5px; font-variant-numeric: tabular-nums; margin-top: 6px; }
+  .kv span:nth-child(odd) { color: var(--muted); }
+  .badge { display: inline-block; padding: 2px 9px; border-radius: 99px; font-size: 11.5px; font-weight: 600; margin: 10px 0 2px; border: 1px solid var(--line); color: var(--muted); }
+  .badge.ok { border-color: var(--ink); color: var(--ink); }
+  .case { margin: 7px 0; font-size: 12.5px; }
+  .case .row { display: flex; justify-content: space-between; font-variant-numeric: tabular-nums; }
+  .case .row span:last-child { color: var(--muted); }
+  .meter { height: 3px; background: var(--soft); border-radius: 2px; margin-top: 4px; position: relative; overflow: hidden; }
+  .meter > div { position: absolute; inset: 0 auto 0 0; background: var(--ink); }
+  .meter > i { position: absolute; top: -2px; bottom: -2px; width: 1.5px; background: var(--muted); }
+  table.opts { width: 100%; font-size: 12px; border-collapse: collapse; font-variant-numeric: tabular-nums; }
+  table.opts th { color: var(--muted); font-weight: 500; text-align: right; padding: 4px; border-bottom: 1px solid var(--line); }
+  table.opts td { text-align: right; padding: 5px 4px; border-bottom: 1px solid var(--line); }
+  table.opts th:first-child, table.opts td:first-child { text-align: left; }
+  table.opts tr.opt { cursor: pointer; }
+  table.opts tr.opt:hover td { background: var(--soft); }
+  table.opts tr.sel td { font-weight: 650; }
+  table.opts tr.miss td { color: var(--muted); }
+  .dl { display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px; margin-top: 14px; }
+  .dl a { text-align: center; padding: 8px; border: 1px solid var(--line); border-radius: 8px; color: var(--ink); text-decoration: none; font-weight: 600; font-size: 12.5px; }
+  .dl a:hover { border-color: var(--ink); }
+  details.more { margin-top: 10px; }
+  details.more > summary { cursor: pointer; font-size: 12px; color: var(--muted); list-style: none; padding: 4px 0; }
+  details.more > summary::-webkit-details-marker { display: none; }
+  details.more > summary::before { content: "› "; }
+  details.more[open] > summary::before { content: "⌄ "; }
+  .pickbox { background: var(--soft); border-radius: 9px; padding: 10px 12px; font-size: 12.5px; }
+  .pickbox .what { font-weight: 600; }
+  .pickbox .row { display: flex; align-items: center; gap: 8px; margin-top: 8px; flex-wrap: wrap; }
+  .pickbox input[type=number] { width: 76px; padding: 5px 7px; border: 1px solid var(--line); border-radius: 7px; background: var(--bg); text-align: right; }
+  .chips { display: flex; flex-wrap: wrap; gap: 5px; margin: 4px 0 8px; }
+  .chip { border: 1px solid var(--line); background: var(--panel); padding: 3px 9px; border-radius: 99px; font-size: 11.5px; cursor: pointer; }
+  .chip:hover { border-color: var(--ink); }
+  .check { display: flex; align-items: center; gap: 6px; font-size: 12px; color: var(--muted); margin-top: 8px; cursor: pointer; }
+  .roles { display: inline-flex; flex-wrap: wrap; border: 1px solid var(--line); border-radius: 8px; padding: 2px; gap: 2px; }
+  .roles button { border: 0; background: transparent; padding: 3px 8px; border-radius: 6px; font-size: 11.5px; cursor: pointer; }
+  .roles button.on { background: var(--btn); color: var(--btn-ink); }
+  .screen { margin-top: 10px; font-size: 12.5px; background: var(--soft); border-radius: 9px; padding: 10px 12px; }
+  .panel { position: absolute; left: 12px; bottom: 12px; max-width: min(560px, calc(100% - 24px)); background: var(--panel);
+    border: 1px solid var(--line); border-radius: 12px; padding: 10px 12px; font-size: 12.5px; display: none;
+    max-height: 45%; overflow-y: auto; box-shadow: 0 6px 24px rgba(0,0,0,.08); }
+  .panel .row { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
+  .panel select { padding: 4px 6px; font-size: 12.5px; }
+  .simlegend { display: flex; align-items: center; gap: 8px; margin-top: 8px; font-variant-numeric: tabular-nums; }
+  .simlegend canvas { width: 180px; height: 8px; border-radius: 3px; }
+  @media (max-width: 820px) {
+    .app { grid-template-columns: 1fr; grid-template-rows: 60vh auto; height: auto; }
+    aside { border-right: 0; border-top: 1px solid var(--line); order: 2; }
+    main { order: 1; height: 60vh; }
+  }
+</style>
+<script type="importmap">
+{ "imports": {
+  "three": "https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js",
+  "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/"
+} }
+</script>
+</head>
+<body>
+<div class="app">
+  <aside>
+    <div class="scroll">
+      <div class="brand"><h1>AutoPocket</h1><small>v2</small></div>
+
+      <div class="drop" id="drop">
+        <strong>Drop a plate</strong> or browse<br><small>STEP or 3MF</small>
+        <input type="file" id="file" accept=".step,.stp,.3mf" hidden>
+      </div>
+      <div class="fileinfo" id="fileinfo"></div>
+      <div id="warnings"></div>
+
+      <details class="sec" open>
+        <summary>Pockets</summary>
+        <div class="sec-body">
+          <label class="field"><span>Pattern</span><select id="pattern">
+            <option value="auto">Auto</option>
+            <option value="isogrid">Isogrid</option>
+            <option value="triangles">Freestyle triangles</option>
+            <option value="hexagon">Hexagon</option>
+            <option value="voronoi">Voronoi</option></select></label>
+          <label class="field"><span>Rib width</span><span><input type="number" id="rib" min="3" max="25" step="0.5" value="8"><span class="unit">mm</span></span></label>
+          <label class="field"><span>Tool radius</span><span><input type="number" id="tool" min="0.3" max="8" step="0.05" value="2"><span class="unit">mm</span></span></label>
+          <label class="field"><span>Edge &amp; hole margin</span><span><input type="number" id="clear" min="1" max="100" step="0.5" value="8"><span class="unit">mm</span></span></label>
+        </div>
+      </details>
+
+      <details class="sec" id="protect" style="display:none">
+        <summary>Protect</summary>
+        <div class="sec-body">
+          <div class="hint" style="margin-bottom:6px">Click holes, sides or corners in the view.</div>
+          <div class="chips" id="quick"></div>
+          <div class="pickbox" id="pickbox"><span class="hint">Nothing selected.</span></div>
+          <label class="check"><input type="checkbox" id="showprot" checked> Show protected area</label>
+          <div class="hint" id="customsum" style="margin-top:4px"></div>
+        </div>
+      </details>
+
+      <details class="sec">
+        <summary>Loads<span class="val" id="loadmode">Generic</span></summary>
+        <div class="sec-body">
+          <textarea id="loaddesc" rows="3" placeholder="What is this plate for? e.g. chassis side plate, 15 kg robot, weight comes down through the screw holes, wheels in the bearings"></textarea>
+          <div class="row" style="display:flex;justify-content:flex-end;margin-top:6px"><button class="chip" id="loadread">Apply</button></div>
+          <div class="hint" id="loadread-out" style="margin-top:6px"></div>
+          <div class="field" style="margin-top:6px"><span>Direction</span><span class="roles" id="dirbtns">
+            <button data-d="down">↓</button><button data-d="up">↑</button><button data-d="left">←</button><button data-d="right">→</button>
+            <button data-d="in">⊗</button><button data-d="all" class="on">All</button></span></div>
+          <div class="hint" id="loadhint"></div>
+          <label class="field" id="forcerow" style="display:none"><span>Load</span><span><input type="number" id="force" min="0" max="100000" step="10" placeholder="—"><span class="unit">N</span></span></label>
+        </div>
+      </details>
+
+      <details class="sec">
+        <summary>Structure<span class="val" id="targetv">33%</span></summary>
+        <div class="sec-body">
+          <label class="field"><span>Material</span><select id="material"></select></label>
+          <div class="props" id="props"></div>
+          <div class="field" style="margin-top:6px"><span>Keep stiffness ≥</span></div>
+          <input type="range" id="target" min="10" max="80" step="1" value="33">
+        </div>
+      </details>
+
+      <div class="results" id="results">
+        <div class="big"><span class="v" id="r-pct">–</span><span class="u">lighter</span></div>
+        <div class="kv" id="r-kv"></div>
+        <div id="r-badge"></div>
+        <div class="dl"><a id="dl-step" href="#">STEP</a><a id="dl-3mf" href="#">3MF</a><a id="dl-stl" href="#">STL</a></div>
+        <details class="more"><summary>Other options</summary><div id="r-opts" style="margin-top:6px"></div></details>
+        <details class="more"><summary>Details</summary>
+          <div id="r-cases"></div>
+          <div id="r-screen"></div>
+          <div id="r-learn"></div>
+          <p class="hint" style="margin-top:8px">Screening FEA, not a certified analysis. Check critical parts against your real loads.</p>
+        </details>
+      </div>
+    </div>
+    <div class="foot">
+      <button class="btn" id="go" disabled>Generate</button>
+      <div class="progress" id="progress"><div class="bar"><div id="barfill"></div></div><div class="pmsg" id="pmsg"></div></div>
+      <div class="err" id="err"></div>
+    </div>
+  </aside>
+
+  <main>
+    <div id="viewer"></div>
+    <canvas id="cube" title="Click a face, edge or corner to snap the view"></canvas>
+    <div class="panel" id="simpanel">
+      <div class="row">
+        <select id="sim-field"><option value="stress">Stress</option><option value="strain">Strain</option><option value="disp">Deflection</option></select>
+        <select id="sim-case"></select>
+        <span class="seg" id="sim-which"><button data-w="pocketed" class="on">Pocketed</button><button data-w="original">Original</button></span>
+        <label id="sim-deformrow" style="display:flex;gap:4px;align-items:center"><input type="checkbox" id="sim-deform" checked> Deflect</label>
+      </div>
+      <div class="simlegend"><span id="sim-min">0</span><canvas id="sim-bar" width="180" height="8"></canvas><span id="sim-max"></span></div>
+      <div class="hint" id="sim-status"></div>
+      <details class="more" open><summary>Most stressed</summary><div id="sim-hot" style="font-size:12px"></div></details>
+      <details class="more"><summary>About</summary><div class="hint" id="sim-note"></div></details>
+    </div>
+    <div class="panel" id="editpanel">
+      <div class="row">
+        <span class="seg" id="edit-tool"><button data-t="draw" class="on">Draw rib</button><button data-t="erase">Erase</button></span>
+        <button class="tbtn" id="edit-undo" title="Ctrl+Z">Undo</button>
+        <button class="tbtn" id="edit-reset">Reset</button>
+        <label style="display:flex;gap:4px;align-items:center"><input type="checkbox" id="edit-mirror" checked> Mirror</label>
+        <button class="tbtn primary" id="edit-go">Regenerate</button>
+      </div>
+      <div class="hint" id="edit-status" style="margin-top:6px">Click two points to draw a rib. Esc cancels.</div>
+    </div>
+    <div class="empty" id="empty"><div>Drop a flat plate to start</div></div>
+    <div class="toolbar">
+      <div class="seg" id="viewmode"><button data-v="orig" class="on">Original</button><button data-v="result" disabled>Pocketed</button><button data-v="sim" disabled>Simulation</button><button data-v="edit" disabled>Edit</button></div>
+      <button class="tbtn" id="fit">Fit</button>
+    </div>
+  </main>
+</div>
+
+<script type="module">
+import * as THREE from "three";
+import { OrbitControls } from "three/addons/controls/OrbitControls.js";
+
+const $ = (id) => document.getElementById(id);
+const dark = matchMedia("(prefers-color-scheme: dark)").matches;
+let session = null, polling = null, materials = {};
+
+fetch("/api/defaults").then(r => r.json()).then(d => {
+  materials = d.materials;
+  $("material").innerHTML = Object.keys(d.materials).map(n => `<option>${n}</option>`).join("");
+  showProps();
+});
+function showProps() {
+  const m = materials[$("material").value]; if (!m) return;
+  $("props").textContent = `${m.density} g/cm³ · E ${m.E} GPa · strength ${m.strength} MPa — ${m.note}`;
+}
+$("material").onchange = showProps;
+$("target").oninput = () => $("targetv").textContent = $("target").value + "%";
+
+// ?sample=name.step opens one of the bundled sample plates (for demos and testing)
+const sampleParam = new URLSearchParams(location.search).get("sample");
+if (sampleParam) fetch("/samples/" + encodeURIComponent(sampleParam)).then(r => r.ok ? r.blob() : null)
+  .then(b => b && upload(new File([b], sampleParam)));
+
+// ------------------------------------------------------------------ viewer
+const viewerEl = $("viewer");
+const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
+renderer.setPixelRatio(window.devicePixelRatio);
+viewerEl.appendChild(renderer.domElement);
+const scene = new THREE.Scene();
+const camera = new THREE.PerspectiveCamera(35, 1, 0.1, 1e6);
+camera.up.set(0, 0, 1);  // CAD convention: Z up, front looks along +Y
+const controls = new OrbitControls(camera, renderer.domElement);
+controls.enableDamping = true;
+scene.add(new THREE.HemisphereLight(0xffffff, 0x777777, 1.7));
+const sun = new THREE.DirectionalLight(0xffffff, 1.4); scene.add(sun);
+const models = { orig: null, result: null };
+let view = "orig";
+
+function resize() {
+  const w = viewerEl.clientWidth, h = viewerEl.clientHeight;
+  renderer.setSize(w, h); camera.aspect = w / h; camera.updateProjectionMatrix();
+}
+new ResizeObserver(resize).observe(viewerEl);
+function loop() {
+  requestAnimationFrame(loop);
+  stepViewAnimation();
+  if (typeof stepCut === "function") { stepCut(); stepSim(); }
+  controls.update();
+  sun.position.copy(camera.position).add(camera.up.clone().multiplyScalar(camera.position.length() * 0.5));
+  renderer.render(scene, camera);
+  renderCube();
+}
+
+// ------------------------------------------------------------------ view cube
+const cubeCanvas = $("cube");
+const cubeRenderer = new THREE.WebGLRenderer({ canvas: cubeCanvas, antialias: true, alpha: true });
+cubeRenderer.setPixelRatio(window.devicePixelRatio);
+cubeRenderer.setSize(120, 120, false);
+const cubeScene = new THREE.Scene();
+const cubeCam = new THREE.OrthographicCamera(-1.85, 1.85, 1.85, -1.85, 0.1, 20);
+function faceTexture(label, hot) {
+  const c = document.createElement("canvas"); c.width = c.height = 256;
+  const g = c.getContext("2d");
+  g.fillStyle = hot ? (dark ? "#ffffff" : "#000000") : (dark ? "#1b1b1b" : "#fafafa");
+  g.fillRect(0, 0, 256, 256);
+  g.strokeStyle = dark ? "#5a5a5a" : "#b5b5b5"; g.lineWidth = 6; g.strokeRect(3, 3, 250, 250);
+  g.fillStyle = hot ? (dark ? "#000000" : "#ffffff") : (dark ? "#ffffff" : "#000000");
+  g.font = "600 44px system-ui, -apple-system, Segoe UI, sans-serif";
+  g.textAlign = "center"; g.textBaseline = "middle"; g.fillText(label, 128, 130);
+  const t = new THREE.CanvasTexture(c); t.anisotropy = 4; return t;
+}
+// BoxGeometry material order is +x, -x, +y, -y, +z, -z. Labels are laid out Y-up,
+// then the cube is turned 90° about X so TOP = +Z and FRONT = -Y (Z-up CAD frame).
+const CUBE_LABELS = ["RIGHT", "LEFT", "TOP", "BOTTOM", "FRONT", "BACK"];
+const cubeMats = CUBE_LABELS.map(l => new THREE.MeshBasicMaterial({ map: faceTexture(l, false) }));
+const cubeHot = CUBE_LABELS.map(l => faceTexture(l, true));
+const cubeNormal = CUBE_LABELS.map((_, i) => cubeMats[i].map);
+const cube = new THREE.Mesh(new THREE.BoxGeometry(2, 2, 2), cubeMats);
+cube.rotation.x = Math.PI / 2;
+cube.add(new THREE.LineSegments(new THREE.EdgesGeometry(cube.geometry),
+  new THREE.LineBasicMaterial({ color: dark ? 0x8a8a8a : 0x333333 })));
+cubeScene.add(cube);
+
+function renderCube() {
+  const d = camera.position.clone().sub(controls.target).normalize();
+  cubeCam.position.copy(d.multiplyScalar(6));
+  cubeCam.up.copy(camera.up);
+  cubeCam.lookAt(0, 0, 0);
+  cubeRenderer.render(cubeScene, cubeCam);
+}
+
+// which face / edge / corner of the cube was hit -> view direction (e.g. (0,-1,0) = front, (1,-1,1) = iso)
+const cubeRay = new THREE.Raycaster();
+function cubeDirection(ev) {
+  const r = cubeCanvas.getBoundingClientRect();
+  cubeRay.setFromCamera(new THREE.Vector2(((ev.clientX - r.left) / r.width) * 2 - 1,
+    -((ev.clientY - r.top) / r.height) * 2 + 1), cubeCam);
+  const hit = cubeRay.intersectObject(cube, false)[0];
+  if (!hit) return null;
+  const p = hit.point, dir = new THREE.Vector3();
+  for (const k of ["x", "y", "z"]) dir[k] = Math.abs(p[k]) > 0.62 ? Math.sign(p[k]) : 0;
+  return { dir, face: hit.face.materialIndex };
+}
+let hotFace = -1;
+function setHot(i) {
+  if (i === hotFace) return;
+  if (hotFace >= 0) { cubeMats[hotFace].map = cubeNormal[hotFace]; cubeMats[hotFace].needsUpdate = true; }
+  if (i >= 0) { cubeMats[i].map = cubeHot[i]; cubeMats[i].needsUpdate = true; }
+  hotFace = i;
+}
+cubeCanvas.addEventListener("pointermove", e => { const h = cubeDirection(e); setHot(h ? h.face : -1); });
+cubeCanvas.addEventListener("pointerleave", () => setHot(-1));
+cubeCanvas.addEventListener("click", e => { const h = cubeDirection(e); if (h) viewFrom(h.dir); });
+
+// smooth turn of the camera around the orbit target
+let viewAnim = null;
+function viewFrom(dir, animate = true) {
+  const to = dir.clone();
+  if (to.x === 0 && to.y === 0) to.y = -1e-3;  // top/bottom: nudge so the Z-up camera stays stable
+  to.normalize();
+  const offset = camera.position.clone().sub(controls.target);
+  const from = offset.clone().normalize();
+  if (!animate) { camera.position.copy(controls.target).add(to.multiplyScalar(offset.length())); return; }
+  viewAnim = { q: new THREE.Quaternion().setFromUnitVectors(from, to), from, len: offset.length(), t0: performance.now() };
+}
+function stepViewAnimation() {
+  if (!viewAnim) return;
+  const t = Math.min(1, (performance.now() - viewAnim.t0) / 350), e = t * t * (3 - 2 * t);
+  const q = new THREE.Quaternion().slerp(viewAnim.q, e);
+  camera.position.copy(controls.target).add(viewAnim.from.clone().applyQuaternion(q).multiplyScalar(viewAnim.len));
+  camera.lookAt(controls.target);
+  if (t >= 1) viewAnim = null;
+}
+requestAnimationFrame(loop);
+
+const dec = (b64, T) => { const s = atob(b64), u = new Uint8Array(s.length);
+  for (let i = 0; i < s.length; i++) u[i] = s.charCodeAt(i); return new T(u.buffer); };
+const C_PART = new THREE.Color(dark ? 0xd9d9d9 : 0xfafafa), C_POCKET = new THREE.Color(dark ? 0x5a5a5a : 0x2a2a2a);
+
+function buildModel(mesh) {
+  const pos = dec(mesh.positions, Float32Array), idx = dec(mesh.indices, Uint32Array), faces = dec(mesh.faces, Uint32Array);
+  const g = new THREE.BufferGeometry();
+  g.setAttribute("position", new THREE.BufferAttribute(pos, 3));
+  g.setIndex(new THREE.BufferAttribute(idx, 1));
+  g.computeVertexNormals();
+  const pocket = new Set(mesh.pocketFaces || []);
+  const col = new Float32Array(pos.length);
+  for (let t = 0; t < faces.length; t++) {
+    const c = pocket.has(faces[t]) ? C_POCKET : C_PART;
+    for (let k = 0; k < 3; k++) { const v = idx[3 * t + k]; col[3 * v] = c.r; col[3 * v + 1] = c.g; col[3 * v + 2] = c.b; }
+  }
+  g.setAttribute("color", new THREE.BufferAttribute(col, 3));
+  const m = new THREE.Mesh(g, new THREE.MeshStandardMaterial({ vertexColors: true, metalness: 0.05, roughness: 0.7,
+    polygonOffset: true, polygonOffsetFactor: 1, polygonOffsetUnits: 1, side: THREE.DoubleSide }));
+  const edges = new THREE.LineSegments(new THREE.EdgesGeometry(g, 25),
+    new THREE.LineBasicMaterial({ color: dark ? 0x000000 : 0x111111, transparent: true, opacity: 0.6 }));
+  const grp = new THREE.Group(); grp.add(m, edges);
+  return grp;
+}
+
+// frame the part, looking face-on at the plate (front, top or right view, whichever faces it)
+function fit() {
+  const m = models[view] || models.orig; if (!m) return;
+  const box = new THREE.Box3().setFromObject(m), c = box.getCenter(new THREE.Vector3()), s = box.getSize(new THREE.Vector3());
+  const thin = ["x", "y", "z"].reduce((a, k) => s[k] < s[a] ? k : a, "x");
+  const dir = { x: new THREE.Vector3(1, 0, 0), y: new THREE.Vector3(0, -1, 0), z: new THREE.Vector3(0, 0, 1) }[thin];
+  const r = s.length() / 2, d = r / Math.sin(THREE.MathUtils.degToRad(camera.fov / 2)) * 0.95;
+  viewAnim = null;
+  controls.target.copy(c);
+  camera.position.copy(c).add(new THREE.Vector3(0, -1, 0).multiplyScalar(d));
+  viewFrom(dir, false);
+  camera.near = d / 100; camera.far = d * 100; camera.updateProjectionMatrix();
+  camera.lookAt(c); controls.update();
+}
+$("fit").onclick = fit;
+
+function setView(v) {
+  view = v;
+  document.querySelectorAll("#viewmode button").forEach(b => b.classList.toggle("on", b.dataset.v === v));
+  for (const k in models) if (models[k]) models[k].visible = k === v || (v === "edit" && k === "result");
+  if (typeof plateGroups !== "undefined") plateGroups.forEach(pg => pg.prot.visible = protVisible());
+  if (typeof simGroup !== "undefined") {
+    simGroup.visible = v === "sim"; overlay.visible = v !== "sim" && v !== "edit";
+    $("simpanel").style.display = v === "sim" ? "block" : "none";
+    editGroup.visible = v === "edit"; $("editpanel").style.display = v === "edit" ? "block" : "none";
+    if (v !== "edit") renderer.domElement.style.cursor = "";
+    if (v === "sim") loadSim();
+    if (v === "edit") enterEdit();
+    if (v !== "result") endCut();
+  }
+}
+document.querySelectorAll("#viewmode button").forEach(b => b.onclick = () => !b.disabled && setView(b.dataset.v));
+
+function setResult(mesh, keepView = false) {
+  if (models.result) scene.remove(models.result);
+  models.result = buildModel(mesh); scene.add(models.result);
+  document.querySelector('#viewmode button[data-v="result"]').disabled = false;
+  document.querySelector('#viewmode button[data-v="sim"]').disabled = false;
+  document.querySelector('#viewmode button[data-v="edit"]').disabled = false;
+  sim.data = []; sim.meshes = []; resultVersion++;
+  setView(keepView ? view : "result");
+}
+
+// ------------------------------------------------------------------ features: clearances and picking
+// Each plate's holes, outline sides and corners come from the server in the plate's own 2D
+// frame. Clicks are cast onto the plate's top plane, mapped into that frame and hit-tested
+// there; overlays are drawn in the same frame, just above the top face.
+const KIND = { fastener: "Screw hole", bearing: "Bearing / shaft bore", hole: "Hole", slot: "Slot", cutout: "Cutout" };
+const TKEY = { h: "holes", s: "sides", c: "corners" };
+const C_SEL = 0x0a84ff, C_HOVER = dark ? 0xffffff : 0x000000, C_CUSTOM = 0xf5a524, C_PROT = 0xf5a524;
+const C_MOUNT = 0x30d158, C_BEARING = 0xff453a;
+let roles = [];  // per plate: {hole id: "mount" | "bearing"}
+const LIFT = 0.15;  // mm above the top face
+let feats = [], clears = [], selected = new Set(), hovered = null, plateGroups = [];
+const overlay = new THREE.Group(); scene.add(overlay);
+
+function plateMatrix(f) {
+  const fr = f.frame, v = a => new THREE.Vector3(...a);
+  return new THREE.Matrix4().makeBasis(v(fr.x), v(fr.y), v(fr.n)).setPosition(v(fr.origin));
+}
+const open = pts => (pts.length > 1 && pts[0][0] === pts[pts.length - 1][0] && pts[0][1] === pts[pts.length - 1][1]) ? pts.slice(0, -1) : pts;
+function ribbon(pts, w, closed) {  // quads along a polyline, in the plate frame
+  const P = closed ? [...open(pts), open(pts)[0]] : pts, pos = [];
+  for (let i = 0; i + 1 < P.length; i++) {
+    const [ax, ay] = P[i], [bx, by] = P[i + 1], dx = bx - ax, dy = by - ay, L = Math.hypot(dx, dy) || 1;
+    const nx = -dy / L * w / 2, ny = dx / L * w / 2;
+    pos.push(ax + nx, ay + ny, LIFT, bx + nx, by + ny, LIFT, bx - nx, by - ny, LIFT,
+             ax + nx, ay + ny, LIFT, bx - nx, by - ny, LIFT, ax - nx, ay - ny, LIFT);
+  }
+  const g = new THREE.BufferGeometry(); g.setAttribute("position", new THREE.Float32BufferAttribute(pos, 3)); return g;
+}
+function shapeOf(outer, holes) {
+  const sh = new THREE.Shape(open(outer).map(([x, y]) => new THREE.Vector2(x, y)));
+  for (const h of holes || []) sh.holes.push(new THREE.Path(open(h).map(([x, y]) => new THREE.Vector2(x, y))));
+  return sh;
+}
+const flat = (color, opacity) => new THREE.MeshBasicMaterial({ color, transparent: true, opacity, side: THREE.DoubleSide, depthWrite: false });
+function clearGroup(g) { for (const c of [...g.children]) { g.remove(c); c.geometry && c.geometry.dispose(); c.material && c.material.dispose(); } }
+
+function buildOverlay() {
+  for (const pg of plateGroups) { clearGroup(pg.prot); clearGroup(pg.marks); }
+  overlay.clear(); plateGroups = [];
+  feats.forEach(f => {
+    const g = new THREE.Group(); g.matrixAutoUpdate = false; g.matrix.copy(plateMatrix(f));
+    const prot = new THREE.Group(), marks = new THREE.Group(); g.add(prot, marks); overlay.add(g);
+    const xs = f.outline.map(p => p[0]), ys = f.outline.map(p => p[1]);
+    const diag = Math.hypot(Math.max(...xs) - Math.min(...xs), Math.max(...ys) - Math.min(...ys));
+    plateGroups.push({ f, g, prot, marks, inv: plateMatrix(f).invert(), w: Math.min(2.5, Math.max(0.6, diag / 250)) });
+  });
+  drawMarks();
+}
+
+function drawMarks() {
+  plateGroups.forEach((pg, pi) => {
+    clearGroup(pg.marks);
+    const { f, w } = pg, c = clears[pi] || { holes: {}, sides: {}, corners: {} };
+    const look = key => selected.has(key) ? C_SEL : key === hovered ? C_HOVER : null;
+    for (const h of f.holes) {
+      const key = `${pi}:h:${h.id}`, col = look(key);
+      if (selected.has(key)) { const m = new THREE.Mesh(new THREE.ShapeGeometry(shapeOf(h.ring)), flat(C_SEL, 0.45)); m.position.z = LIFT; pg.marks.add(m); }
+      const role = (roles[pi] || {})[h.id];
+      if (role) pg.marks.add(new THREE.Mesh(ribbon(h.ring, w * 1.4, true), flat(role === "mount" ? C_MOUNT : C_BEARING, 0.95)));
+      if (col !== null) pg.marks.add(new THREE.Mesh(ribbon(h.ring, w, true), flat(col, 0.95)));
+      else if (c.holes[h.id] !== undefined) pg.marks.add(new THREE.Mesh(ribbon(h.ring, w * 0.8, true), flat(C_CUSTOM, 0.95)));
+    }
+    for (const sd of f.sides) {
+      const key = `${pi}:s:${sd.id}`, col = look(key);
+      if (col !== null) pg.marks.add(new THREE.Mesh(ribbon(sd.coords, w * 1.6, false), flat(col, 0.95)));
+      else if (c.sides[sd.id] !== undefined) pg.marks.add(new THREE.Mesh(ribbon(sd.coords, w, false), flat(C_CUSTOM, 0.95)));
+    }
+    for (const k of f.corners) {
+      const key = `${pi}:c:${k.id}`, col = look(key), custom = c.corners[k.id] !== undefined;
+      const dot = new THREE.Mesh(new THREE.CircleGeometry(w * (col !== null ? 2.6 : 1.8), 24),
+        flat(col !== null ? col : custom ? C_CUSTOM : (dark ? 0x9a9a9a : 0x6b6b6b), col !== null || custom ? 0.95 : 0.6));
+      dot.position.set(k.point[0], k.point[1], LIFT * 1.2); pg.marks.add(dot);
+    }
+  });
+}
+
+function drawProtected(list) {
+  plateGroups.forEach((pg, pi) => {
+    clearGroup(pg.prot);
+    for (const s of (list[pi] || [])) {
+      const m = new THREE.Mesh(new THREE.ShapeGeometry(shapeOf(s.outer, s.holes)), flat(C_PROT, 0.32));
+      m.position.z = LIFT * 0.6; pg.prot.add(m);
+    }
+    pg.prot.visible = protVisible();
+  });
+}
+const protVisible = () => $("showprot").checked && view === "orig";
+
+// 2D hit-testing in the plate frame
+function inPoly(x, y, ring) {
+  let inside = false;
+  for (let i = 0, j = ring.length - 1; i < ring.length; j = i++) {
+    const [xi, yi] = ring[i], [xj, yj] = ring[j];
+    if ((yi > y) !== (yj > y) && x < (xj - xi) * (y - yi) / (yj - yi) + xi) inside = !inside;
+  }
+  return inside;
+}
+function distPoly(x, y, pts) {
+  let d = Infinity;
+  for (let i = 0; i + 1 < pts.length; i++) {
+    const [ax, ay] = pts[i], [bx, by] = pts[i + 1], dx = bx - ax, dy = by - ay;
+    const t = Math.max(0, Math.min(1, ((x - ax) * dx + (y - ay) * dy) / (dx * dx + dy * dy || 1)));
+    d = Math.min(d, Math.hypot(x - ax - t * dx, y - ay - t * dy));
+  }
+  return d;
+}
+const pickRay = new THREE.Raycaster();
+function pickAt(ev) {
+  const rect = renderer.domElement.getBoundingClientRect();
+  pickRay.setFromCamera(new THREE.Vector2(((ev.clientX - rect.left) / rect.width) * 2 - 1,
+    -((ev.clientY - rect.top) / rect.height) * 2 + 1), camera);
+  let best = null;
+  const consider = (key, d, prio) => { if (!best || prio < best.prio || (prio === best.prio && d < best.d)) best = { key, d, prio }; };
+  plateGroups.forEach((pg, pi) => {
+    const f = pg.f, n = new THREE.Vector3(...f.frame.n), o = new THREE.Vector3(...f.frame.origin);
+    const P = pickRay.ray.intersectPlane(new THREE.Plane().setFromNormalAndCoplanarPoint(n, o), new THREE.Vector3());
+    if (!P) return;
+    const q = P.clone().applyMatrix4(pg.inv), u = q.x, v = q.y;
+    const px = 2 * P.distanceTo(camera.position) * Math.tan(THREE.MathUtils.degToRad(camera.fov / 2)) / rect.height;
+    const tol = Math.max(0.4, 9 * px);
+    for (const h of f.holes) {
+      if (inPoly(u, v, h.ring)) consider(`${pi}:h:${h.id}`, 0, 0);
+      else { const d = distPoly(u, v, h.ring); if (d < tol) consider(`${pi}:h:${h.id}`, d, 2); }
+    }
+    for (const k of f.corners) { const d = Math.hypot(u - k.point[0], v - k.point[1]); if (d < Math.max(1.6 * tol, 2)) consider(`${pi}:c:${k.id}`, d, 1); }
+    for (const sd of f.sides) { const d = distPoly(u, v, sd.coords); if (d < tol) consider(`${pi}:s:${sd.id}`, d, 3); }
+  });
+  return best && best.key;
+}
+let downAt = null;
+renderer.domElement.addEventListener("pointerdown", e => { downAt = { x: e.clientX, y: e.clientY }; });
+renderer.domElement.addEventListener("pointerup", e => {
+  if (!downAt || !feats.length || e.button !== 0 || view === "sim" || view === "edit") return;
+  const moved = Math.hypot(e.clientX - downAt.x, e.clientY - downAt.y); downAt = null;
+  if (moved > 5) return;  // that was an orbit drag
+  const key = pickAt(e);
+  if (e.shiftKey || e.ctrlKey || e.metaKey) { if (key) selected.has(key) ? selected.delete(key) : selected.add(key); }
+  else selected = new Set(key ? [key] : []);
+  drawMarks(); showPick();
+});
+renderer.domElement.addEventListener("pointermove", e => {
+  if (e.buttons || !feats.length || view === "sim" || view === "edit") return;
+  const key = pickAt(e);
+  if (key !== hovered) { hovered = key; renderer.domElement.style.cursor = key ? "pointer" : ""; drawMarks(); }
+});
+
+function featureOf(key) {
+  const [pi, t, id] = key.split(":"), f = feats[+pi];
+  return { pi: +pi, t, id: +id, item: f[TKEY[t]].find(x => x.id === +id) };
+}
+function label(key) {
+  const { t, item } = featureOf(key);
+  if (t === "h") return `${KIND[item.kind] || "Hole"} Ø${item.d.toFixed(1)} mm`;
+  if (t === "s") return `Plate side, ${item.length.toFixed(0)} mm long`;
+  return "Plate corner";
+}
+function showPick() {
+  const box = $("pickbox"), keys = [...selected];
+  summarize();
+  if (!keys.length) { box.innerHTML = `<span class="hint">Nothing selected.</span>`; return; }
+  const vals = keys.map(k => { const { pi, t, id } = featureOf(k); return clears[pi][TKEY[t]][id]; });
+  const same = vals.every(v => v === vals[0]), corners = keys.every(k => k.split(":")[1] === "c");
+  const holesOnly = keys.every(k => k.split(":")[1] === "h");
+  const rs = holesOnly ? keys.map(k => { const { pi, id } = featureOf(k); return (roles[pi] || {})[id] || ""; }) : [];
+  const roleNow = rs.length && rs.every(r => r === rs[0]) ? rs[0] : null;
+  box.innerHTML = `<div class="what">${keys.length === 1 ? label(keys[0]) : keys.length + " features selected"}</div>
+    <div class="row"><span>Material kept around ${keys.length === 1 ? "it" : "them"}</span>
+      <input type="number" id="pickval" min="1" max="100" step="0.5" placeholder="${same ? (corners ? "off" : $("clear").value) : "mixed"}"
+        value="${same && vals[0] !== undefined ? vals[0] : ""}"> mm</div>
+    <div class="row"><button class="chip" id="pickreset">Reset to default</button></div>
+    ${holesOnly ? `<div class="row"><span>Role</span><span class="roles" id="rolebtns">
+      <button data-r="" class="${roleNow === "" ? "on" : ""}">Not set</button>
+      <button data-r="mount" class="${roleNow === "mount" ? "on" : ""}">Holds the plate</button>
+      <button data-r="bearing" class="${roleNow === "bearing" ? "on" : ""}">Load comes in</button></span></div>` : ""}
+    <div class="hint" style="margin-top:6px">${corners
+      ? "For a corner this is a radius of solid material around the corner point. Empty = only the sides' clearance."
+      : "Distance from the feature's edge to the nearest pocket. Empty = the default above."}</div>`;
+  $("pickval").oninput = () => { const v = parseFloat($("pickval").value); setSelected(Number.isFinite(v) && v >= 1 ? v : undefined); };
+  $("pickreset").onclick = () => { setSelected(undefined); showPick(); };
+  if (holesOnly) $("rolebtns").querySelectorAll("button").forEach(b => b.onclick = () => {
+    for (const k of selected) { const { pi, id } = featureOf(k); if (b.dataset.r) roles[pi][id] = b.dataset.r; else delete roles[pi][id]; }
+    drawMarks(); showPick(); showLoadMode(); drawArrows();
+  });
+}
+function showLoadMode() {
+  const nm = roles.reduce((a, r) => a + Object.values(r).filter(x => x === "mount").length, 0);
+  const nb = roles.reduce((a, r) => a + Object.values(r).filter(x => x === "bearing").length, 0);
+  const eng = nm > 0 && nb > 0;
+  const dirs = (typeof loadDirs !== "undefined" && loadDirs.keys.length) ? loadDirs.keys.map(k => DIR_LABEL[k].toLowerCase()).join(" and ") : null;
+  $("loadmode").textContent = eng ? (loadPurpose || "Custom") : "Generic";
+  $("loadhint").textContent = eng
+    ? `Held at the green holes; the load goes in at the red holes ${dirs ? dirs + " (red arrows), shared between them" : "in every direction, one hole at a time"}. The stiffness target applies to those cases. Enter a load to get MPa and mm.`
+    : (nm || nb) ? `Needs at least one hole that holds the plate and one where the load comes in (now ${nm} holding, ${nb} loaded). Until then the plate is clamped at either end of its long side.`
+    : "Generic screening: the plate is clamped at either end of its long side, bent both ways and twisted. Describe the plate above, or click holes and set their role.";
+  $("forcerow").style.display = eng ? "flex" : "none";
+}
+function setSelected(v) {
+  for (const k of selected) {
+    const { pi, t, id } = featureOf(k), m = clears[pi][TKEY[t]];
+    if (v === undefined) delete m[id]; else m[id] = v;
+  }
+  drawMarks(); refreshProtected(); summarize();
+}
+function summarize() {
+  const n = clears.reduce((a, c) => a + Object.keys(c.holes).length + Object.keys(c.sides).length + Object.keys(c.corners).length, 0);
+  $("customsum").textContent = n ? `${n} feature${n === 1 ? " has its" : "s have their"} own clearance.` : "Every feature uses the default clearance.";
+}
+function quickChips() {
+  const html = [];
+  for (const [kind, name] of [["bearing", "All bearing bores"], ["fastener", "All screw holes"], ["slot", "All slots"]]) {
+    const n = feats.reduce((a, f) => a + f.holes.filter(h => h.kind === kind).length, 0);
+    if (n) html.push(`<button class="chip" data-q="h:${kind}">${name} (${n})</button>`);
+  }
+  const ns = feats.reduce((a, f) => a + f.sides.length, 0), nc = feats.reduce((a, f) => a + f.corners.length, 0);
+  if (ns) html.push(`<button class="chip" data-q="s">All sides (${ns})</button>`);
+  if (nc) html.push(`<button class="chip" data-q="c">All corners (${nc})</button>`);
+  html.push(`<button class="chip" data-q="none">Clear selection</button>`, `<button class="chip" data-q="reset">Reset all</button>`);
+  $("quick").innerHTML = html.join("");
+  $("quick").querySelectorAll(".chip").forEach(b => b.onclick = () => {
+    const q = b.dataset.q;
+    selected = new Set();
+    if (q === "reset") { clears = feats.map(() => ({ holes: {}, sides: {}, corners: {} })); roles = feats.map(() => ({})); refreshProtected(); showLoadMode(); drawArrows(); }
+    else if (q !== "none") feats.forEach((f, pi) => {
+      if (q.startsWith("h:")) f.holes.filter(h => h.kind === q.slice(2)).forEach(h => selected.add(`${pi}:h:${h.id}`));
+      if (q === "s") f.sides.forEach(sd => selected.add(`${pi}:s:${sd.id}`));
+      if (q === "c") f.corners.forEach(k => selected.add(`${pi}:c:${k.id}`));
+    });
+    drawMarks(); showPick();
+  });
+}
+function settings() {
+  const loads = roles.map((r, pi) => ({ mounts: Object.keys(r).filter(k => r[k] === "mount").map(Number),
+                                  bearings: Object.keys(r).filter(k => r[k] === "bearing").map(Number),
+                                  dirs: ((typeof loadDirs !== "undefined" && loadDirs.vecs[pi]) || []).map(([label, v]) => ({ label, v })) }));
+  return { rules: { rib: +$("rib").value, tool_radius: +$("tool").value, clearance: +$("clear").value },
+           clearances: clears, loads, force_n: +$("force").value || null, pattern: $("pattern").value,
+           purpose: typeof loadPurpose !== "undefined" ? loadPurpose : null };
+}
+let protTimer = null;
+function refreshProtected() {
+  clearTimeout(protTimer);
+  protTimer = setTimeout(async () => {
+    if (!session) return;
+    const sid = session.id;
+    const r = await fetch(`/api/protected/${sid}`, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(settings()) });
+    if (r.ok && session && session.id === sid) drawProtected((await r.json()).plates);
+  }, 200);
+}
+for (const id of ["rib", "tool", "clear"]) $(id).addEventListener("input", () => { refreshProtected(); if (selected.size) showPick(); });
+const PATTERN_HINT = {
+  auto: "Tries every pattern and keeps the lightest design that passes every check.",
+  isogrid: "Regular triangle grid (like CheeseIt's isogrid), both orientations.",
+  triangles: "Free triangle truss laid out between your holes, like your hand-pocketed plates; plain and load-guided.",
+  hexagon: "Honeycomb (like CheeseIt's hex option). Hexagons carry load by bending, so they need more material than triangles for the same stiffness.",
+  voronoi: "Organic Voronoi web from evenly relaxed seed points; the guided version uses smaller cells where the plate works hardest. Like hexagons, less stiff per gram than triangles.",
+};
+const showPatternHint = () => $("pattern").title = PATTERN_HINT[$("pattern").value];
+$("pattern").onchange = showPatternHint; showPatternHint();
+$("showprot").onchange = () => plateGroups.forEach(pg => pg.prot.visible = protVisible());
+function loadFeatures(list) {
+  feats = list || []; clears = feats.map(() => ({ holes: {}, sides: {}, corners: {} })); roles = feats.map(() => ({}));
+  selected = new Set(); hovered = null;
+  buildOverlay(); quickChips(); showPick(); loadPurpose = null; $("loadread-out").textContent = ""; setDirections([]);
+  $("protect").style.display = feats.length ? "block" : "none";
+  refreshProtected();
+}
+
+// ------------------------------------------------------------------ cut animation
+// Every pocket at once: the pocketed part is shown with a slab of plate material filling each
+// pocket (so it looks like the original), then all slabs dissolve together along a noise
+// pattern with a glowing edge, shedding particles that drift up and fade, until only the
+// pocketed plate is left. The dissolve runs on the GPU (shader discards fragments below the
+// moving threshold); particles take off when the same threshold reaches them.
+const cutGroup = new THREE.Group(); scene.add(cutGroup);
+let cut = null;
+const HOLD = 0.35, DISSOLVE = 2.6, AFTER = 0.9, NOISE_SCALE = 0.09, MAX_PARTICLES = 9000;
+const ease = x => x < 0.5 ? 2 * x * x : 1 - Math.pow(-2 * x + 2, 2) / 2;
+const NOISE_GLSL = `
+  float hash(vec2 p) { return fract(sin(dot(p, vec2(127.1, 311.7))) * 43758.5453); }
+  float vnoise(vec2 p) { vec2 i = floor(p), f = fract(p); f = f * f * (3.0 - 2.0 * f);
+    return mix(mix(hash(i), hash(i + vec2(1.0, 0.0)), f.x), mix(hash(i + vec2(0.0, 1.0)), hash(i + vec2(1.0, 1.0)), f.x), f.y); }
+  float fbm(vec2 p) { return 0.5 * vnoise(p) + 0.25 * vnoise(p * 2.03) + 0.15 * vnoise(p * 4.01) + 0.1 * vnoise(p * 8.07); }`;
+// the same noise on the CPU, to know when each particle's spot dissolves
+const fract = x => x - Math.floor(x);
+const hash2 = (x, y) => fract(Math.sin(x * 127.1 + y * 311.7) * 43758.5453);
+function vnoise(x, y) {
+  const ix = Math.floor(x), iy = Math.floor(y); let fx = x - ix, fy = y - iy;
+  fx = fx * fx * (3 - 2 * fx); fy = fy * fy * (3 - 2 * fy);
+  const a = hash2(ix, iy), b = hash2(ix + 1, iy), c = hash2(ix, iy + 1), d = hash2(ix + 1, iy + 1);
+  return (a + (b - a) * fx) + ((c + (d - c) * fx) - (a + (b - a) * fx)) * fy;
+}
+const fbm = (x, y) => 0.5 * vnoise(x, y) + 0.25 * vnoise(x * 2.03, y * 2.03) + 0.15 * vnoise(x * 4.01, y * 4.01) + 0.1 * vnoise(x * 8.07, y * 8.07);
+const NMIN = 0.12, NMAX = 0.88;  // fbm's practical range, mapped to progress 0..1
+
+function slabMaterial() {
+  return new THREE.ShaderMaterial({
+    uniforms: { uProg: { value: -0.1 }, uColor: { value: C_PART.clone() }, uEdge: { value: new THREE.Color(0xff8a00) },
+                uHot: { value: new THREE.Color(0xfff1c0) }, uScale: { value: NOISE_SCALE } },
+    vertexShader: `varying vec2 vP; varying float vShade;
+      void main() { vP = position.xy; vShade = normal.z > 0.5 ? 1.0 : (normal.z < -0.5 ? 0.55 : 0.78);
+        gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0); }`,
+    fragmentShader: `uniform float uProg; uniform vec3 uColor, uEdge, uHot; uniform float uScale; varying vec2 vP; varying float vShade;
+      ${NOISE_GLSL}
+      void main() { float n = (fbm(vP * uScale) - ${NMIN}) / ${(NMAX - NMIN).toFixed(3)};
+        if (n < uProg) discard;
+        float e = 1.0 - smoothstep(0.0, 0.07, n - uProg);
+        vec3 c = mix(uColor * vShade, mix(uEdge, uHot, e * e), e);
+        gl_FragColor = vec4(c, 1.0); }`,
+    polygonOffset: true, polygonOffsetFactor: -1, polygonOffsetUnits: -1,
+  });
+}
+function particleMaterial(px) {
+  return new THREE.ShaderMaterial({
+    uniforms: { uProg: { value: -0.1 }, uPx: { value: px } },
+    transparent: true, depthWrite: false, blending: THREE.AdditiveBlending,
+    vertexShader: `attribute float aN; attribute vec3 aDir; uniform float uProg; uniform float uPx; varying float vLife;
+      void main() { float life = clamp((uProg - aN) / 0.28, 0.0, 1.0); vLife = (uProg > aN) ? life : -1.0;
+        vec3 p = position + aDir * life * 9.0 + vec3(0.0, 0.0, 22.0 * life * life);
+        vec4 mv = modelViewMatrix * vec4(p, 1.0);
+        gl_PointSize = uPx * (1.0 - 0.7 * life) / -mv.z; gl_Position = projectionMatrix * mv; }`,
+    fragmentShader: `varying float vLife;
+      void main() { if (vLife < 0.0 || vLife >= 1.0) discard;
+        vec2 d = gl_PointCoord - 0.5; if (dot(d, d) > 0.25) discard;
+        vec3 c = mix(vec3(1.0, 0.75, 0.35), vec3(0.85, 0.85, 0.85), vLife);
+        gl_FragColor = vec4(c, (1.0 - vLife) * 0.9); }`,
+  });
+}
+function inRing(x, y, ring) {
+  let inside = false;
+  for (let i = 0, j = ring.length - 1; i < ring.length; j = i++) {
+    const [xi, yi] = ring[i], [xj, yj] = ring[j];
+    if ((yi > y) !== (yj > y) && x < (xj - xi) * (y - yi) / (yj - yi) + xi) inside = !inside;
+  }
+  return inside;
+}
+
+async function playCut() {
+  if (cut) { endCut(); return; }  // a second click skips to the end
+  if (!session || !plateGroups.length) return;
+  const d = await (await fetch(`/api/pockets/${session.id}`)).json();
+  setView("result");
+  const totalArea = d.plates.flat().reduce((s, r) => s + Math.abs(THREE.ShapeUtils.area(r.map(([x, y]) => new THREE.Vector2(x, y)))), 0);
+  const perArea = Math.min(0.5, MAX_PARTICLES / Math.max(totalArea, 1));
+  const px = renderer.domElement.clientHeight * 2.2;
+  const mats = [];
+  d.plates.forEach((rings, pi) => {
+    const pg = plateGroups[pi]; if (!pg) return;
+    const t = feats[pi].thickness;
+    const g = new THREE.Group(); g.matrixAutoUpdate = false; g.matrix.copy(pg.g.matrix); cutGroup.add(g);
+    const slab = slabMaterial(); mats.push(slab);
+    const pos = [], aN = [], aDir = [];
+    for (const ring of rings) {
+      const geo = new THREE.ExtrudeGeometry(shapeOf(ring), { depth: t + 0.04, bevelEnabled: false });
+      const m = new THREE.Mesh(geo, slab); m.position.z = -t - 0.02; g.add(m);
+      // particles through the pocket's volume
+      const xs = ring.map(p => p[0]), ys = ring.map(p => p[1]);
+      const x0 = Math.min(...xs), x1 = Math.max(...xs), y0 = Math.min(...ys), y1 = Math.max(...ys);
+      const area = Math.abs(THREE.ShapeUtils.area(ring.map(([x, y]) => new THREE.Vector2(x, y))));
+      let want = Math.round(area * perArea), tries = want * 4;
+      while (want > 0 && tries-- > 0) {
+        const x = x0 + Math.random() * (x1 - x0), y = y0 + Math.random() * (y1 - y0);
+        if (!inRing(x, y, ring)) continue;
+        pos.push(x, y, -Math.random() * t);
+        aN.push((fbm(x * NOISE_SCALE, y * NOISE_SCALE) - NMIN) / (NMAX - NMIN));
+        const a = Math.random() * Math.PI * 2;
+        aDir.push(Math.cos(a), Math.sin(a), 0.3 + Math.random());
+        want--;
+      }
+    }
+    if (pos.length) {
+      const pg2 = new THREE.BufferGeometry();
+      pg2.setAttribute("position", new THREE.Float32BufferAttribute(pos, 3));
+      pg2.setAttribute("aN", new THREE.Float32BufferAttribute(aN, 1));
+      pg2.setAttribute("aDir", new THREE.Float32BufferAttribute(aDir, 3));
+      const pm = particleMaterial(px); mats.push(pm);
+      const pts = new THREE.Points(pg2, pm); pts.frustumCulled = false; g.add(pts);
+    }
+  });
+  cut = { mats, t0: performance.now() };
+}
+
+function stepCut() {
+  if (!cut) return;
+  const t = (performance.now() - cut.t0) / 1000;
+  const prog = -0.1 + 1.45 * ease(Math.min(1, Math.max(0, (t - HOLD) / DISSOLVE)));
+  for (const m of cut.mats) m.uniforms.uProg.value = prog;
+  if (t > HOLD + DISSOLVE + AFTER) endCut();
+}
+
+function endCut() {
+  if (!cut) return;
+  cutGroup.traverse(o => { o.geometry && o.geometry.dispose(); o.material && o.material.dispose(); });
+  cutGroup.clear(); cut = null;
+}
+
+// ------------------------------------------------------------------ simulation view
+// The analysis results drawn on a fine triangle mesh of the plate's true shape: colours are
+// smooth between vertices, holes and pockets have their real edges. "Show deflection" moves
+// every vertex by its computed displacement, exaggerated, back and forth. Red arrows show
+// where and which way the load goes in, green rings where the plate is held, numbered
+// markers the hot spots listed in the panel.
+const simGroup = new THREE.Group(); simGroup.visible = false; scene.add(simGroup);
+const sim = { field: "stress", which: "pocketed", caseIdx: -1, deform: true, data: [], meshes: [], t0: 0, amp: 0, cases: [] };
+const STOPS = [[0, [0.17, 0.24, 0.62]], [0.25, [0.10, 0.56, 0.86]], [0.5, [0.24, 0.76, 0.42]], [0.75, [0.98, 0.79, 0.16]], [1, [0.86, 0.16, 0.13]]];
+function cmap(x) {
+  x = Math.min(1, Math.max(0, x));
+  for (let i = 1; i < STOPS.length; i++) if (x <= STOPS[i][0]) {
+    const [a, ca] = STOPS[i - 1], [b, cb] = STOPS[i], f = (x - a) / (b - a);
+    return ca.map((v, k) => v + (cb[k] - v) * f);
+  }
+  return STOPS[STOPS.length - 1][1];
+}
+function drawBar() {
+  const c = $("sim-bar"), g = c.getContext("2d");
+  for (let x = 0; x < c.width; x++) { const [r, gg, b] = cmap(x / (c.width - 1)); g.fillStyle = `rgb(${255 * r},${255 * gg},${255 * b})`; g.fillRect(x, 0, 1, c.height); }
+}
+async function loadSim() {
+  if (!session || !feats.length) return;
+  $("sim-status").textContent = "Running the high-resolution analysis…";
+  const q = `which=${sim.which}&case=${sim.caseIdx}`, sid = session.id;
+  const data = await Promise.all(feats.map((_, pi) => fetch(`/api/sim/${sid}?plate=${pi}&${q}`).then(r => r.ok ? r.json() : null)));
+  if (!session || session.id !== sid || data.some(d => !d)) { $("sim-status").textContent = "Analysis failed."; return; }
+  $("sim-status").textContent = "";
+  sim.data = data; buildSim();
+}
+function vertexValues(d) {
+  const st = dec(d.stress, Float32Array);
+  if (sim.field === "stress") return st;
+  if (sim.field === "strain") return d.absolute ? st.map(v => v / d.E_mpa * 1e6) : st;
+  const u = d.u ? dec(d.u, Float32Array) : null, out = new Float32Array(st.length).fill(NaN);
+  if (u) for (let k = 0; k < out.length; k++) out[k] = Math.hypot(u[3 * k], u[3 * k + 1], u[3 * k + 2]);
+  return out;
+}
+function label3d(text, color) {
+  const c = document.createElement("canvas"); c.width = c.height = 64;
+  const g = c.getContext("2d");
+  g.fillStyle = color; g.beginPath(); g.arc(32, 32, 28, 0, 2 * Math.PI); g.fill();
+  g.fillStyle = "#000"; g.font = "bold 34px system-ui, sans-serif"; g.textAlign = "center"; g.textBaseline = "middle"; g.fillText(text, 32, 34);
+  const sp = new THREE.Sprite(new THREE.SpriteMaterial({ map: new THREE.CanvasTexture(c), depthTest: false }));
+  return sp;
+}
+function buildSim() {
+  simGroup.traverse(o => { o.geometry && o.geometry.dispose(); o.material && (o.material.map && o.material.map.dispose(), o.material.dispose()); });
+  simGroup.clear(); sim.meshes = [];
+  const d0 = sim.data[0];
+  if (JSON.stringify(sim.cases) !== JSON.stringify(d0.cases)) {
+    sim.cases = d0.cases;
+    $("sim-case").innerHTML = `<option value="-1">Worst case (all load cases)</option>` + d0.cases.map((c, i) => `<option value="${i}">${c}</option>`).join("");
+    $("sim-case").value = String(sim.caseIdx);
+  }
+  const hasU = sim.data.every(d => d.u);
+  $("sim-field").querySelector('option[value="disp"]').disabled = !hasU;
+  $("sim-deformrow").style.display = hasU ? "" : "none";
+  const vals = sim.data.map(vertexValues), all = [];
+  vals.forEach(v => v.forEach(x => { if (Number.isFinite(x)) all.push(x); }));
+  all.sort((a, b) => a - b);
+  const vmax = all.length ? all[Math.floor(0.995 * (all.length - 1))] || 1 : 1;
+  let umax = 0, diag = 0;
+  sim.data.forEach((d, pi) => {
+    const pg = plateGroups[pi]; if (!pg) return;
+    const V = dec(d.V, Float32Array), T = dec(d.T, Uint32Array), v = vals[pi], u = d.u ? dec(d.u, Float32Array) : null;
+    const n = V.length / 2, pos = new Float32Array(n * 3), col = new Float32Array(n * 3);
+    for (let k = 0; k < n; k++) {
+      pos[3 * k] = V[2 * k]; pos[3 * k + 1] = V[2 * k + 1]; pos[3 * k + 2] = LIFT;
+      col.set(Number.isFinite(v[k]) ? cmap(v[k] / vmax) : [0.5, 0.5, 0.5], 3 * k);
+      if (u) { const m = Math.hypot(u[3 * k], u[3 * k + 1], u[3 * k + 2]); if (Number.isFinite(m)) umax = Math.max(umax, m); }
+    }
+    const geo = new THREE.BufferGeometry();
+    geo.setAttribute("position", new THREE.BufferAttribute(pos, 3));
+    geo.setAttribute("color", new THREE.BufferAttribute(col, 3));
+    geo.setIndex(new THREE.BufferAttribute(T, 1));
+    const g = new THREE.Group(); g.matrixAutoUpdate = false; g.matrix.copy(pg.g.matrix);
+    g.add(new THREE.Mesh(geo, new THREE.MeshBasicMaterial({ vertexColors: true, side: THREE.DoubleSide })));
+    const xs = pg.f.outline.map(p => p[0]), ys = pg.f.outline.map(p => p[1]);
+    const dg = Math.hypot(Math.max(...xs) - Math.min(...xs), Math.max(...ys) - Math.min(...ys)); diag = Math.max(diag, dg);
+    // where it is held and loaded
+    for (const c of d.supports) {
+      const ring = new THREE.Mesh(new THREE.RingGeometry(dg * 0.012, dg * 0.02, 24), new THREE.MeshBasicMaterial({ color: C_MOUNT, depthTest: false }));
+      ring.position.set(c[0], c[1], LIFT * 4); g.add(ring);
+    }
+    const L = Math.max(12, 0.09 * dg);
+    for (const [, vec] of d.dirs) for (const c of d.loads) {
+      const dir = new THREE.Vector3(...vec).normalize(), tip = new THREE.Vector3(c[0], c[1], LIFT * 4);
+      g.add(new THREE.ArrowHelper(dir, tip.clone().sub(dir.clone().multiplyScalar(L)), L, 0xff453a, L * 0.32, L * 0.2));
+    }
+    // hot spots
+    d.hot.slice(0, 5).forEach((h, i) => {
+      const sp = label3d(String(i + 1), "#ffffff"); sp.position.set(h.x, h.y, LIFT * 6); sp.scale.setScalar(dg * 0.035); g.add(sp);
+    });
+    simGroup.add(g);
+    sim.meshes.push({ geo, base: pos.slice(), u });
+  });
+  sim.amp = umax > 0 ? 0.05 * diag / umax : 0; sim.lastS = null; sim.t0 = performance.now();
+  drawBar();
+  const abs = d0.absolute;
+  const unit = { stress: abs ? "MPa" : "× original's typical peak", strain: abs ? "µε" : "× original's typical peak",
+                 disp: abs ? "mm" : "× original's largest deflection" }[sim.field];
+  const fmt = x => x >= 100 ? x.toFixed(0) : x >= 10 ? x.toFixed(1) : x.toPrecision(2);
+  $("sim-min").textContent = "0"; $("sim-max").textContent = `${fmt(vmax)} ${unit}`;
+  const sUnit = abs ? "MPa" : "× typ. peak";
+  $("sim-hot").innerHTML = d0.hot.length ? d0.hot.slice(0, 5).map((h, i) =>
+    `<div>${i + 1}. ${h.label} — ${fmt(h.value)} ${sUnit}${abs ? ` (safety factor ${(d0.strength_mpa / Math.max(h.value, 1e-9)).toFixed(1)})` : ""}</div>`).join("") : "";
+  const caseName = sim.caseIdx >= 0 ? sim.cases[sim.caseIdx] : "worst of all load cases";
+  let note = `${sim.which === "original" ? "Original plate" : "Pocketed plate"}, ${caseName}. ${d0.mode === "engineering"
+    ? "Held at the green rings; red arrows show where and which way the load goes in."
+    : "Generic screening loads (plate clamped at either end). Describe the plate's job in Loads for real load paths."} Colour scale tops out at the 99.5th percentile.`;
+  if (!abs) note += " Values are relative to the original plate; give a load in newtons for MPa and mm.";
+  if (hasU && sim.deform) note += " Deflection is exaggerated to be visible.";
+  $("sim-note").textContent = note;
+}
+function stepSim() {
+  if (!simGroup.visible || !sim.meshes.length) return;
+  const t = (performance.now() - sim.t0) / 1000;
+  const s = sim.deform && sim.amp ? sim.amp * (0.5 - 0.5 * Math.cos(2 * Math.PI * t / 2.4)) : 0;
+  if (s === sim.lastS) return;
+  sim.lastS = s;
+  for (const m of sim.meshes) {
+    if (!m.u) continue;
+    const p = m.geo.attributes.position.array;
+    for (let k = 0; k < p.length; k++) { const du = m.u[k]; p[k] = m.base[k] + (Number.isFinite(du) ? du * s : 0); }
+    m.geo.attributes.position.needsUpdate = true;
+    m.geo.computeBoundingSphere();
+  }
+}
+$("sim-field").onchange = () => { sim.field = $("sim-field").value; if (sim.data.length) buildSim(); };
+$("sim-case").onchange = () => {
+  sim.caseIdx = +$("sim-case").value;
+  if (sim.caseIdx < 0 && sim.field === "disp") { sim.field = "stress"; $("sim-field").value = "stress"; }
+  loadSim();
+};
+$("sim-deform").onchange = () => { sim.deform = $("sim-deform").checked; sim.t0 = performance.now(); if (sim.data.length) buildSim(); };
+document.querySelectorAll("#sim-which button").forEach(b => b.onclick = () => {
+  sim.which = b.dataset.w;
+  document.querySelectorAll("#sim-which button").forEach(x => x.classList.toggle("on", x === b));
+  loadSim();
+});
+
+// ------------------------------------------------------------------ loads: description, directions, arrows
+// Directions are picked relative to the screen ("down" = down as you look at the plate now)
+// and frozen into each plate's own frame at that moment, then drawn as arrows on the plate.
+const DIR_LABEL = { down: "Downward", up: "Upward", left: "Leftward", right: "Rightward", in: "Into the plate", out: "Out of the plate" };
+let loadDirs = { keys: [], vecs: [] }, loadPurpose = null;
+
+function dirVectors(keys) {
+  const q = camera.quaternion, right = new THREE.Vector3(1, 0, 0).applyQuaternion(q), up = new THREE.Vector3(0, 1, 0).applyQuaternion(q);
+  const fwd = new THREE.Vector3(0, 0, -1).applyQuaternion(q);
+  return feats.map(f => {
+    const x = new THREE.Vector3(...f.frame.x), y = new THREE.Vector3(...f.frame.y), n = new THREE.Vector3(...f.frame.n);
+    const inPlane = w => { const v = [w.dot(x), w.dot(y)], L = Math.hypot(...v); return L > 1e-3 ? [v[0] / L, v[1] / L, 0] : null; };
+    const into = Math.sign(fwd.dot(n)) || -1;
+    const map = { down: inPlane(up.clone().negate()), up: inPlane(up), left: inPlane(right.clone().negate()), right: inPlane(right),
+                  in: [0, 0, into], out: [0, 0, -into] };
+    return keys.filter(k => map[k]).map(k => [DIR_LABEL[k], map[k]]);
+  });
+}
+function setDirections(keys) {
+  keys = keys.filter(k => k !== "all");
+  loadDirs = { keys, vecs: keys.length ? dirVectors(keys) : feats.map(() => []) };
+  document.querySelectorAll("#dirbtns button").forEach(b =>
+    b.classList.toggle("on", b.dataset.d === "all" ? !keys.length : keys.includes(b.dataset.d)));
+  drawArrows(); showLoadMode();
+}
+document.querySelectorAll("#dirbtns button").forEach(b => b.onclick = () => {
+  const d = b.dataset.d;
+  if (d === "all") return setDirections([]);
+  const k = loadDirs.keys.includes(d) ? loadDirs.keys.filter(x => x !== d) : [...loadDirs.keys, d];
+  setDirections(k);
+});
+
+function drawArrows() {
+  plateGroups.forEach((pg, pi) => {
+    if (pg.arrows) { pg.g.remove(pg.arrows); pg.arrows.traverse(o => { o.geometry && o.geometry.dispose(); o.material && o.material.dispose(); }); }
+    pg.arrows = new THREE.Group(); pg.g.add(pg.arrows);
+    const f = pg.f, vecs = (loadDirs.vecs[pi] || []);
+    if (!vecs.length) return;
+    const xs = f.outline.map(p => p[0]), ys = f.outline.map(p => p[1]);
+    const diag = Math.hypot(Math.max(...xs) - Math.min(...xs), Math.max(...ys) - Math.min(...ys));
+    const r = roles[pi] || {};
+    let pts = f.holes.filter(h => r[h.id] === "bearing").map(h => h.center);
+    if (!pts.length) pts = [[(Math.max(...xs) + Math.min(...xs)) / 2, (Math.max(...ys) + Math.min(...ys)) / 2]];
+    const L = Math.max(12, 0.09 * diag);
+    for (const [, v] of vecs) for (const c of pts) {
+      const dir = new THREE.Vector3(...v).normalize();
+      // the arrow ends at the hole: the load pushes into it
+      const tip = new THREE.Vector3(c[0], c[1], LIFT * 3), origin = tip.clone().sub(dir.clone().multiplyScalar(L));
+      pg.arrows.add(new THREE.ArrowHelper(dir, origin, L, 0xff453a, L * 0.32, L * 0.2));
+    }
+  });
+}
+
+async function readDescription() {
+  if (!session) return;
+  const text = $("loaddesc").value.trim();
+  if (!text) return;
+  $("loadread-out").textContent = "Reading…";
+  const r = await fetch(`/api/interpret/${session.id}`, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ text }) });
+  const d = await r.json();
+  const p0 = (d.plates || [])[0];
+  if (!p0 || !p0.ok) { $("loadread-out").innerHTML = (p0 && p0.notes || ["Couldn't read that."]).map(n => `<div>${n}</div>`).join(""); return; }
+  (d.plates || []).forEach((p, pi) => {
+    if (!p.ok) return;
+    roles[pi] = {};
+    p.support_ids.forEach(id => roles[pi][id] = "mount");
+    p.load_ids.forEach(id => roles[pi][id] = "bearing");
+  });
+  loadPurpose = p0.purpose;
+  if (p0.force_n) $("force").value = p0.force_n;
+  setDirections(p0.dirs.includes("all") ? [] : p0.dirs);
+  drawMarks(); showPick();
+  $("loadread-out").innerHTML = `<div><b>Understood:</b> ${p0.summary}</div>` + (p0.meaning ? `<div>${p0.meaning}.</div>` : "")
+    + (p0.notes.length ? `<div style="margin-top:3px">Assumed: ${p0.notes.join("; ")}.</div>` : "")
+    + `<div style="margin-top:3px">Green = holds the plate, red = load comes in. Click any hole to change it.</div>`;
+}
+$("loadread").onclick = readDescription;
+$("loaddesc").addEventListener("keydown", e => { if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); readDescription(); } });
+
+// ------------------------------------------------------------------ edit view
+// The design's rib centre lines over the pocketed plate. Draw a rib by clicking two points
+// (they snap to rib ends and hole centres) or erase one by clicking it; with Mirror on, every
+// change is mirrored onto the plate's symmetry axes. Regenerate rebuilds the pockets from these
+// lines on the server (same tool radius, blunt tips and clearances), checks every rule and the
+// stiffness target, and adds the result as a new option.
+const editGroup = new THREE.Group(); editGroup.visible = false; scene.add(editGroup);
+const ed = { plates: [], axes: [], rib: 8, tool: "draw", start: null, cursor: null, hover: null, history: [], version: -1 };
+let resultVersion = 0;
+
+const reflectPt = (p, c, d) => { const vx = p[0] - c[0], vy = p[1] - c[1], k = vx * d[0] + vy * d[1]; return [c[0] + 2 * k * d[0] - vx, c[1] + 2 * k * d[1] - vy]; };
+function images(pi, seg) {
+  let out = [seg];
+  if ($("edit-mirror").checked) for (const [c, d] of (ed.axes[pi] || [])) out = out.concat(out.map(s => [reflectPt(s[0], c, d), reflectPt(s[1], c, d)]));
+  return out;
+}
+const near = (a, b, tol) => Math.hypot(a[0] - b[0], a[1] - b[1]) < tol;
+const sameSeg = (a, b, tol = 0.6) => (near(a[0], b[0], tol) && near(a[1], b[1], tol)) || (near(a[0], b[1], tol) && near(a[1], b[0], tol));
+
+async function enterEdit() {
+  if (ed.keep) { ed.keep = false; ed.version = resultVersion; }  // just regenerated from these very lines
+  if (ed.version === resultVersion) { drawEdit(); return; }
+  $("edit-status").textContent = "Loading ribs…";
+  const d = await (await fetch(`/api/ribs/${session.id}`)).json();
+  ed.plates = d.plates.map(ls => ls.map(seg => [seg[0], seg[seg.length - 1]]));
+  ed.axes = d.axes; ed.rib = d.rib; ed.history = []; ed.start = null; ed.hover = null; ed.version = resultVersion;
+  $("edit-status").textContent = `${d.label || "Design"} · click two points to draw a rib, or Erase. Esc cancels.`;
+  drawEdit();
+}
+function editHit(ev) {
+  const rect = renderer.domElement.getBoundingClientRect();
+  pickRay.setFromCamera(new THREE.Vector2(((ev.clientX - rect.left) / rect.width) * 2 - 1, -((ev.clientY - rect.top) / rect.height) * 2 + 1), camera);
+  let best = null;
+  plateGroups.forEach((pg, pi) => {
+    const f = pg.f;
+    const P = pickRay.ray.intersectPlane(new THREE.Plane().setFromNormalAndCoplanarPoint(new THREE.Vector3(...f.frame.n), new THREE.Vector3(...f.frame.origin)), new THREE.Vector3());
+    if (!P) return;
+    const q = P.clone().applyMatrix4(pg.inv), inside = inPoly(q.x, q.y, f.outline);
+    if (!best || (inside && !best.inside))
+      best = { pi, u: q.x, v: q.y, inside, px: 2 * P.distanceTo(camera.position) * Math.tan(THREE.MathUtils.degToRad(camera.fov / 2)) / rect.height };
+  });
+  return best;
+}
+function snap(h) {
+  const pts = [];
+  for (const s of ed.plates[h.pi] || []) pts.push(s[0], s[1]);
+  for (const ho of plateGroups[h.pi].f.holes) pts.push(ho.center);
+  let best = null, bd = Math.max(1.5, 12 * h.px);
+  for (const p of pts) { const d = Math.hypot(p[0] - h.u, p[1] - h.v); if (d < bd) { bd = d; best = p; } }
+  return best ? [best[0], best[1]] : [h.u, h.v];
+}
+function nearestSeg(h) {
+  let best = -1, bd = Math.max(ed.rib / 2, 10 * h.px);
+  (ed.plates[h.pi] || []).forEach((s, i) => { const d = distPoly(h.u, h.v, s); if (d < bd) { bd = d; best = i; } });
+  return best;
+}
+function drawEdit() {
+  editGroup.traverse(o => { o.geometry && o.geometry.dispose(); o.material && o.material.dispose(); });
+  editGroup.clear();
+  plateGroups.forEach((pg, pi) => {
+    const g = new THREE.Group(); g.matrixAutoUpdate = false; g.matrix.copy(pg.g.matrix); editGroup.add(g);
+    const segs = ed.plates[pi] || [];
+    const hot = ed.hover && ed.hover.pi === pi && segs[ed.hover.i] ? images(pi, segs[ed.hover.i]) : [];
+    for (const s of segs) {
+      const h = hot.some(x => sameSeg(x, s)), col = h ? 0xff453a : C_SEL;
+      const band = new THREE.Mesh(ribbon(s, ed.rib, false), flat(col, h ? 0.7 : 0.35)); band.position.z = LIFT * 2; g.add(band);
+      const mid = new THREE.Mesh(ribbon(s, Math.max(0.5, ed.rib * 0.1), false), flat(col, 0.95)); mid.position.z = LIFT * 3; g.add(mid);
+    }
+    const ends = new Set(segs.flatMap(s => s.map(p => p[0].toFixed(2) + "," + p[1].toFixed(2))));
+    for (const k of ends) {
+      const [x, y] = k.split(",").map(Number);
+      const dot = new THREE.Mesh(new THREE.CircleGeometry(ed.rib * 0.3, 16), flat(C_SEL, 0.95)); dot.position.set(x, y, LIFT * 4); g.add(dot);
+    }
+    if (ed.start && ed.start.pi === pi && ed.cursor)
+      for (const s of images(pi, [ed.start.p, ed.cursor])) {
+        const m = new THREE.Mesh(ribbon(s, ed.rib, false), flat(0x30d158, 0.55)); m.position.z = LIFT * 5; g.add(m);
+      }
+  });
+}
+function pushHistory() { ed.history.push(JSON.stringify(ed.plates)); if (ed.history.length > 100) ed.history.shift(); }
+function undoEdit() { if (!ed.history.length) return; ed.plates = JSON.parse(ed.history.pop()); ed.start = null; ed.hover = null; drawEdit(); }
+
+let edDown = null;
+renderer.domElement.addEventListener("pointerdown", e => { if (view === "edit") edDown = { x: e.clientX, y: e.clientY }; });
+renderer.domElement.addEventListener("pointerup", e => {
+  if (view !== "edit" || !edDown || e.button !== 0) return;
+  const moved = Math.hypot(e.clientX - edDown.x, e.clientY - edDown.y); edDown = null;
+  if (moved > 5) return;  // that was an orbit drag
+  const h = editHit(e); if (!h) return;
+  if (ed.tool === "erase") {
+    const i = nearestSeg(h); if (i < 0) return;
+    pushHistory();
+    const kill = images(h.pi, ed.plates[h.pi][i]);
+    ed.plates[h.pi] = ed.plates[h.pi].filter(s => !kill.some(k => sameSeg(k, s)));
+    ed.hover = null; drawEdit(); return;
+  }
+  const p = snap(h);
+  if (!ed.start || ed.start.pi !== h.pi) { ed.start = { pi: h.pi, p }; ed.cursor = p; drawEdit(); return; }
+  if (Math.hypot(p[0] - ed.start.p[0], p[1] - ed.start.p[1]) > 1) {
+    pushHistory();
+    for (const s of images(h.pi, [ed.start.p, p])) if (!ed.plates[h.pi].some(t => sameSeg(t, s))) ed.plates[h.pi].push(s);
+  }
+  ed.start = null; ed.cursor = null; drawEdit();
+});
+renderer.domElement.addEventListener("pointermove", e => {
+  if (view !== "edit" || e.buttons) return;
+  renderer.domElement.style.cursor = "crosshair";
+  const h = editHit(e); if (!h) return;
+  if (ed.tool === "erase") {
+    const i = nearestSeg(h), nh = i >= 0 ? { pi: h.pi, i } : null;
+    if (JSON.stringify(nh) !== JSON.stringify(ed.hover)) { ed.hover = nh; drawEdit(); }
+  } else if (ed.start) { ed.cursor = snap(h); drawEdit(); }
+});
+addEventListener("keydown", e => {
+  if (view !== "edit" || e.target.matches("input, textarea")) return;
+  if (e.key === "Escape") { ed.start = null; ed.cursor = null; drawEdit(); }
+  if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === "z") { e.preventDefault(); undoEdit(); }
+});
+$("edit-undo").onclick = undoEdit;
+$("edit-reset").onclick = () => { ed.version = -1; enterEdit(); };
+document.querySelectorAll("#edit-tool button").forEach(b => b.onclick = () => {
+  ed.tool = b.dataset.t; ed.start = null; ed.cursor = null; ed.hover = null;
+  document.querySelectorAll("#edit-tool button").forEach(x => x.classList.toggle("on", x === b));
+  $("edit-status").textContent = ed.tool === "erase" ? "Click a rib to remove it." : "Click two points to draw a rib. Esc cancels.";
+  drawEdit();
+});
+$("edit-go").onclick = async () => {
+  if (!session) return;
+  $("edit-go").disabled = true; $("edit-status").textContent = "Regenerating pockets from your ribs…";
+  const r = await fetch(`/api/edit/${session.id}`, { method: "POST", headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ plates: ed.plates.map(ls => ({ lines: ls })), mirror: false }) });
+  $("edit-go").disabled = false;
+  if (!r.ok) { $("edit-status").textContent = (await r.json()).detail || "Regenerate failed."; return; }
+  const d = await r.json(), rep = d.report;
+  ed.keep = true;  // the drawn lines are this design's ribs: keep them (and the undo history)
+  setResult(d.mesh, true); showReport(rep);
+  $("edit-status").textContent = `${rep.mass_saved_pct.toFixed(1)}% lighter · ${pct(rep.structure.worst_stiffness_retained)} stiffness`
+    + (rep.failed_rules && rep.failed_rules.length ? ` · breaks: ${rep.failed_rules.join(", ")}` : " · passes every rule") + " · saved as a new option.";
+};
+
+// ------------------------------------------------------------------ upload
+const drop = $("drop");
+drop.onclick = () => $("file").click();
+$("file").onchange = () => $("file").files[0] && upload($("file").files[0]);
+drop.ondragover = e => { e.preventDefault(); drop.classList.add("over"); };
+drop.ondragleave = () => drop.classList.remove("over");
+drop.ondrop = e => { e.preventDefault(); drop.classList.remove("over"); e.dataTransfer.files[0] && upload(e.dataTransfer.files[0]); };
+
+function showError(msg) { $("err").style.display = msg ? "block" : "none"; $("err").textContent = msg || ""; }
+const mmin = mm => `${mm.toFixed(1)} mm (${(mm / 25.4).toFixed(2)}″)`;
+
+async function upload(file) {
+  showError(""); $("fileinfo").textContent = `Loading ${file.name}…`; $("warnings").innerHTML = ""; $("go").disabled = true;
+  const fd = new FormData(); fd.append("file", file);
+  const r = await fetch("/api/upload", { method: "POST", body: fd });
+  const d = await r.json();
+  if (!r.ok) { $("fileinfo").textContent = ""; return showError(d.detail || "Upload failed"); }
+  session = d;
+  for (const k in models) if (models[k]) { scene.remove(models[k]); models[k] = null; }
+  models.orig = buildModel(d.mesh); scene.add(models.orig);
+  document.querySelector('#viewmode button[data-v="result"]').disabled = true;
+  document.querySelector('#viewmode button[data-v="sim"]').disabled = true;
+  document.querySelector('#viewmode button[data-v="edit"]').disabled = true;
+  setView("orig"); fit();
+  $("empty").style.display = "none"; $("results").style.display = "none";
+  $("fileinfo").innerHTML = `<b>${d.name}</b>` + d.plates.map(p =>
+    `<br>${p.size[0].toFixed(1)} × ${p.size[1].toFixed(1)} mm (${(p.size[0] / 25.4).toFixed(2)} × ${(p.size[1] / 25.4).toFixed(2)}″) · ${mmin(p.thickness)} thick · ${p.holes} hole${p.holes === 1 ? "" : "s"}`).join("");
+  $("warnings").innerHTML = d.warnings.map(w => `<div class="warn">${w}</div>`).join("");
+  loadFeatures(d.features);
+  $("go").disabled = false;
+}
+
+// ------------------------------------------------------------------ run
+$("go").onclick = async () => {
+  if (!session) return;
+  showError(""); $("go").disabled = true; $("results").style.display = "none";
+  const body = { material: $("material").value, target_stiffness: $("target").value / 100, ...settings() };
+  const r = await fetch(`/api/pocket/${session.id}`, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(body) });
+  if (!r.ok) { $("go").disabled = false; return showError((await r.json()).detail); }
+  $("progress").style.display = "block";
+  clearInterval(polling);
+  polling = setInterval(poll, 400);
+};
+
+async function poll() {
+  const s = await (await fetch(`/api/status/${session.id}`)).json();
+  $("barfill").style.width = (100 * s.progress).toFixed(1) + "%";
+  $("pmsg").textContent = s.message;
+  if (s.state === "running") return;
+  clearInterval(polling); $("go").disabled = false; $("progress").style.display = "none";
+  if (s.state === "error") return showError("Pocketing failed: " + s.error);
+  if (s.state === "done") {
+    setResult(await (await fetch(`/api/result_mesh/${session.id}`)).json());
+    showReport(s.report);
+    playCut();  // the material dissolves away once, right as the result arrives
+  }
+}
+
+async function chooseVariant(k) {
+  $("r-opts").style.opacity = .4;
+  const r = await fetch(`/api/variant/${session.id}/${k}`, { method: "POST" });
+  $("r-opts").style.opacity = 1;
+  if (!r.ok) return showError((await r.json()).detail);
+  const d = await r.json();
+  setResult(d.mesh); showReport(d.report);
+}
+
+const pct = v => (100 * v).toFixed(0) + "%";
+const sig = x => x >= 100 ? x.toFixed(0) : x >= 1 ? x.toFixed(1) : x.toPrecision(2);
+const grams = g => g >= 1000 ? (g / 1000).toFixed(2) + " kg" : g.toFixed(1) + " g";
+
+function showReport(r) {
+  $("results").style.display = "block";
+  $("r-pct").textContent = r.mass_saved_pct.toFixed(1) + "%";
+  $("r-kv").innerHTML = `
+    <span>Weight</span><span>${grams(r.mass_g[0])} → ${grams(r.mass_g[1])}</span>
+    <span>Saved</span><span>${grams(r.mass_saved_g)} · ${(r.mass_saved_g / 453.6).toFixed(2)} lb</span>
+    <span>Pockets</span><span>${r.pockets}</span>
+    <span>Layout</span><span>${r.spacing}</span>
+    ${r.failed_rules && r.failed_rules.length ? `<span>Breaks</span><span>${r.failed_rules.join(", ")}</span>` : ""}`;
+  const detailKv = `
+    <span>Status</span><span>${r.status}</span>
+    ${r.convergence ? `<span>Finer-mesh check</span><span>${pct(r.convergence.fine_stiffness)} (${r.convergence.difference_pct >= 0 ? "+" : ""}${r.convergence.difference_pct.toFixed(1)}%)</span>` : ""}
+    ${r.diagnostics ? `<span>Designs checked</span><span>${r.diagnostics.candidates_evaluated} (${r.diagnostics.feasible} meet target)</span>` : ""}
+    <span>Holes held on 3+ sides</span><span>${r.holes_supported} of ${r.holes}</span>
+    <span>Rib · tool radius</span><span>${(+r.rules.rib).toFixed(1)} mm · ${(+r.rules.tool_radius).toFixed(2)} mm</span>
+    ${r.diagnostics ? `<span>Own clearances</span><span>${r.diagnostics.custom_clearances || "none"}</span>` : ""}
+    <span>Material</span><span>${r.material}</span>`;
+  const lm = r.load_model || {}, sc = r.screening;
+  $("r-screen").innerHTML = `<div class="screen"><b>${lm.mode === "engineering" ? "Engineering load model" : "Generic screening loads"}</b>
+    <div class="hint" style="margin-top:4px">${lm.summary || ""}</div>
+    ${lm.inputs ? `<div class="kv" style="margin-top:6px">${Object.entries(lm.inputs).map(([k, v]) => `<span>${k}</span><span>${v}</span>`).join("")}</div>` : ""}
+    ${sc ? `<div class="kv" style="margin-top:8px">
+      <span>Peak stress (${sc.force_n} N)</span><span>${sig(sc.peak_stress_mpa)} MPa (blank ${sig(sc.peak_stress_blank_mpa)})</span>
+      <span>Safety factor vs ${r.material_props.note.toLowerCase().includes("yield") ? "yield" : "strength"}</span><span>${sc.safety_factor ? (sc.safety_factor > 100 ? "> 100" : sc.safety_factor.toFixed(1)) : "–"}</span>
+      <span>Max deflection</span><span>${sig(sc.max_deflection_mm)} mm (blank ${sig(sc.max_deflection_blank_mm)})</span></div>
+      <div class="hint" style="margin-top:4px">${sc.note}</div>` : ""}</div>`;
+  const L = r.learning;
+  $("r-learn").innerHTML = L ? `<div class="screen"><b>Learning</b>
+    <div class="kv" style="margin-top:6px">
+      <span>On record</span><span>${L.knowledge.plates} plate${L.knowledge.plates === 1 ? "" : "s"} · ${L.knowledge.fea_designs} FEA-checked designs</span>
+      <span>Search order</span><span>${(L.prior.order || []).join(" → ")}${L.prior.coarse && L.prior.coarse.length ? ` (coarse: ${L.prior.coarse.join(", ")})` : ""}</span>
+      <span>Surrogate</span><span>${L.surrogate_gate_open ? `on · skipped ${L.fea_skipped} FEA runs` : "off (not enough verified data yet)"}</span>
+      <span>Your style</span><span>${L.style ? `${L.knowledge.style_refs} hand-made plates · ${L.style.choices_learned} picks learned` : "none yet"}</span></div>
+    </div>` : "";
+  $("r-badge").innerHTML = r.meets_target
+    ? `<span class="badge ok">✓ ${pct(r.structure.worst_stiffness_retained)} stiffness (target ${pct(r.target_stiffness)})</span>`
+    : `<span class="badge">${pct(r.structure.worst_stiffness_retained)} stiffness · below ${pct(r.target_stiffness)} target</span>`;
+  const t = r.target_stiffness;
+  $("r-cases").innerHTML = `<div class="kv" style="margin:6px 0 10px">${detailKv}</div>` + r.structure.cases.map(c => `<div class="case"><div class="row"><span>${c.case}</span>
+      <span>${pct(c.stiffness_retained)} stiffness · stress ×${c.peak_stress_ratio.toFixed(1)}</span></div>
+      <div class="meter"><div style="width:${(100 * Math.min(c.stiffness_retained, 1)).toFixed(1)}%"></div><i style="left:${100 * t}%"></i></div></div>`).join("");
+  $("r-opts").innerHTML = `<table class="opts"><tr><th>Layout</th><th>Pockets</th><th>Lighter</th><th>Stiffness</th></tr>` +
+    r.variants.map((v, i) => `<tr class="opt ${i === r.chosen ? "sel" : ""} ${v.meets_target ? "" : "miss"}" data-k="${i}">
+      <td>${i === r.chosen ? "▸ " : ""}${v.label}</td><td>${v.pockets}</td><td>${v.mass_saved_pct.toFixed(1)}%</td><td>${pct(v.stiffness)}</td></tr>`).join("") + `</table>`;
+  $("r-opts").querySelectorAll("tr.opt").forEach(tr => tr.onclick = () => +tr.dataset.k !== r.chosen && chooseVariant(+tr.dataset.k));
+  for (const f of ["step", "3mf", "stl"]) $("dl-" + f).href = `/api/download/${session.id}/${f}`;
+}
+</script>
+</body>
+</html>

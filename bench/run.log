@@ -1,0 +1,13 @@
+== blank_example.step
+   v1 chosen 33.2% / 33% / ×5.6 ⚠ asymmetric, sharp tips  (11s)   v2 chosen 36.9% / 35% / ×3.9  (139s)
+   best meeting target (graded): v1 33.2% / 33% / ×5.6 ⚠ asymmetric, sharp tips   v2 36.9% / 35% / ×3.9
+== blank_example1.step
+   v1 chosen 41.5% / 31% / ×6.7 ⚠ asymmetric, sharp tips  (9s)   v2 chosen 40.7% / 34% / ×5.7  (94s)
+   best meeting target (graded): v1 39.0% / 34% / ×5.0 ⚠ asymmetric, sharp tips   v2 40.7% / 34% / ×5.7
+== blank_example2.step
+   v1 chosen 39.1% / 35% / ×3.9 ⚠ sharp tips  (9s)   v2 chosen 46.0% / 34% / ×3.0  (84s)
+   best meeting target (graded): v1 39.1% / 35% / ×3.9 ⚠ sharp tips   v2 46.0% / 34% / ×3.0
+== blank_kiwi.step
+   v1 chosen 33.5% / 40% / ×2.8 ⚠ sharp tips  (30s)   v2 chosen 37.5% / 51% / ×2.2  (39690s)
+   best meeting target (graded): v1 33.5% / 40% / ×2.8 ⚠ sharp tips   v2 37.5% / 51% / ×2.2
+== blank_supes.step

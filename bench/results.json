@@ -1,0 +1,2456 @@
+[
+ {
+  "plate": "blank_example.step",
+  "v1_seconds": 7.390612602233887,
+  "v2_seconds": 76.82310032844543,
+  "v2_diag": {
+   "candidates_evaluated": 73,
+   "rejections": {
+    "sharpest_tip_depth_mm": 2,
+    "pocket_symmetry_mismatch_pct": 1,
+    "no_pockets_fit": 6
+   },
+   "feasible": 55,
+   "families": [
+    "truss",
+    "guided",
+    "isogrid",
+    "isogrid-turned"
+   ],
+   "eso_steps": 3,
+   "clearances": [
+    {
+     "default": 8.0,
+     "holes": {},
+     "sides": {},
+     "corners": {}
+    }
+   ],
+   "custom_clearances": 0,
+   "load_model": {
+    "mode": "generic",
+    "summary": "Generic screening loads: plate clamped at either end of its long side, bent both ways and twisted. Mark bolted mounts and loaded bearings for an engineering check.",
+    "inputs": {
+     "supports": "assumed (end clamp)",
+     "loads": "assumed (unit loads at the far end)"
+    }
+   }
+  },
+  "v1_chosen": {
+   "mass_saved_pct": 33.163588925342104,
+   "stiffness": 0.33323376665278487,
+   "stress": 5.602721887920655,
+   "rules_ok": false,
+   "failed": [
+    "pocket_symmetry_mismatch_pct",
+    "sharpest_tip_depth_mm"
+   ],
+   "core_ok": true,
+   "label": "40 mm"
+  },
+  "v2_chosen": {
+   "mass_saved_pct": 36.28272682384179,
+   "stiffness": 0.3629053962027518,
+   "stress": 3.8231142004526446,
+   "rules_ok": true,
+   "failed": [],
+   "core_ok": true,
+   "label": "53 mm isogrid turned \u00b7 pruned \u00d71"
+  },
+  "v1_all": [
+   {
+    "mass_saved_pct": 32.194201816249944,
+    "stiffness": 0.2898458241568171,
+    "stress": 5.6886055236229875,
+    "rules_ok": false,
+    "failed": [
+     "pocket_symmetry_mismatch_pct",
+     "sharpest_tip_depth_mm"
+    ],
+    "core_ok": true,
+    "label": "32 mm"
+   },
+   {
+    "mass_saved_pct": 34.69837052322442,
+    "stiffness": 0.2905442000393078,
+    "stress": 5.261862821148458,
+    "rules_ok": false,
+    "failed": [
+     "pocket_symmetry_mismatch_pct",
+     "sharpest_tip_depth_mm"
+    ],
+    "core_ok": true,
+    "label": "36 mm"
+   },
+   {
+    "mass_saved_pct": 33.163588925342104,
+    "stiffness": 0.33323376665278487,
+    "stress": 5.602721887920655,
+    "rules_ok": false,
+    "failed": [
+     "pocket_symmetry_mismatch_pct",
+     "sharpest_tip_depth_mm"
+    ],
+    "core_ok": true,
+    "label": "40 mm"
+   },
+   {
+    "mass_saved_pct": 36.48626023653614,
+    "stiffness": 0.29172047042022214,
+    "stress": 7.10632367239185,
+    "rules_ok": false,
+    "failed": [
+     "pocket_symmetry_mismatch_pct",
+     "sharpest_tip_depth_mm"
+    ],
+    "core_ok": true,
+    "label": "44 mm"
+   },
+   {
+    "mass_saved_pct": 39.82649810344397,
+    "stiffness": 0.2223019377533922,
+    "stress": 6.571929386034755,
+    "rules_ok": false,
+    "failed": [
+     "min_web_between_pockets_mm",
+     "pocket_symmetry_mismatch_pct",
+     "sharpest_tip_depth_mm"
+    ],
+    "core_ok": false,
+    "label": "48 mm"
+   },
+   {
+    "mass_saved_pct": 40.3308352761228,
+    "stiffness": 0.25316704616528773,
+    "stress": 7.63093008418358,
+    "rules_ok": false,
+    "failed": [
+     "pocket_symmetry_mismatch_pct",
+     "sharpest_tip_depth_mm"
+    ],
+    "core_ok": true,
+    "label": "53 mm"
+   },
+   {
+    "mass_saved_pct": 45.68854008529247,
+    "stiffness": 0.15078110813106624,
+    "stress": 9.639739652925629,
+    "rules_ok": false,
+    "failed": [
+     "pocket_symmetry_mismatch_pct",
+     "sharpest_tip_depth_mm"
+    ],
+    "core_ok": true,
+    "label": "58 mm"
+   },
+   {
+    "mass_saved_pct": 47.80991264578304,
+    "stiffness": 0.09991249191272764,
+    "stress": 8.11011314953959,
+    "rules_ok": false,
+    "failed": [
+     "pocket_symmetry_mismatch_pct",
+     "sharpest_tip_depth_mm"
+    ],
+    "core_ok": true,
+    "label": "64 mm"
+   },
+   {
+    "mass_saved_pct": 48.79410551422656,
+    "stiffness": 0.05019936714271606,
+    "stress": 12.944982334810451,
+    "rules_ok": false,
+    "failed": [
+     "pocket_symmetry_mismatch_pct",
+     "sharpest_tip_depth_mm"
+    ],
+    "core_ok": true,
+    "label": "72 mm"
+   }
+  ],
+  "v2_all": [
+   {
+    "mass_saved_pct": 6.708412772498962,
+    "stiffness": 0.7265678408700853,
+    "stress": 1.3202388253499018,
+    "rules_ok": true,
+    "failed": [],
+    "core_ok": true,
+    "label": "24 mm"
+   },
+   {
+    "mass_saved_pct": 10.16555553601306,
+    "stiffness": 0.7071002441488594,
+    "stress": 2.1223693878111005,
+    "rules_ok": true,
+    "failed": [],
+    "core_ok": true,
+    "label": "28 mm guided"
+   },
+   {
+    "mass_saved_pct": 11.86829342372091,
+    "stiffness": 0.6223652749727921,
+    "stress": 1.7294649544545642,
+    "rules_ok": true,
+    "failed": [],
+    "core_ok": true,
+    "label": "24 mm \u00b7 pruned \u00d71"
+   },
+   {
+    "mass_saved_pct": 18.194081206408008,
+    "stiffness": 0.5822920208323589,
+    "stress": 3.238724537614343,
+    "rules_ok": true,
+    "failed": [],
+    "core_ok": true,
+    "label": "36 mm isogrid turned"
+   },
+   {
+    "mass_saved_pct": 18.52984565357194,
+    "stiffness": 0.574794355297521,
+    "stress": 2.3777388083454847,
+    "rules_ok": true,
+    "failed": [],
+    "core_ok": true,
+    "label": "40 mm isogrid turned"
+   },
+   {
+    "mass_saved_pct": 20.82033977428376,
+    "stiffness": 0.5390090895162251,
+    "stress": 2.4530465961640906,
+    "rules_ok": true,
+    "failed": [],
+    "core_ok": true,
+    "label": "36 mm isogrid"
+   },
+   {
+    "mass_saved_pct": 24.808583851103194,
+    "stiffness": 0.49087690547844226,
+    "stress": 2.6559169251962236,
+    "rules_ok": true,
+    "failed": [],
+    "core_ok": true,
+    "label": "44 mm isogrid turned"
+   },
+   {
+    "mass_saved_pct": 27.746566006399263,
+    "stiffness": 0.4308028048866106,
+    "stress": 3.260221360242244,
+    "rules_ok": true,
+    "failed": [],
+    "core_ok": true,
+    "label": "44 mm guided"
+   },
+   {
+    "mass_saved_pct": 29.480118904277617,
+    "stiffness": 0.427530955042824,
+    "stress": 2.965445665962703,
+    "rules_ok": true,
+    "failed": [],
+    "core_ok": true,
+    "label": "53 mm isogrid"
+   },
+   {
+    "mass_saved_pct": 31.62609124368774,
+    "stiffness": 0.41405070725629906,
+    "stress": 3.572770281774731,
+    "rules_ok": true,
+    "failed": [],
+    "core_ok": true,
+    "label": "48 mm isogrid turned"
+   },
+   {
+    "mass_saved_pct": 31.641618936799,
+    "stiffness": 0.3992055678704395,
+    "stress": 2.8944683580044686,
+    "rules_ok": true,
+    "failed": [],
+    "core_ok": true,
+    "label": "58 mm isogrid"
+   },
+   {
+    "mass_saved_pct": 32.92416871103789,
+    "stiffness": 0.3703538579745782,
+    "stress": 3.6709978379171173,
+    "rules_ok": true,
+    "failed": [],
+    "core_ok": true,
+    "label": "44 mm guided \u00b7 pruned \u00d71"
+   },
+   {
+    "mass_saved_pct": 34.07904959377668,
+    "stiffness": 0.369725720061006,
+    "stress": 3.752087966673468,
+    "rules_ok": true,
+    "failed": [],
+    "core_ok": true,
+    "label": "53 mm isogrid turned"
+   },
+   {
+    "mass_saved_pct": 36.28272682384179,
+    "stiffness": 0.3629053962027518,
+    "stress": 3.8231142004526446,
+    "rules_ok": true,
+    "failed": [],
+    "core_ok": true,
+    "label": "53 mm isogrid turned \u00b7 pruned \u00d71"
+   },
+   {
+    "mass_saved_pct": 36.503055545656295,
+    "stiffness": 0.3254561942692721,
+    "stress": 4.113374557620198,
+    "rules_ok": true,
+    "failed": [],
+    "core_ok": true,
+    "label": "64 mm isogrid turned"
+   },
+   {
+    "mass_saved_pct": 39.27347409136445,
+    "stiffness": 0.3169040871194447,
+    "stress": 4.157066163345746,
+    "rules_ok": true,
+    "failed": [],
+    "core_ok": true,
+    "label": "64 mm isogrid turned \u00b7 pruned \u00d71"
+   },
+   {
+    "mass_saved_pct": 39.95904376958976,
+    "stiffness": 0.28424351721415947,
+    "stress": 4.052556441556132,
+    "rules_ok": true,
+    "failed": [],
+    "core_ok": true,
+    "label": "72 mm isogrid"
+   },
+   {
+    "mass_saved_pct": 40.047697187132854,
+    "stiffness": 0.27444960584786093,
+    "stress": 4.429467335085324,
+    "rules_ok": true,
+    "failed": [],
+    "core_ok": true,
+    "label": "53 mm isogrid turned \u00b7 pruned \u00d72"
+   }
+  ],
+  "v1_best_at_target": {
+   "mass_saved_pct": 33.163588925342104,
+   "stiffness": 0.33323376665278487,
+   "stress": 5.602721887920655,
+   "rules_ok": false,
+   "failed": [
+    "pocket_symmetry_mismatch_pct",
+    "sharpest_tip_depth_mm"
+   ],
+   "core_ok": true,
+   "label": "40 mm"
+  },
+  "v2_best_at_target": {
+   "mass_saved_pct": 36.28272682384179,
+   "stiffness": 0.3629053962027518,
+   "stress": 3.8231142004526446,
+   "rules_ok": true,
+   "failed": [],
+   "core_ok": true,
+   "label": "53 mm isogrid turned \u00b7 pruned \u00d71"
+  }
+ },
+ {
+  "plate": "blank_example1.step",
+  "v1_seconds": 6.940536260604858,
+  "v2_seconds": 55.6868634223938,
+  "v2_diag": {
+   "candidates_evaluated": 57,
+   "rejections": {
+    "sharpest_tip_depth_mm": 6,
+    "pocket_symmetry_mismatch_pct": 13,
+    "no_pockets_fit": 6
+   },
+   "feasible": 53,
+   "families": [
+    "truss",
+    "guided",
+    "isogrid",
+    "isogrid-turned"
+   ],
+   "eso_steps": 3,
+   "clearances": [
+    {
+     "default": 8.0,
+     "holes": {},
+     "sides": {},
+     "corners": {}
+    }
+   ],
+   "custom_clearances": 0,
+   "load_model": {
+    "mode": "generic",
+    "summary": "Generic screening loads: plate clamped at either end of its long side, bent both ways and twisted. Mark bolted mounts and loaded bearings for an engineering check.",
+    "inputs": {
+     "supports": "assumed (end clamp)",
+     "loads": "assumed (unit loads at the far end)"
+    }
+   }
+  },
+  "v1_chosen": {
+   "mass_saved_pct": 41.48463351348431,
+   "stiffness": 0.3082689132320437,
+   "stress": 6.728086731646997,
+   "rules_ok": false,
+   "failed": [
+    "pocket_symmetry_mismatch_pct",
+    "sharpest_tip_depth_mm"
+   ],
+   "core_ok": true,
+   "label": "44 mm"
+  },
+  "v2_chosen": {
+   "mass_saved_pct": 40.74881528764108,
+   "stiffness": 0.3428400960797421,
+   "stress": 5.666691155991914,
+   "rules_ok": true,
+   "failed": [],
+   "core_ok": true,
+   "label": "72 mm isogrid"
+  },
+  "v1_all": [
+   {
+    "mass_saved_pct": 29.790660200417594,
+    "stiffness": 0.38588176675195784,
+    "stress": 5.140472006688223,
+    "rules_ok": false,
+    "failed": [
+     "pocket_symmetry_mismatch_pct",
+     "sharpest_tip_depth_mm"
+    ],
+    "core_ok": true,
+    "label": "32 mm"
+   },
+   {
+    "mass_saved_pct": 35.82297333178176,
+    "stiffness": 0.3365879259642889,
+    "stress": 6.50306566916766,
+    "rules_ok": false,
+    "failed": [
+     "pocket_symmetry_mismatch_pct",
+     "sharpest_tip_depth_mm"
+    ],
+    "core_ok": true,
+    "label": "36 mm"
+   },
+   {
+    "mass_saved_pct": 39.01774330867889,
+    "stiffness": 0.3356985250080376,
+    "stress": 5.003975090732879,
+    "rules_ok": false,
+    "failed": [
+     "pocket_symmetry_mismatch_pct",
+     "sharpest_tip_depth_mm"
+    ],
+    "core_ok": true,
+    "label": "40 mm"
+   },
+   {
+    "mass_saved_pct": 41.48463351348431,
+    "stiffness": 0.3082689132320437,
+    "stress": 6.728086731646997,
+    "rules_ok": false,
+    "failed": [
+     "pocket_symmetry_mismatch_pct",
+     "sharpest_tip_depth_mm"
+    ],
+    "core_ok": true,
+    "label": "44 mm"
+   },
+   {
+    "mass_saved_pct": 44.503572916697976,
+    "stiffness": 0.3030977716749705,
+    "stress": 7.369097136834721,
+    "rules_ok": false,
+    "failed": [
+     "pocket_symmetry_mismatch_pct",
+     "sharpest_tip_depth_mm"
+    ],
+    "core_ok": true,
+    "label": "48 mm"
+   },
+   {
+    "mass_saved_pct": 48.137379140589644,
+    "stiffness": 0.2648195409841592,
+    "stress": 7.310372148669605,
+    "rules_ok": false,
+    "failed": [
+     "pocket_symmetry_mismatch_pct",
+     "sharpest_tip_depth_mm"
+    ],
+    "core_ok": true,
+    "label": "53 mm"
+   },
+   {
+    "mass_saved_pct": 49.100124838597715,
+    "stiffness": 0.2265805120642852,
+    "stress": 7.259985665304868,
+    "rules_ok": false,
+    "failed": [
+     "pocket_symmetry_mismatch_pct",
+     "sharpest_tip_depth_mm"
+    ],
+    "core_ok": true,
+    "label": "58 mm"
+   },
+   {
+    "mass_saved_pct": 49.234057191910786,
+    "stiffness": 0.26026366710513416,
+    "stress": 11.630467873048813,
+    "rules_ok": false,
+    "failed": [
+     "pocket_symmetry_mismatch_pct",
+     "sharpest_tip_depth_mm"
+    ],
+    "core_ok": true,
+    "label": "64 mm"
+   }
+  ],
+  "v2_all": [
+   {
+    "mass_saved_pct": 11.807671304405032,
+    "stiffness": 0.7175424112860046,
+    "stress": 2.2965200052718218,
+    "rules_ok": true,
+    "failed": [],
+    "core_ok": true,
+    "label": "36 mm isogrid turned"
+   },
+   {
+    "mass_saved_pct": 15.338362629575474,
+    "stiffness": 0.6354223760745471,
+    "stress": 2.429619770762879,
+    "rules_ok": true,
+    "failed": [],
+    "core_ok": true,
+    "label": "36 mm isogrid"
+   },
+   {
+    "mass_saved_pct": 15.730129000933902,
+    "stiffness": 0.6297612832496094,
+    "stress": 2.8308016939747818,
+    "rules_ok": true,
+    "failed": [],
+    "core_ok": true,
+    "label": "40 mm isogrid turned"
+   },
+   {
+    "mass_saved_pct": 21.260102828380035,
+    "stiffness": 0.5264225123442442,
+    "stress": 2.8507124129849344,
+    "rules_ok": true,
+    "failed": [],
+    "core_ok": true,
+    "label": "28 mm guided"
+   },
+   {
+    "mass_saved_pct": 21.82832505084633,
+    "stiffness": 0.5089714532900179,
+    "stress": 3.431726075714375,
+    "rules_ok": true,
+    "failed": [],
+    "core_ok": true,
+    "label": "32 mm"
+   },
+   {
+    "mass_saved_pct": 25.721446442828732,
+    "stiffness": 0.5015122449671455,
+    "stress": 3.0869857539629675,
+    "rules_ok": true,
+    "failed": [],
+    "core_ok": true,
+    "label": "28 mm guided \u00b7 pruned \u00d71"
+   },
+   {
+    "mass_saved_pct": 26.210950793764265,
+    "stiffness": 0.4545712000234785,
+    "stress": 5.5671673895962925,
+    "rules_ok": true,
+    "failed": [],
+    "core_ok": true,
+    "label": "53 mm isogrid turned"
+   },
+   {
+    "mass_saved_pct": 27.05706593534685,
+    "stiffness": 0.4373722813046566,
+    "stress": 6.268737778407346,
+    "rules_ok": true,
+    "failed": [],
+    "core_ok": true,
+    "label": "58 mm isogrid turned"
+   },
+   {
+    "mass_saved_pct": 28.932963315930028,
+    "stiffness": 0.4291991620803063,
+    "stress": 3.683989868652311,
+    "rules_ok": true,
+    "failed": [],
+    "core_ok": true,
+    "label": "28 mm \u00b7 pruned \u00d72"
+   },
+   {
+    "mass_saved_pct": 30.791536224646332,
+    "stiffness": 0.4278991610988788,
+    "stress": 3.7084898082647837,
+    "rules_ok": true,
+    "failed": [],
+    "core_ok": true,
+    "label": "40 mm guided"
+   },
+   {
+    "mass_saved_pct": 31.02252504348071,
+    "stiffness": 0.4265674952468503,
+    "stress": 3.688010721398229,
+    "rules_ok": true,
+    "failed": [],
+    "core_ok": true,
+    "label": "40 mm"
+   },
+   {
+    "mass_saved_pct": 34.55743132449855,
+    "stiffness": 0.4133837571693923,
+    "stress": 3.9598585428703386,
+    "rules_ok": true,
+    "failed": [],
+    "core_ok": true,
+    "label": "44 mm"
+   },
+   {
+    "mass_saved_pct": 35.233039411141476,
+    "stiffness": 0.3992538804875604,
+    "stress": 3.683373388342777,
+    "rules_ok": true,
+    "failed": [],
+    "core_ok": true,
+    "label": "40 mm \u00b7 pruned \u00d71"
+   },
+   {
+    "mass_saved_pct": 36.436139367769115,
+    "stiffness": 0.3939640498287745,
+    "stress": 4.120342900024458,
+    "rules_ok": true,
+    "failed": [],
+    "core_ok": true,
+    "label": "40 mm \u00b7 pruned \u00d72"
+   },
+   {
+    "mass_saved_pct": 37.899424064114186,
+    "stiffness": 0.35808380580805127,
+    "stress": 3.99321789358845,
+    "rules_ok": true,
+    "failed": [],
+    "core_ok": true,
+    "label": "58 mm"
+   },
+   {
+    "mass_saved_pct": 37.899424064114186,
+    "stiffness": 0.35808380580805127,
+    "stress": 3.99321789358845,
+    "rules_ok": true,
+    "failed": [],
+    "core_ok": true,
+    "label": "58 mm guided"
+   },
+   {
+    "mass_saved_pct": 37.899424064114186,
+    "stiffness": 0.35808380580805127,
+    "stress": 3.99321789358845,
+    "rules_ok": true,
+    "failed": [],
+    "core_ok": true,
+    "label": "64 mm guided"
+   },
+   {
+    "mass_saved_pct": 39.189866743415244,
+    "stiffness": 0.35789691383283334,
+    "stress": 3.8619693959136008,
+    "rules_ok": true,
+    "failed": [],
+    "core_ok": true,
+    "label": "48 mm guided"
+   },
+   {
+    "mass_saved_pct": 39.189866743415244,
+    "stiffness": 0.35789691383283334,
+    "stress": 3.8619693959136008,
+    "rules_ok": true,
+    "failed": [],
+    "core_ok": true,
+    "label": "53 mm guided"
+   },
+   {
+    "mass_saved_pct": 39.28595354139652,
+    "stiffness": 0.35486670478347887,
+    "stress": 3.847928934024843,
+    "rules_ok": true,
+    "failed": [],
+    "core_ok": true,
+    "label": "53 mm"
+   },
+   {
+    "mass_saved_pct": 40.48743143750183,
+    "stiffness": 0.3441048001118576,
+    "stress": 9.437571613930452,
+    "rules_ok": true,
+    "failed": [],
+    "core_ok": true,
+    "label": "40 mm \u00b7 pruned \u00d73"
+   },
+   {
+    "mass_saved_pct": 40.74881528764108,
+    "stiffness": 0.3428400960797421,
+    "stress": 5.666691155991914,
+    "rules_ok": true,
+    "failed": [],
+    "core_ok": true,
+    "label": "72 mm isogrid"
+   },
+   {
+    "mass_saved_pct": 43.374369407150525,
+    "stiffness": 0.2494158377547027,
+    "stress": 9.568777222876474,
+    "rules_ok": true,
+    "failed": [],
+    "core_ok": true,
+    "label": "64 mm isogrid \u00b7 pruned \u00d71"
+   },
+   {
+    "mass_saved_pct": 44.259784414435146,
+    "stiffness": 0.24268510081761116,
+    "stress": 9.769011903816358,
+    "rules_ok": true,
+    "failed": [],
+    "core_ok": true,
+    "label": "72 mm isogrid \u00b7 pruned \u00d71"
+   }
+  ],
+  "v1_best_at_target": {
+   "mass_saved_pct": 39.01774330867889,
+   "stiffness": 0.3356985250080376,
+   "stress": 5.003975090732879,
+   "rules_ok": false,
+   "failed": [
+    "pocket_symmetry_mismatch_pct",
+    "sharpest_tip_depth_mm"
+   ],
+   "core_ok": true,
+   "label": "40 mm"
+  },
+  "v2_best_at_target": {
+   "mass_saved_pct": 40.74881528764108,
+   "stiffness": 0.3428400960797421,
+   "stress": 5.666691155991914,
+   "rules_ok": true,
+   "failed": [],
+   "core_ok": true,
+   "label": "72 mm isogrid"
+  }
+ },
+ {
+  "plate": "blank_example2.step",
+  "v1_seconds": 6.781700849533081,
+  "v2_seconds": 52.84746742248535,
+  "v2_diag": {
+   "candidates_evaluated": 70,
+   "rejections": {
+    "pocket_symmetry_mismatch_pct": 1,
+    "sharpest_tip_depth_mm": 2,
+    "clearance_margin_mm": 5,
+    "no_pockets_fit": 6
+   },
+   "feasible": 48,
+   "families": [
+    "truss",
+    "guided",
+    "isogrid",
+    "isogrid-turned"
+   ],
+   "eso_steps": 3,
+   "clearances": [
+    {
+     "default": 8.0,
+     "holes": {},
+     "sides": {},
+     "corners": {}
+    }
+   ],
+   "custom_clearances": 0,
+   "load_model": {
+    "mode": "generic",
+    "summary": "Generic screening loads: plate clamped at either end of its long side, bent both ways and twisted. Mark bolted mounts and loaded bearings for an engineering check.",
+    "inputs": {
+     "supports": "assumed (end clamp)",
+     "loads": "assumed (unit loads at the far end)"
+    }
+   }
+  },
+  "v1_chosen": {
+   "mass_saved_pct": 39.0807848356598,
+   "stiffness": 0.34583945474239713,
+   "stress": 3.9330536097079825,
+   "rules_ok": false,
+   "failed": [
+    "sharpest_tip_depth_mm"
+   ],
+   "core_ok": true,
+   "label": "44 mm"
+  },
+  "v2_chosen": {
+   "mass_saved_pct": 46.00338988950055,
+   "stiffness": 0.3351923407329127,
+   "stress": 3.0423219870679983,
+   "rules_ok": true,
+   "failed": [],
+   "core_ok": true,
+   "label": "32 mm \u00b7 pruned \u00d73"
+  },
+  "v1_all": [
+   {
+    "mass_saved_pct": 31.372804939011235,
+    "stiffness": 0.38208394611846613,
+    "stress": 3.217456897210823,
+    "rules_ok": false,
+    "failed": [
+     "sharpest_tip_depth_mm"
+    ],
+    "core_ok": true,
+    "label": "32 mm"
+   },
+   {
+    "mass_saved_pct": 34.25251119408498,
+    "stiffness": 0.34501009031492835,
+    "stress": 3.5203367329464976,
+    "rules_ok": false,
+    "failed": [
+     "sharpest_tip_depth_mm"
+    ],
+    "core_ok": true,
+    "label": "36 mm"
+   },
+   {
+    "mass_saved_pct": 40.06923716511842,
+    "stiffness": 0.23590316785701487,
+    "stress": 6.710332608321457,
+    "rules_ok": false,
+    "failed": [
+     "sharpest_tip_depth_mm"
+    ],
+    "core_ok": true,
+    "label": "40 mm"
+   },
+   {
+    "mass_saved_pct": 39.0807848356598,
+    "stiffness": 0.34583945474239713,
+    "stress": 3.9330536097079825,
+    "rules_ok": false,
+    "failed": [
+     "sharpest_tip_depth_mm"
+    ],
+    "core_ok": true,
+    "label": "44 mm"
+   },
+   {
+    "mass_saved_pct": 47.72939203198909,
+    "stiffness": 0.23160042449105547,
+    "stress": 7.844417364891582,
+    "rules_ok": false,
+    "failed": [
+     "sharpest_tip_depth_mm"
+    ],
+    "core_ok": true,
+    "label": "48 mm"
+   },
+   {
+    "mass_saved_pct": 42.56934447939727,
+    "stiffness": 0.3012707012186818,
+    "stress": 4.294360769092682,
+    "rules_ok": false,
+    "failed": [
+     "sharpest_tip_depth_mm"
+    ],
+    "core_ok": true,
+    "label": "53 mm"
+   },
+   {
+    "mass_saved_pct": 46.99955381335421,
+    "stiffness": 0.28250653204144793,
+    "stress": 4.547904418286733,
+    "rules_ok": false,
+    "failed": [
+     "sharpest_tip_depth_mm"
+    ],
+    "core_ok": true,
+    "label": "58 mm"
+   },
+   {
+    "mass_saved_pct": 51.41360637946202,
+    "stiffness": 0.20895959078995321,
+    "stress": 6.364361989114009,
+    "rules_ok": false,
+    "failed": [
+     "sharpest_tip_depth_mm"
+    ],
+    "core_ok": true,
+    "label": "64 mm"
+   }
+  ],
+  "v2_all": [
+   {
+    "mass_saved_pct": 21.0308658451012,
+    "stiffness": 0.5869279024330845,
+    "stress": 1.685502474849511,
+    "rules_ok": true,
+    "failed": [],
+    "core_ok": true,
+    "label": "36 mm isogrid turned"
+   },
+   {
+    "mass_saved_pct": 22.305116658866076,
+    "stiffness": 0.5663001504690108,
+    "stress": 1.9299279737533546,
+    "rules_ok": true,
+    "failed": [],
+    "core_ok": true,
+    "label": "36 mm isogrid \u00b7 pruned \u00d71"
+   },
+   {
+    "mass_saved_pct": 23.258252989923122,
+    "stiffness": 0.5467010630116882,
+    "stress": 2.0810781719864875,
+    "rules_ok": true,
+    "failed": [],
+    "core_ok": true,
+    "label": "36 mm isogrid \u00b7 pruned \u00d72"
+   },
+   {
+    "mass_saved_pct": 28.53271551900218,
+    "stiffness": 0.5325273100703665,
+    "stress": 2.017966860896395,
+    "rules_ok": true,
+    "failed": [],
+    "core_ok": true,
+    "label": "36 mm isogrid turned \u00b7 pruned \u00d71"
+   },
+   {
+    "mass_saved_pct": 31.58020261405785,
+    "stiffness": 0.5066871566033759,
+    "stress": 2.3809839884178907,
+    "rules_ok": true,
+    "failed": [],
+    "core_ok": true,
+    "label": "36 mm isogrid turned \u00b7 pruned \u00d72"
+   },
+   {
+    "mass_saved_pct": 33.56988263447139,
+    "stiffness": 0.452702114628807,
+    "stress": 2.8815799244012816,
+    "rules_ok": true,
+    "failed": [],
+    "core_ok": true,
+    "label": "40 mm isogrid turned \u00b7 pruned \u00d71"
+   },
+   {
+    "mass_saved_pct": 37.320081308454355,
+    "stiffness": 0.4138079285088863,
+    "stress": 3.007848850973525,
+    "rules_ok": true,
+    "failed": [],
+    "core_ok": true,
+    "label": "36 mm isogrid turned \u00b7 pruned \u00d73"
+   },
+   {
+    "mass_saved_pct": 39.880346110830935,
+    "stiffness": 0.37654587350757446,
+    "stress": 3.586554411600543,
+    "rules_ok": true,
+    "failed": [],
+    "core_ok": true,
+    "label": "40 mm isogrid turned \u00b7 pruned \u00d72"
+   },
+   {
+    "mass_saved_pct": 41.59182839153982,
+    "stiffness": 0.3675007488745575,
+    "stress": 3.614650073981478,
+    "rules_ok": true,
+    "failed": [],
+    "core_ok": true,
+    "label": "40 mm isogrid turned \u00b7 pruned \u00d73"
+   },
+   {
+    "mass_saved_pct": 46.00338988950055,
+    "stiffness": 0.3351923407329127,
+    "stress": 3.0423219870679983,
+    "rules_ok": true,
+    "failed": [],
+    "core_ok": true,
+    "label": "32 mm \u00b7 pruned \u00d73"
+   },
+   {
+    "mass_saved_pct": 46.7355311795319,
+    "stiffness": 0.31292103338173427,
+    "stress": 4.530180692528552,
+    "rules_ok": true,
+    "failed": [],
+    "core_ok": true,
+    "label": "58 mm isogrid turned \u00b7 pruned \u00d73"
+   },
+   {
+    "mass_saved_pct": 49.1148101354582,
+    "stiffness": 0.28824051016109975,
+    "stress": 5.483779473299466,
+    "rules_ok": true,
+    "failed": [],
+    "core_ok": true,
+    "label": "36 mm guided \u00b7 pruned \u00d73"
+   },
+   {
+    "mass_saved_pct": 51.61916556240528,
+    "stiffness": 0.2290251649511126,
+    "stress": 6.009044835431606,
+    "rules_ok": true,
+    "failed": [],
+    "core_ok": true,
+    "label": "72 mm"
+   }
+  ],
+  "v1_best_at_target": {
+   "mass_saved_pct": 39.0807848356598,
+   "stiffness": 0.34583945474239713,
+   "stress": 3.9330536097079825,
+   "rules_ok": false,
+   "failed": [
+    "sharpest_tip_depth_mm"
+   ],
+   "core_ok": true,
+   "label": "44 mm"
+  },
+  "v2_best_at_target": {
+   "mass_saved_pct": 46.00338988950055,
+   "stiffness": 0.3351923407329127,
+   "stress": 3.0423219870679983,
+   "rules_ok": true,
+   "failed": [],
+   "core_ok": true,
+   "label": "32 mm \u00b7 pruned \u00d73"
+  }
+ },
+ {
+  "plate": "blank_kiwi.step",
+  "v1_seconds": 34.96814227104187,
+  "v2_seconds": 136.28027439117432,
+  "v2_diag": {
+   "candidates_evaluated": 30,
+   "rejections": {
+    "sharpest_tip_depth_mm": 31,
+    "min_web_between_pockets_mm": 8,
+    "no_pockets_fit": 6
+   },
+   "feasible": 30,
+   "families": [
+    "truss",
+    "guided",
+    "isogrid",
+    "isogrid-turned"
+   ],
+   "eso_steps": 3,
+   "clearances": [
+    {
+     "default": 8.0,
+     "holes": {},
+     "sides": {},
+     "corners": {}
+    }
+   ],
+   "custom_clearances": 0,
+   "load_model": {
+    "mode": "generic",
+    "summary": "Generic screening loads: plate clamped at either end of its long side, bent both ways and twisted. Mark bolted mounts and loaded bearings for an engineering check.",
+    "inputs": {
+     "supports": "assumed (end clamp)",
+     "loads": "assumed (unit loads at the far end)"
+    }
+   }
+  },
+  "v1_chosen": {
+   "mass_saved_pct": 33.4849601378974,
+   "stiffness": 0.4041648568662279,
+   "stress": 2.8159632051818235,
+   "rules_ok": false,
+   "failed": [
+    "sharpest_tip_depth_mm"
+   ],
+   "core_ok": true,
+   "label": "53 mm"
+  },
+  "v2_chosen": {
+   "mass_saved_pct": 31.35967962481595,
+   "stiffness": 0.8208658045721238,
+   "stress": 1.2848893471627727,
+   "rules_ok": true,
+   "failed": [],
+   "core_ok": true,
+   "label": "64 mm isogrid \u00b7 pruned \u00d71"
+  },
+  "v1_all": [
+   {
+    "mass_saved_pct": 21.146908072453606,
+    "stiffness": 0.7225084557572314,
+    "stress": 1.3438903341763526,
+    "rules_ok": false,
+    "failed": [
+     "sharpest_tip_depth_mm"
+    ],
+    "core_ok": true,
+    "label": "32 mm"
+   },
+   {
+    "mass_saved_pct": 25.481029570714608,
+    "stiffness": 0.4326681030552134,
+    "stress": 2.576065671394892,
+    "rules_ok": false,
+    "failed": [
+     "sharpest_tip_depth_mm"
+    ],
+    "core_ok": true,
+    "label": "36 mm"
+   },
+   {
+    "mass_saved_pct": 30.453925466873176,
+    "stiffness": 0.6075949846619123,
+    "stress": 1.5367295811957014,
+    "rules_ok": false,
+    "failed": [
+     "sharpest_tip_depth_mm"
+    ],
+    "core_ok": true,
+    "label": "40 mm"
+   },
+   {
+    "mass_saved_pct": 28.70607406140403,
+    "stiffness": 0.544734040669519,
+    "stress": 1.6279707571475057,
+    "rules_ok": false,
+    "failed": [
+     "sharpest_tip_depth_mm"
+    ],
+    "core_ok": true,
+    "label": "44 mm"
+   },
+   {
+    "mass_saved_pct": 29.71989929507085,
+    "stiffness": 0.43735308506415244,
+    "stress": 2.6644917393621377,
+    "rules_ok": false,
+    "failed": [
+     "sharpest_tip_depth_mm"
+    ],
+    "core_ok": true,
+    "label": "48 mm"
+   },
+   {
+    "mass_saved_pct": 33.4849601378974,
+    "stiffness": 0.4041648568662279,
+    "stress": 2.8159632051818235,
+    "rules_ok": false,
+    "failed": [
+     "sharpest_tip_depth_mm"
+    ],
+    "core_ok": true,
+    "label": "53 mm"
+   },
+   {
+    "mass_saved_pct": 32.50725044070559,
+    "stiffness": 0.5276351178702247,
+    "stress": 2.6501397138021954,
+    "rules_ok": false,
+    "failed": [
+     "min_web_between_pockets_mm",
+     "sharpest_tip_depth_mm"
+    ],
+    "core_ok": false,
+    "label": "58 mm"
+   },
+   {
+    "mass_saved_pct": 33.27825839472,
+    "stiffness": 0.517534709668253,
+    "stress": 2.3878143304849724,
+    "rules_ok": false,
+    "failed": [
+     "min_web_between_pockets_mm",
+     "sharpest_tip_depth_mm"
+    ],
+    "core_ok": false,
+    "label": "64 mm"
+   },
+   {
+    "mass_saved_pct": 32.15670882498824,
+    "stiffness": 0.4569533297557449,
+    "stress": 2.0523406637389137,
+    "rules_ok": false,
+    "failed": [
+     "sharpest_tip_depth_mm"
+    ],
+    "core_ok": true,
+    "label": "72 mm"
+   }
+  ],
+  "v2_all": [
+   {
+    "mass_saved_pct": 16.43110508525023,
+    "stiffness": 0.952171983769617,
+    "stress": 1.1153346763447747,
+    "rules_ok": true,
+    "failed": [],
+    "core_ok": true,
+    "label": "24 mm guided"
+   },
+   {
+    "mass_saved_pct": 20.837372468822224,
+    "stiffness": 0.9378649159134194,
+    "stress": 1.154527981643999,
+    "rules_ok": true,
+    "failed": [],
+    "core_ok": true,
+    "label": "24 mm guided \u00b7 pruned \u00d71"
+   },
+   {
+    "mass_saved_pct": 24.71925936448651,
+    "stiffness": 0.9196443536694844,
+    "stress": 1.177819827435718,
+    "rules_ok": true,
+    "failed": [],
+    "core_ok": true,
+    "label": "24 mm guided \u00b7 pruned \u00d72"
+   },
+   {
+    "mass_saved_pct": 26.95478066894339,
+    "stiffness": 0.8968306387331086,
+    "stress": 1.2080103544078906,
+    "rules_ok": true,
+    "failed": [],
+    "core_ok": true,
+    "label": "24 mm guided \u00b7 pruned \u00d73"
+   },
+   {
+    "mass_saved_pct": 26.96306392088419,
+    "stiffness": 0.8175339126776389,
+    "stress": 1.293612255047851,
+    "rules_ok": true,
+    "failed": [],
+    "core_ok": true,
+    "label": "53 mm isogrid \u00b7 pruned \u00d71"
+   },
+   {
+    "mass_saved_pct": 29.314770788305832,
+    "stiffness": 0.8121175823262715,
+    "stress": 1.335693659468612,
+    "rules_ok": true,
+    "failed": [],
+    "core_ok": true,
+    "label": "53 mm isogrid \u00b7 pruned \u00d72"
+   },
+   {
+    "mass_saved_pct": 31.35967962481595,
+    "stiffness": 0.8208658045721238,
+    "stress": 1.2848893471627727,
+    "rules_ok": true,
+    "failed": [],
+    "core_ok": true,
+    "label": "64 mm isogrid \u00b7 pruned \u00d71"
+   },
+   {
+    "mass_saved_pct": 31.46740639875545,
+    "stiffness": 0.8056772505010653,
+    "stress": 1.3520940768369256,
+    "rules_ok": true,
+    "failed": [],
+    "core_ok": true,
+    "label": "53 mm isogrid \u00b7 pruned \u00d73"
+   }
+  ],
+  "v1_best_at_target": {
+   "mass_saved_pct": 33.4849601378974,
+   "stiffness": 0.4041648568662279,
+   "stress": 2.8159632051818235,
+   "rules_ok": false,
+   "failed": [
+    "sharpest_tip_depth_mm"
+   ],
+   "core_ok": true,
+   "label": "53 mm"
+  },
+  "v2_best_at_target": {
+   "mass_saved_pct": 31.46740639875545,
+   "stiffness": 0.8056772505010653,
+   "stress": 1.3520940768369256,
+   "rules_ok": true,
+   "failed": [],
+   "core_ok": true,
+   "label": "53 mm isogrid \u00b7 pruned \u00d73"
+  }
+ },
+ {
+  "plate": "blank_supes.step",
+  "v1_seconds": 37.668954610824585,
+  "v2_seconds": 228.85002040863037,
+  "v2_diag": {
+   "candidates_evaluated": 28,
+   "rejections": {
+    "sharpest_tip_depth_mm": 23,
+    "pocket_symmetry_mismatch_pct": 1,
+    "no_pockets_fit": 6
+   },
+   "feasible": 26,
+   "families": [
+    "truss",
+    "guided",
+    "isogrid",
+    "isogrid-turned"
+   ],
+   "eso_steps": 3,
+   "clearances": [
+    {
+     "default": 8.0,
+     "holes": {},
+     "sides": {},
+     "corners": {}
+    }
+   ],
+   "custom_clearances": 0,
+   "load_model": {
+    "mode": "generic",
+    "summary": "Generic screening loads: plate clamped at either end of its long side, bent both ways and twisted. Mark bolted mounts and loaded bearings for an engineering check.",
+    "inputs": {
+     "supports": "assumed (end clamp)",
+     "loads": "assumed (unit loads at the far end)"
+    }
+   }
+  },
+  "v1_chosen": {
+   "mass_saved_pct": 31.917708401490707,
+   "stiffness": 0.3576588791741949,
+   "stress": 4.345239680030667,
+   "rules_ok": false,
+   "failed": [
+    "pocket_symmetry_mismatch_pct",
+    "sharpest_tip_depth_mm"
+   ],
+   "core_ok": true,
+   "label": "32 mm"
+  },
+  "v2_chosen": {
+   "mass_saved_pct": 26.698680739753332,
+   "stiffness": 0.3721315806694683,
+   "stress": 4.404486784321246,
+   "rules_ok": true,
+   "failed": [],
+   "core_ok": true,
+   "label": "72 mm isogrid"
+  },
+  "v1_all": [
+   {
+    "mass_saved_pct": 31.917708401490707,
+    "stiffness": 0.3576588791741949,
+    "stress": 4.345239680030667,
+    "rules_ok": false,
+    "failed": [
+     "pocket_symmetry_mismatch_pct",
+     "sharpest_tip_depth_mm"
+    ],
+    "core_ok": true,
+    "label": "32 mm"
+   },
+   {
+    "mass_saved_pct": 34.916009186654364,
+    "stiffness": 0.3307751256763586,
+    "stress": 5.021523794139076,
+    "rules_ok": false,
+    "failed": [
+     "pocket_symmetry_mismatch_pct",
+     "sharpest_tip_depth_mm"
+    ],
+    "core_ok": true,
+    "label": "36 mm"
+   },
+   {
+    "mass_saved_pct": 38.70589373056967,
+    "stiffness": 0.27701991732353676,
+    "stress": 5.521990933572669,
+    "rules_ok": false,
+    "failed": [
+     "pocket_symmetry_mismatch_pct",
+     "sharpest_tip_depth_mm"
+    ],
+    "core_ok": true,
+    "label": "40 mm"
+   },
+   {
+    "mass_saved_pct": 41.37996827764939,
+    "stiffness": 0.2750074706317396,
+    "stress": 4.825976411844245,
+    "rules_ok": false,
+    "failed": [
+     "pocket_symmetry_mismatch_pct",
+     "sharpest_tip_depth_mm"
+    ],
+    "core_ok": true,
+    "label": "44 mm"
+   },
+   {
+    "mass_saved_pct": 42.90309701309537,
+    "stiffness": 0.282408609200296,
+    "stress": 5.9797258511690865,
+    "rules_ok": false,
+    "failed": [
+     "pocket_symmetry_mismatch_pct",
+     "sharpest_tip_depth_mm"
+    ],
+    "core_ok": true,
+    "label": "48 mm"
+   },
+   {
+    "mass_saved_pct": 47.62871906007546,
+    "stiffness": 0.19277206154112617,
+    "stress": 9.679618520413882,
+    "rules_ok": false,
+    "failed": [
+     "min_web_between_pockets_mm",
+     "pocket_symmetry_mismatch_pct",
+     "sharpest_tip_depth_mm"
+    ],
+    "core_ok": false,
+    "label": "53 mm"
+   },
+   {
+    "mass_saved_pct": 49.12258187400739,
+    "stiffness": 0.20617009748548185,
+    "stress": 8.330692066591574,
+    "rules_ok": false,
+    "failed": [
+     "pocket_symmetry_mismatch_pct",
+     "sharpest_tip_depth_mm"
+    ],
+    "core_ok": true,
+    "label": "58 mm"
+   },
+   {
+    "mass_saved_pct": 52.55417946451608,
+    "stiffness": 0.16649772641601962,
+    "stress": 10.35793852340076,
+    "rules_ok": false,
+    "failed": [
+     "pocket_symmetry_mismatch_pct",
+     "sharpest_tip_depth_mm"
+    ],
+    "core_ok": true,
+    "label": "64 mm"
+   },
+   {
+    "mass_saved_pct": 54.21552726239308,
+    "stiffness": 0.17702276725167398,
+    "stress": 8.379259570655737,
+    "rules_ok": false,
+    "failed": [
+     "pocket_symmetry_mismatch_pct",
+     "sharpest_tip_depth_mm"
+    ],
+    "core_ok": true,
+    "label": "72 mm"
+   }
+  ],
+  "v2_all": [
+   {
+    "mass_saved_pct": 12.473711876368988,
+    "stiffness": 0.6633542624720578,
+    "stress": 2.117191453168405,
+    "rules_ok": true,
+    "failed": [],
+    "core_ok": true,
+    "label": "36 mm isogrid"
+   },
+   {
+    "mass_saved_pct": 17.534757434132963,
+    "stiffness": 0.6183576410715443,
+    "stress": 2.1949166982702173,
+    "rules_ok": true,
+    "failed": [],
+    "core_ok": true,
+    "label": "40 mm isogrid turned"
+   },
+   {
+    "mass_saved_pct": 18.527517085880408,
+    "stiffness": 0.5794663549954961,
+    "stress": 2.535755930790562,
+    "rules_ok": true,
+    "failed": [],
+    "core_ok": true,
+    "label": "40 mm isogrid"
+   },
+   {
+    "mass_saved_pct": 21.723044443735162,
+    "stiffness": 0.5398447958678128,
+    "stress": 2.784554508685465,
+    "rules_ok": true,
+    "failed": [],
+    "core_ok": true,
+    "label": "48 mm isogrid turned"
+   },
+   {
+    "mass_saved_pct": 21.775288787242896,
+    "stiffness": 0.48295886012062395,
+    "stress": 3.4170880002928734,
+    "rules_ok": true,
+    "failed": [],
+    "core_ok": true,
+    "label": "32 mm \u00b7 pruned \u00d72"
+   },
+   {
+    "mass_saved_pct": 23.24964269802804,
+    "stiffness": 0.47153080148242776,
+    "stress": 3.184152321484977,
+    "rules_ok": true,
+    "failed": [],
+    "core_ok": true,
+    "label": "53 mm isogrid"
+   },
+   {
+    "mass_saved_pct": 23.25899079600009,
+    "stiffness": 0.4390140043046003,
+    "stress": 3.912974877569724,
+    "rules_ok": true,
+    "failed": [],
+    "core_ok": true,
+    "label": "32 mm \u00b7 pruned \u00d73"
+   },
+   {
+    "mass_saved_pct": 24.48439662778036,
+    "stiffness": 0.42901160482805967,
+    "stress": 3.6945408487009357,
+    "rules_ok": true,
+    "failed": [],
+    "core_ok": true,
+    "label": "64 mm \u00b7 pruned \u00d71"
+   },
+   {
+    "mass_saved_pct": 26.698680739753332,
+    "stiffness": 0.3721315806694683,
+    "stress": 4.404486784321246,
+    "rules_ok": true,
+    "failed": [],
+    "core_ok": true,
+    "label": "72 mm isogrid"
+   }
+  ],
+  "v1_best_at_target": {
+   "mass_saved_pct": 34.916009186654364,
+   "stiffness": 0.3307751256763586,
+   "stress": 5.021523794139076,
+   "rules_ok": false,
+   "failed": [
+    "pocket_symmetry_mismatch_pct",
+    "sharpest_tip_depth_mm"
+   ],
+   "core_ok": true,
+   "label": "36 mm"
+  },
+  "v2_best_at_target": {
+   "mass_saved_pct": 26.698680739753332,
+   "stiffness": 0.3721315806694683,
+   "stress": 4.404486784321246,
+   "rules_ok": true,
+   "failed": [],
+   "core_ok": true,
+   "label": "72 mm isogrid"
+  }
+ },
+ {
+  "plate": "blank_top.step",
+  "v1_seconds": 7.414778232574463,
+  "v2_seconds": 119.51378560066223,
+  "v2_diag": {
+   "candidates_evaluated": 84,
+   "rejections": {
+    "sharpest_tip_depth_mm": 11,
+    "min_web_between_pockets_mm": 1,
+    "no_pockets_fit": 6,
+    "pocket_symmetry_mismatch_pct": 1
+   },
+   "feasible": 81,
+   "families": [
+    "truss",
+    "guided",
+    "isogrid",
+    "isogrid-turned"
+   ],
+   "eso_steps": 3,
+   "clearances": [
+    {
+     "default": 8.0,
+     "holes": {},
+     "sides": {},
+     "corners": {}
+    }
+   ],
+   "custom_clearances": 0,
+   "load_model": {
+    "mode": "generic",
+    "summary": "Generic screening loads: plate clamped at either end of its long side, bent both ways and twisted. Mark bolted mounts and loaded bearings for an engineering check.",
+    "inputs": {
+     "supports": "assumed (end clamp)",
+     "loads": "assumed (unit loads at the far end)"
+    }
+   }
+  },
+  "v1_chosen": {
+   "mass_saved_pct": 42.18509903043414,
+   "stiffness": 0.3450164853147876,
+   "stress": 4.24091097146782,
+   "rules_ok": false,
+   "failed": [
+    "pocket_symmetry_mismatch_pct",
+    "sharpest_tip_depth_mm"
+   ],
+   "core_ok": true,
+   "label": "58 mm"
+  },
+  "v2_chosen": {
+   "mass_saved_pct": 25.459645925115215,
+   "stiffness": 0.5254028470265929,
+   "stress": 3.4540337873016216,
+   "rules_ok": true,
+   "failed": [],
+   "core_ok": true,
+   "label": "44 mm guided \u00b7 pruned \u00d73"
+  },
+  "v1_all": [
+   {
+    "mass_saved_pct": 27.562415523870055,
+    "stiffness": 0.48532741311604544,
+    "stress": 2.465367913817742,
+    "rules_ok": false,
+    "failed": [
+     "pocket_symmetry_mismatch_pct",
+     "sharpest_tip_depth_mm"
+    ],
+    "core_ok": true,
+    "label": "32 mm"
+   },
+   {
+    "mass_saved_pct": 32.97473704573507,
+    "stiffness": 0.4921687353448255,
+    "stress": 6.448816434198648,
+    "rules_ok": false,
+    "failed": [
+     "pocket_symmetry_mismatch_pct",
+     "sharpest_tip_depth_mm"
+    ],
+    "core_ok": true,
+    "label": "36 mm"
+   },
+   {
+    "mass_saved_pct": 36.3000348676947,
+    "stiffness": 0.3672011901601799,
+    "stress": 3.3384168332719804,
+    "rules_ok": false,
+    "failed": [
+     "pocket_symmetry_mismatch_pct",
+     "sharpest_tip_depth_mm"
+    ],
+    "core_ok": true,
+    "label": "40 mm"
+   },
+   {
+    "mass_saved_pct": 38.09932855971373,
+    "stiffness": 0.3622810952124409,
+    "stress": 4.365728210492012,
+    "rules_ok": false,
+    "failed": [
+     "pocket_symmetry_mismatch_pct",
+     "sharpest_tip_depth_mm"
+    ],
+    "core_ok": true,
+    "label": "44 mm"
+   },
+   {
+    "mass_saved_pct": 38.53042910791442,
+    "stiffness": 0.372546476556509,
+    "stress": 5.420507255648043,
+    "rules_ok": false,
+    "failed": [
+     "pocket_symmetry_mismatch_pct",
+     "sharpest_tip_depth_mm"
+    ],
+    "core_ok": true,
+    "label": "48 mm"
+   },
+   {
+    "mass_saved_pct": 41.9585780063446,
+    "stiffness": 0.34724543979290273,
+    "stress": 4.370381583198833,
+    "rules_ok": false,
+    "failed": [
+     "pocket_symmetry_mismatch_pct",
+     "sharpest_tip_depth_mm"
+    ],
+    "core_ok": true,
+    "label": "53 mm"
+   },
+   {
+    "mass_saved_pct": 42.18509903043414,
+    "stiffness": 0.3450164853147876,
+    "stress": 4.24091097146782,
+    "rules_ok": false,
+    "failed": [
+     "pocket_symmetry_mismatch_pct",
+     "sharpest_tip_depth_mm"
+    ],
+    "core_ok": true,
+    "label": "58 mm"
+   },
+   {
+    "mass_saved_pct": 45.251470775709244,
+    "stiffness": 0.29761774698940213,
+    "stress": 5.868289374722517,
+    "rules_ok": false,
+    "failed": [
+     "pocket_symmetry_mismatch_pct",
+     "sharpest_tip_depth_mm"
+    ],
+    "core_ok": true,
+    "label": "64 mm"
+   },
+   {
+    "mass_saved_pct": 46.82742896198874,
+    "stiffness": 0.28833914226549073,
+    "stress": 5.837785009208798,
+    "rules_ok": false,
+    "failed": [
+     "pocket_symmetry_mismatch_pct",
+     "sharpest_tip_depth_mm"
+    ],
+    "core_ok": true,
+    "label": "72 mm"
+   }
+  ],
+  "v2_all": [
+   {
+    "mass_saved_pct": 4.110110806233647,
+    "stiffness": 0.9298804691515444,
+    "stress": 1.1024710513359697,
+    "rules_ok": true,
+    "failed": [],
+    "core_ok": true,
+    "label": "36 mm isogrid"
+   },
+   {
+    "mass_saved_pct": 4.954097471793196,
+    "stiffness": 0.8768572758890109,
+    "stress": 1.2276443202628546,
+    "rules_ok": true,
+    "failed": [],
+    "core_ok": true,
+    "label": "36 mm isogrid \u00b7 pruned \u00d71"
+   },
+   {
+    "mass_saved_pct": 13.57590113220124,
+    "stiffness": 0.8415229925517373,
+    "stress": 1.2741332478685368,
+    "rules_ok": true,
+    "failed": [],
+    "core_ok": true,
+    "label": "53 mm isogrid \u00b7 pruned \u00d71"
+   },
+   {
+    "mass_saved_pct": 14.42101292188196,
+    "stiffness": 0.786670441993865,
+    "stress": 1.7204208669052854,
+    "rules_ok": true,
+    "failed": [],
+    "core_ok": true,
+    "label": "44 mm isogrid turned \u00b7 pruned \u00d71"
+   },
+   {
+    "mass_saved_pct": 15.200389244312419,
+    "stiffness": 0.7784240769922336,
+    "stress": 1.7264749907167078,
+    "rules_ok": true,
+    "failed": [],
+    "core_ok": true,
+    "label": "44 mm isogrid turned \u00b7 pruned \u00d72"
+   },
+   {
+    "mass_saved_pct": 15.229811053965703,
+    "stiffness": 0.7493048827988713,
+    "stress": 4.6516015502522965,
+    "rules_ok": true,
+    "failed": [],
+    "core_ok": true,
+    "label": "36 mm isogrid turned \u00b7 pruned \u00d73"
+   },
+   {
+    "mass_saved_pct": 16.349866300043658,
+    "stiffness": 0.7430224719189145,
+    "stress": 1.738159806648818,
+    "rules_ok": true,
+    "failed": [],
+    "core_ok": true,
+    "label": "44 mm isogrid turned \u00b7 pruned \u00d73"
+   },
+   {
+    "mass_saved_pct": 17.231056145370292,
+    "stiffness": 0.6990107407241604,
+    "stress": 5.011084167226337,
+    "rules_ok": true,
+    "failed": [],
+    "core_ok": true,
+    "label": "58 mm isogrid"
+   },
+   {
+    "mass_saved_pct": 17.412065191639947,
+    "stiffness": 0.6874649364904206,
+    "stress": 18.30029190891542,
+    "rules_ok": true,
+    "failed": [],
+    "core_ok": true,
+    "label": "40 mm \u00b7 pruned \u00d71"
+   },
+   {
+    "mass_saved_pct": 18.34519980324918,
+    "stiffness": 0.6649371617760941,
+    "stress": 2.5159092836538486,
+    "rules_ok": true,
+    "failed": [],
+    "core_ok": true,
+    "label": "72 mm isogrid turned"
+   },
+   {
+    "mass_saved_pct": 19.13605962411853,
+    "stiffness": 0.6400922445988594,
+    "stress": 5.153128124116146,
+    "rules_ok": true,
+    "failed": [],
+    "core_ok": true,
+    "label": "58 mm"
+   },
+   {
+    "mass_saved_pct": 20.943964484816135,
+    "stiffness": 0.6305040267431143,
+    "stress": 5.273329932399801,
+    "rules_ok": true,
+    "failed": [],
+    "core_ok": true,
+    "label": "64 mm"
+   },
+   {
+    "mass_saved_pct": 21.718349142791592,
+    "stiffness": 0.5539096603003618,
+    "stress": 5.293145708166645,
+    "rules_ok": true,
+    "failed": [],
+    "core_ok": true,
+    "label": "72 mm"
+   },
+   {
+    "mass_saved_pct": 23.32728197286199,
+    "stiffness": 0.5486600972862791,
+    "stress": 3.234795905294706,
+    "rules_ok": true,
+    "failed": [],
+    "core_ok": true,
+    "label": "44 mm guided \u00b7 pruned \u00d72"
+   },
+   {
+    "mass_saved_pct": 25.459645925115215,
+    "stiffness": 0.5254028470265929,
+    "stress": 3.4540337873016216,
+    "rules_ok": true,
+    "failed": [],
+    "core_ok": true,
+    "label": "44 mm guided \u00b7 pruned \u00d73"
+   },
+   {
+    "mass_saved_pct": 25.61647536606797,
+    "stiffness": 0.44243596532791846,
+    "stress": 4.443735850097594,
+    "rules_ok": true,
+    "failed": [],
+    "core_ok": true,
+    "label": "53 mm guided \u00b7 pruned \u00d73"
+   },
+   {
+    "mass_saved_pct": 28.890268975500188,
+    "stiffness": 0.14985575281764707,
+    "stress": 6.712533632719559,
+    "rules_ok": true,
+    "failed": [],
+    "core_ok": true,
+    "label": "64 mm guided \u00b7 pruned \u00d71"
+   }
+  ],
+  "v1_best_at_target": {
+   "mass_saved_pct": 42.18509903043414,
+   "stiffness": 0.3450164853147876,
+   "stress": 4.24091097146782,
+   "rules_ok": false,
+   "failed": [
+    "pocket_symmetry_mismatch_pct",
+    "sharpest_tip_depth_mm"
+   ],
+   "core_ok": true,
+   "label": "58 mm"
+  },
+  "v2_best_at_target": {
+   "mass_saved_pct": 25.61647536606797,
+   "stiffness": 0.44243596532791846,
+   "stress": 4.443735850097594,
+   "rules_ok": true,
+   "failed": [],
+   "core_ok": true,
+   "label": "53 mm guided \u00b7 pruned \u00d73"
+  }
+ },
+ {
+  "plate": "round_plate.step",
+  "v1_seconds": 6.690786600112915,
+  "v2_seconds": 45.154167890548706,
+  "v2_diag": {
+   "candidates_evaluated": 46,
+   "rejections": {
+    "pocket_symmetry_mismatch_pct": 1,
+    "sharpest_tip_depth_mm": 3,
+    "no_pockets_fit": 6
+   },
+   "feasible": 17,
+   "families": [
+    "truss",
+    "guided",
+    "isogrid",
+    "isogrid-turned"
+   ],
+   "eso_steps": 3,
+   "clearances": [
+    {
+     "default": 8.0,
+     "holes": {},
+     "sides": {},
+     "corners": {}
+    }
+   ],
+   "custom_clearances": 0,
+   "load_model": {
+    "mode": "generic",
+    "summary": "Generic screening loads: plate clamped at either end of its long side, bent both ways and twisted. Mark bolted mounts and loaded bearings for an engineering check.",
+    "inputs": {
+     "supports": "assumed (end clamp)",
+     "loads": "assumed (unit loads at the far end)"
+    }
+   }
+  },
+  "v1_chosen": {
+   "mass_saved_pct": 28.94963064025433,
+   "stiffness": 0.2749044589846992,
+   "stress": 5.141101554758408,
+   "rules_ok": false,
+   "failed": [
+    "sharpest_tip_depth_mm"
+   ],
+   "core_ok": true,
+   "label": "53 mm"
+  },
+  "v2_chosen": {
+   "mass_saved_pct": 25.69139233974804,
+   "stiffness": 0.3823483334823056,
+   "stress": 4.281704008230798,
+   "rules_ok": true,
+   "failed": [],
+   "core_ok": true,
+   "label": "36 mm isogrid"
+  },
+  "v1_all": [
+   {
+    "mass_saved_pct": 28.996436651967905,
+    "stiffness": 0.2098400957449609,
+    "stress": 4.938331946507855,
+    "rules_ok": true,
+    "failed": [],
+    "core_ok": true,
+    "label": "32 mm"
+   },
+   {
+    "mass_saved_pct": 31.180972967158205,
+    "stiffness": 0.2688955730535462,
+    "stress": 6.6642332504253075,
+    "rules_ok": false,
+    "failed": [
+     "sharpest_tip_depth_mm"
+    ],
+    "core_ok": true,
+    "label": "36 mm"
+   },
+   {
+    "mass_saved_pct": 33.98807148056778,
+    "stiffness": 0.14823828170148598,
+    "stress": 8.52703862343866,
+    "rules_ok": true,
+    "failed": [],
+    "core_ok": true,
+    "label": "40 mm"
+   },
+   {
+    "mass_saved_pct": 48.04375937705561,
+    "stiffness": 0.08526045181791907,
+    "stress": 11.029807259056888,
+    "rules_ok": true,
+    "failed": [],
+    "core_ok": true,
+    "label": "48 mm"
+   },
+   {
+    "mass_saved_pct": 28.94963064025433,
+    "stiffness": 0.2749044589846992,
+    "stress": 5.141101554758408,
+    "rules_ok": false,
+    "failed": [
+     "sharpest_tip_depth_mm"
+    ],
+    "core_ok": true,
+    "label": "53 mm"
+   },
+   {
+    "mass_saved_pct": 42.47825043904657,
+    "stiffness": 0.1621273219650091,
+    "stress": 9.400714352124394,
+    "rules_ok": true,
+    "failed": [],
+    "core_ok": true,
+    "label": "58 mm"
+   }
+  ],
+  "v2_all": [
+   {
+    "mass_saved_pct": 9.958494732150204,
+    "stiffness": 0.6700677082204486,
+    "stress": 1.9387424798924,
+    "rules_ok": true,
+    "failed": [],
+    "core_ok": true,
+    "label": "24 mm guided"
+   },
+   {
+    "mass_saved_pct": 12.871905426736719,
+    "stiffness": 0.6243645329154982,
+    "stress": 2.1020126276206414,
+    "rules_ok": true,
+    "failed": [],
+    "core_ok": true,
+    "label": "28 mm"
+   },
+   {
+    "mass_saved_pct": 18.462723481067034,
+    "stiffness": 0.541896513942186,
+    "stress": 2.4469169124984895,
+    "rules_ok": true,
+    "failed": [],
+    "core_ok": true,
+    "label": "36 mm"
+   },
+   {
+    "mass_saved_pct": 22.337564607120974,
+    "stiffness": 0.5056536842426507,
+    "stress": 2.500961692136247,
+    "rules_ok": true,
+    "failed": [],
+    "core_ok": true,
+    "label": "40 mm"
+   },
+   {
+    "mass_saved_pct": 22.375882054039188,
+    "stiffness": 0.42417408347293756,
+    "stress": 3.5357310938366635,
+    "rules_ok": true,
+    "failed": [],
+    "core_ok": true,
+    "label": "24 mm \u00b7 pruned \u00d71"
+   },
+   {
+    "mass_saved_pct": 23.519976893126216,
+    "stiffness": 0.3962097831577379,
+    "stress": 3.9157412197561836,
+    "rules_ok": true,
+    "failed": [],
+    "core_ok": true,
+    "label": "24 mm \u00b7 pruned \u00d72"
+   },
+   {
+    "mass_saved_pct": 25.69139233974804,
+    "stiffness": 0.3823483334823056,
+    "stress": 4.281704008230798,
+    "rules_ok": true,
+    "failed": [],
+    "core_ok": true,
+    "label": "36 mm isogrid"
+   },
+   {
+    "mass_saved_pct": 32.36302410723917,
+    "stiffness": 0.3301737081501673,
+    "stress": 4.6927064227702004,
+    "rules_ok": true,
+    "failed": [],
+    "core_ok": true,
+    "label": "44 mm isogrid turned \u00b7 pruned \u00d71"
+   },
+   {
+    "mass_saved_pct": 33.165774452881536,
+    "stiffness": 0.3001256991250754,
+    "stress": 5.085081274413857,
+    "rules_ok": true,
+    "failed": [],
+    "core_ok": true,
+    "label": "40 mm isogrid"
+   },
+   {
+    "mass_saved_pct": 35.5253866728235,
+    "stiffness": 0.22719640079754985,
+    "stress": 6.626330650195783,
+    "rules_ok": true,
+    "failed": [],
+    "core_ok": true,
+    "label": "44 mm isogrid turned \u00b7 pruned \u00d72"
+   },
+   {
+    "mass_saved_pct": 37.92295043090166,
+    "stiffness": 0.2006850692720056,
+    "stress": 8.894535910500723,
+    "rules_ok": true,
+    "failed": [],
+    "core_ok": true,
+    "label": "53 mm isogrid turned"
+   },
+   {
+    "mass_saved_pct": 38.647505796858454,
+    "stiffness": 0.19222663644685672,
+    "stress": 8.554769297903047,
+    "rules_ok": true,
+    "failed": [],
+    "core_ok": true,
+    "label": "58 mm"
+   },
+   {
+    "mass_saved_pct": 41.39740076977701,
+    "stiffness": 0.1651772942576746,
+    "stress": 10.189914188343439,
+    "rules_ok": true,
+    "failed": [],
+    "core_ok": true,
+    "label": "64 mm isogrid turned"
+   },
+   {
+    "mass_saved_pct": 43.53873504255247,
+    "stiffness": 0.16436830995194415,
+    "stress": 8.913872979508772,
+    "rules_ok": true,
+    "failed": [],
+    "core_ok": true,
+    "label": "72 mm isogrid turned"
+   },
+   {
+    "mass_saved_pct": 43.97175330404709,
+    "stiffness": 0.12247659381026649,
+    "stress": 9.820823395472969,
+    "rules_ok": true,
+    "failed": [],
+    "core_ok": true,
+    "label": "58 mm guided"
+   }
+  ],
+  "v1_best_at_target": null,
+  "v2_best_at_target": {
+   "mass_saved_pct": 32.36302410723917,
+   "stiffness": 0.3301737081501673,
+   "stress": 4.6927064227702004,
+   "rules_ok": true,
+   "failed": [],
+   "core_ok": true,
+   "label": "44 mm isogrid turned \u00b7 pruned \u00d71"
+  }
+ },
+ {
+  "plate": "side_plate.step",
+  "v1_seconds": 7.018962860107422,
+  "v2_seconds": 51.10043954849243,
+  "v2_diag": {
+   "candidates_evaluated": 55,
+   "rejections": {
+    "sharpest_tip_depth_mm": 3,
+    "min_web_between_pockets_mm": 1,
+    "no_pockets_fit": 6
+   },
+   "feasible": 31,
+   "families": [
+    "truss",
+    "guided",
+    "isogrid",
+    "isogrid-turned"
+   ],
+   "eso_steps": 3,
+   "clearances": [
+    {
+     "default": 8.0,
+     "holes": {},
+     "sides": {},
+     "corners": {}
+    }
+   ],
+   "custom_clearances": 0,
+   "load_model": {
+    "mode": "generic",
+    "summary": "Generic screening loads: plate clamped at either end of its long side, bent both ways and twisted. Mark bolted mounts and loaded bearings for an engineering check.",
+    "inputs": {
+     "supports": "assumed (end clamp)",
+     "loads": "assumed (unit loads at the far end)"
+    }
+   }
+  },
+  "v1_chosen": {
+   "mass_saved_pct": 39.33263340788741,
+   "stiffness": 0.3257999966385814,
+   "stress": 4.73332725474548,
+   "rules_ok": false,
+   "failed": [
+    "sharpest_tip_depth_mm"
+   ],
+   "core_ok": true,
+   "label": "44 mm"
+  },
+  "v2_chosen": {
+   "mass_saved_pct": 40.10258581462157,
+   "stiffness": 0.3679342267664749,
+   "stress": 3.7459307524557643,
+   "rules_ok": true,
+   "failed": [],
+   "core_ok": true,
+   "label": "58 mm isogrid turned"
+  },
+  "v1_all": [
+   {
+    "mass_saved_pct": 32.64513850773124,
+    "stiffness": 0.2863777917287504,
+    "stress": 3.836344239884581,
+    "rules_ok": false,
+    "failed": [
+     "sharpest_tip_depth_mm"
+    ],
+    "core_ok": true,
+    "label": "32 mm"
+   },
+   {
+    "mass_saved_pct": 35.05549516410401,
+    "stiffness": 0.3082357400939493,
+    "stress": 4.342954501305139,
+    "rules_ok": false,
+    "failed": [
+     "sharpest_tip_depth_mm"
+    ],
+    "core_ok": true,
+    "label": "36 mm"
+   },
+   {
+    "mass_saved_pct": 41.12367574076491,
+    "stiffness": 0.2804261376226779,
+    "stress": 3.784742151131036,
+    "rules_ok": false,
+    "failed": [
+     "sharpest_tip_depth_mm"
+    ],
+    "core_ok": true,
+    "label": "40 mm"
+   },
+   {
+    "mass_saved_pct": 39.33263340788741,
+    "stiffness": 0.3257999966385814,
+    "stress": 4.73332725474548,
+    "rules_ok": false,
+    "failed": [
+     "sharpest_tip_depth_mm"
+    ],
+    "core_ok": true,
+    "label": "44 mm"
+   },
+   {
+    "mass_saved_pct": 44.7651014962233,
+    "stiffness": 0.2535784839324036,
+    "stress": 4.3234994014260035,
+    "rules_ok": false,
+    "failed": [
+     "sharpest_tip_depth_mm"
+    ],
+    "core_ok": true,
+    "label": "48 mm"
+   },
+   {
+    "mass_saved_pct": 45.823835879632156,
+    "stiffness": 0.2366239010301819,
+    "stress": 7.711795239077863,
+    "rules_ok": false,
+    "failed": [
+     "sharpest_tip_depth_mm"
+    ],
+    "core_ok": true,
+    "label": "53 mm"
+   },
+   {
+    "mass_saved_pct": 54.80544183824709,
+    "stiffness": 0.14110251297766607,
+    "stress": 8.248567916338118,
+    "rules_ok": false,
+    "failed": [
+     "sharpest_tip_depth_mm"
+    ],
+    "core_ok": true,
+    "label": "58 mm"
+   }
+  ],
+  "v2_all": [
+   {
+    "mass_saved_pct": 21.100735226020973,
+    "stiffness": 0.5851857523557837,
+    "stress": 2.465147363455132,
+    "rules_ok": true,
+    "failed": [],
+    "core_ok": true,
+    "label": "36 mm isogrid turned"
+   },
+   {
+    "mass_saved_pct": 29.185726854717064,
+    "stiffness": 0.4918430331003114,
+    "stress": 2.3385498933203515,
+    "rules_ok": true,
+    "failed": [],
+    "core_ok": true,
+    "label": "40 mm isogrid turned"
+   },
+   {
+    "mass_saved_pct": 32.254175935111164,
+    "stiffness": 0.47257816288609666,
+    "stress": 2.197345254148658,
+    "rules_ok": true,
+    "failed": [],
+    "core_ok": true,
+    "label": "53 mm isogrid"
+   },
+   {
+    "mass_saved_pct": 33.81459833331797,
+    "stiffness": 0.435413466441423,
+    "stress": 2.900709405077872,
+    "rules_ok": true,
+    "failed": [],
+    "core_ok": true,
+    "label": "53 mm isogrid \u00b7 pruned \u00d71"
+   },
+   {
+    "mass_saved_pct": 36.28672052204918,
+    "stiffness": 0.404559134108285,
+    "stress": 3.1589249690385826,
+    "rules_ok": true,
+    "failed": [],
+    "core_ok": true,
+    "label": "48 mm isogrid"
+   },
+   {
+    "mass_saved_pct": 37.905606875048356,
+    "stiffness": 0.4003090379932085,
+    "stress": 3.076610303688123,
+    "rules_ok": true,
+    "failed": [],
+    "core_ok": true,
+    "label": "58 mm isogrid"
+   },
+   {
+    "mass_saved_pct": 40.10258581462157,
+    "stiffness": 0.3679342267664749,
+    "stress": 3.7459307524557643,
+    "rules_ok": true,
+    "failed": [],
+    "core_ok": true,
+    "label": "58 mm isogrid turned"
+   },
+   {
+    "mass_saved_pct": 41.37332499272136,
+    "stiffness": 0.33146449212579576,
+    "stress": 4.133528297338099,
+    "rules_ok": true,
+    "failed": [],
+    "core_ok": true,
+    "label": "64 mm isogrid turned"
+   },
+   {
+    "mass_saved_pct": 41.391278174286406,
+    "stiffness": 0.32525943219911274,
+    "stress": 5.287711259231572,
+    "rules_ok": true,
+    "failed": [],
+    "core_ok": true,
+    "label": "58 mm isogrid \u00b7 pruned \u00d72"
+   },
+   {
+    "mass_saved_pct": 41.430148621970595,
+    "stiffness": 0.3109768362311111,
+    "stress": 7.300526471441036,
+    "rules_ok": true,
+    "failed": [],
+    "core_ok": true,
+    "label": "28 mm guided \u00b7 pruned \u00d73"
+   },
+   {
+    "mass_saved_pct": 48.46954850642315,
+    "stiffness": 0.29046559721808396,
+    "stress": 4.505829853135066,
+    "rules_ok": true,
+    "failed": [],
+    "core_ok": true,
+    "label": "64 mm isogrid"
+   },
+   {
+    "mass_saved_pct": 50.3564528609858,
+    "stiffness": 0.25570448589272243,
+    "stress": 4.553181607226881,
+    "rules_ok": true,
+    "failed": [],
+    "core_ok": true,
+    "label": "58 mm guided"
+   },
+   {
+    "mass_saved_pct": 53.91218529896218,
+    "stiffness": 0.22606765784480973,
+    "stress": 7.907006458993398,
+    "rules_ok": true,
+    "failed": [],
+    "core_ok": true,
+    "label": "72 mm"
+   },
+   {
+    "mass_saved_pct": 57.59808369767162,
+    "stiffness": 0.2014835175533115,
+    "stress": 6.466552595044336,
+    "rules_ok": true,
+    "failed": [],
+    "core_ok": true,
+    "label": "72 mm guided"
+   }
+  ],
+  "v1_best_at_target": null,
+  "v2_best_at_target": {
+   "mass_saved_pct": 41.37332499272136,
+   "stiffness": 0.33146449212579576,
+   "stress": 4.133528297338099,
+   "rules_ok": true,
+   "failed": [],
+   "core_ok": true,
+   "label": "64 mm isogrid turned"
+  }
+ }
+]

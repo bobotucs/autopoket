@@ -1,0 +1,881 @@
+{
+ "643a9105a06342542dbd0922": {
+  "name": "FRC 1678-22-A-0000 | MARGIE | Public -",
+  "modifiedAt": "2026-10-24T14:44:07.296+00:00",
+  "pocketed": []
+ },
+ "a17c3f45387f5824075bd871": {
+  "name": "Electronics",
+  "modifiedAt": "2026-10-24T04:21:28.553+00:00",
+  "pocketed": []
+ },
+ "f7d9092d409a34f725438519": {
+  "name": "25609 LOADmold",
+  "modifiedAt": "2026-10-24T03:32:16.283+00:00",
+  "pocketed": []
+ },
+ "a5034220af14edecbd8d76d3": {
+  "name": "𝙇𝙐𝙉𝘼𝙇𝘼",
+  "modifiedAt": "2026-10-24T00:10:37.609+00:00",
+  "pocketed": [
+   {
+    "name": "𝙇𝙐𝙉𝘼𝙇𝘼_drivetrain_0",
+    "pockets": 6,
+    "holes": 10,
+    "thickness": 3.174,
+    "removed_pct": 17.7,
+    "stiffness_kept_pct": 33.6
+   },
+   {
+    "name": "𝙇𝙐𝙉𝘼𝙇𝘼_plates_1",
+    "pockets": 2,
+    "holes": 37,
+    "thickness": 3.174,
+    "removed_pct": 2.3,
+    "stiffness_kept_pct": 73.9
+   },
+   {
+    "name": "𝙇𝙐𝙉𝘼𝙇𝘼_indexer_2",
+    "pockets": 2,
+    "holes": 6,
+    "thickness": 3.174,
+    "removed_pct": 1.2,
+    "stiffness_kept_pct": 98.8
+   },
+   {
+    "name": "𝙇𝙐𝙉𝘼𝙇𝘼_intake v4_8",
+    "pockets": 8,
+    "holes": 8,
+    "thickness": 3.174,
+    "removed_pct": 9.7,
+    "stiffness_kept_pct": 79.0
+   },
+   {
+    "name": "𝙇𝙐𝙉𝘼𝙇𝘼_POLLEN TURRET_1",
+    "pockets": 4,
+    "holes": 9,
+    "thickness": 11.999,
+    "removed_pct": 18.4,
+    "stiffness_kept_pct": 59.8
+   },
+   {
+    "name": "𝙇𝙐𝙉𝘼𝙇𝘼_NECTAR TURRET_2",
+    "pockets": 4,
+    "holes": 9,
+    "thickness": 11.999,
+    "removed_pct": 19.7,
+    "stiffness_kept_pct": 0.0
+   }
+  ]
+ },
+ "3b2cf77b0b983ecc00121060": {
+  "name": "PEGASUS 1.2",
+  "modifiedAt": "2026-10-23T18:14:47.566+00:00",
+  "pocketed": [
+   {
+    "name": "PEGASUS 1.2_Part Studio 1_1",
+    "pockets": 36,
+    "holes": 53,
+    "thickness": 3.174,
+    "removed_pct": 38.1,
+    "stiffness_kept_pct": 33.7
+   },
+   {
+    "name": "PEGASUS 1.2_Part Studio 1_3",
+    "pockets": 24,
+    "holes": 8,
+    "thickness": 3.174,
+    "removed_pct": 46.3,
+    "stiffness_kept_pct": 26.4
+   },
+   {
+    "name": "PEGASUS 1.2_Part Studio 1_7",
+    "pockets": 18,
+    "holes": 11,
+    "thickness": 3.174,
+    "removed_pct": 37.9,
+    "stiffness_kept_pct": 35.6
+   },
+   {
+    "name": "PEGASUS 1.2_Part Studio 1_8",
+    "pockets": 5,
+    "holes": 12,
+    "thickness": 3.174,
+    "removed_pct": 16.7,
+    "stiffness_kept_pct": 57.7
+   },
+   {
+    "name": "PEGASUS 1.2_Part Studio 1_9",
+    "pockets": 22,
+    "holes": 16,
+    "thickness": 3.174,
+    "removed_pct": 33.3,
+    "stiffness_kept_pct": 35.2
+   },
+   {
+    "name": "PEGASUS 1.2_safa can touch_3",
+    "pockets": 24,
+    "holes": 8,
+    "thickness": 3.174,
+    "removed_pct": 35.3,
+    "stiffness_kept_pct": 35.2
+   },
+   {
+    "name": "PEGASUS 1.2_safa can touch_8",
+    "pockets": 5,
+    "holes": 12,
+    "thickness": 3.174,
+    "removed_pct": 16.7,
+    "stiffness_kept_pct": 57.7
+   },
+   {
+    "name": "PEGASUS 1.2_safa can touch_9",
+    "pockets": 22,
+    "holes": 16,
+    "thickness": 3.174,
+    "removed_pct": 34.3,
+    "stiffness_kept_pct": 32.4
+   }
+  ]
+ },
+ "2d88a24f18a00606353bd5f9": {
+  "name": "spindexer 8087",
+  "modifiedAt": "2025-12-14T17:53:54.210+00:00",
+  "pocketed": []
+ },
+ "6b6d4a5183f44b3fe8ab1fa8": {
+  "name": "Viper Slides (configurable)",
+  "modifiedAt": "2025-02-01T23:49:11.285+00:00",
+  "pocketed": []
+ },
+ "555223656f5e13decb035be4": {
+  "name": "Configurable Viper Slides",
+  "modifiedAt": "2024-12-17T19:44:27.427+00:00",
+  "pocketed": []
+ },
+ "8132a76a10fcdac36cc61ae8": {
+  "name": "4 Stage Viper-Slide Kit 3210-0001-0004",
+  "modifiedAt": "2024-03-31T18:44:28.728+00:00",
+  "pocketed": []
+ },
+ "5a005eb217a3caeb2cdcf078": {
+  "name": "TETRIX® Flex-Build Robot Chassis 92329",
+  "modifiedAt": "2022-10-15T03:14:47.167+00:00",
+  "pocketed": []
+ },
+ "73b5f3aa015777db3906dec6": {
+  "name": "ShooterCad",
+  "modifiedAt": "2026-10-22T16:08:42.653+00:00",
+  "pocketed": []
+ },
+ "dcd423a91f9339375428b5a9": {
+  "name": "OP Strafer Chassis - Simba",
+  "modifiedAt": "2026-10-04T13:17:09.400+00:00",
+  "pocketed": []
+ },
+ "81e60feeb5470d21e29f5874": {
+  "name": "PickAndPlace_PCB8_2026-05-28.csv",
+  "modifiedAt": "2026-05-28T15:03:18.641+00:00",
+  "pocketed": []
+ },
+ "9a57fc93b7620a448356b4d1": {
+  "name": "Gerber_PCB8_2026-05-28.zip",
+  "modifiedAt": "2026-05-28T15:02:56.980+00:00",
+  "pocketed": []
+ },
+ "c078863d9d2a1de5df6b7161": {
+  "name": "Strafer® Chassis Kit (104mm GripForce™ Mecanum Wheels) 3209-0001-0007",
+  "modifiedAt": "2026-03-07T16:10:23.015+00:00",
+  "pocketed": []
+ },
+ "9cb85364fd09180105136bfb": {
+  "name": "Strafer® Chassis Kit (140mm Mecanum Wheels) 3209-0012-0002",
+  "modifiedAt": "2026-03-07T15:56:21.279+00:00",
+  "pocketed": []
+ },
+ "9360d7b4df056e969da506a5": {
+  "name": "BeeLine Chassis Kit V2 3209-0002-0002",
+  "modifiedAt": "2026-03-06T03:31:18.757+00:00",
+  "pocketed": []
+ },
+ "48c1df37ad163fd64236048e": {
+  "name": "BeeLine Chassis Kit",
+  "modifiedAt": "2026-03-05T14:30:32.722+00:00",
+  "pocketed": []
+ },
+ "fe326d364938a6fb14d67b6b": {
+  "name": "Strafer® Chassis Kit V4 3209-0001-0004",
+  "modifiedAt": "2026-03-01T21:49:31.671+00:00",
+  "pocketed": []
+ },
+ "33061a3d0adc63e4c074bfff": {
+  "name": "CogletESP_2026-02-24.epro",
+  "modifiedAt": "2026-02-24T17:10:58.886+00:00",
+  "pocketed": []
+ },
+ "3693c1679301d13c75c06d90": {
+  "name": "Team 23869 - Most Efficient SHooter Hood Angle.f3d",
+  "modifiedAt": "2025-12-14T08:36:24.819+00:00",
+  "pocketed": []
+ },
+ "ebfd5ca912725a7031337cbc": {
+  "name": "ProDoc_Mouth Board_2025-04-16.epro",
+  "modifiedAt": "2025-09-25T11:27:01.311+00:00",
+  "pocketed": []
+ },
+ "0cfde47b5022d97df8cfeb28": {
+  "name": "Strafer Chassis V5 3209-0001-0005",
+  "modifiedAt": "2025-09-07T14:22:22.094+00:00",
+  "pocketed": []
+ },
+ "1052a4e51526f4c1b6327ee8": {
+  "name": "Intake Wheels",
+  "modifiedAt": "2024-12-18T04:04:12.251+00:00",
+  "pocketed": []
+ },
+ "26ceeb9a9c814cacf3268ba8": {
+  "name": "0 Petal Plates Final v14.step",
+  "modifiedAt": "2024-10-28T16:35:18.995+00:00",
+  "pocketed": []
+ },
+ "57053ff10c427595af36d58d": {
+  "name": "Mecanum Drivetrain Kit V2 (REV-45-2470) - Copy",
+  "modifiedAt": "2024-09-08T23:06:05.814+00:00",
+  "pocketed": []
+ },
+ "f9717665cd189ba5ed8f291d": {
+  "name": "SAR220_STEP_AP203_20230923.zip",
+  "modifiedAt": "2023-09-23T21:24:24.189+00:00",
+  "pocketed": []
+ },
+ "e749fdc02641f0d1bb22ee10": {
+  "name": "Strafer Chassis Kit (No Wheels) 3209-0001-0001",
+  "modifiedAt": "2022-09-04T21:17:17.233+00:00",
+  "pocketed": []
+ },
+ "9878e45bf19aa68c1dc53935": {
+  "name": "Strafer Chassis Kit (No Wheels) 3209-0001-0003",
+  "modifiedAt": "2020-10-31T17:12:26.036+00:00",
+  "pocketed": []
+ },
+ "b1f2cd085e7a3724fb18bef8": {
+  "name": "40:1 Hex Gearbox & Pinion REV-41-1065",
+  "modifiedAt": "2020-04-22T22:31:05.682+00:00",
+  "pocketed": []
+ },
+ "f0a33f10cc168b34761523c1": {
+  "name": "Linear Motion",
+  "modifiedAt": "2026-10-20T02:42:34.381+00:00",
+  "pocketed": []
+ },
+ "79bb54ba3c330d56107a06d0": {
+  "name": "BIOBUZZ™ Presented by RTX Field am-5850",
+  "modifiedAt": "2026-10-17T20:41:05.269+00:00",
+  "pocketed": []
+ },
+ "31b8cbe414784a3dfa2c32c8": {
+  "name": "PLEASE DO NOT SHARE THIS WITH EVERYONE",
+  "modifiedAt": "2026-10-16T20:40:26.091+00:00",
+  "pocketed": []
+ },
+ "64e7bb61197b053f2258c538": {
+  "name": "delete me",
+  "modifiedAt": "2026-09-26T14:14:48.068+00:00",
+  "pocketed": []
+ },
+ "5129897a15f9ad6f2a42bc18": {
+  "name": "Delete Me",
+  "modifiedAt": "2026-09-05T14:01:49.960+00:00",
+  "pocketed": []
+ },
+ "ccd2e790e6d78420c4a7b60b": {
+  "name": "PLEASE DO NOT SHARE THIS WITH EVERYONE",
+  "modifiedAt": "2026-08-23T23:11:32.801+00:00",
+  "pocketed": []
+ },
+ "b644a70c088ef5249f6fa4d7": {
+  "name": "Carbon Fiber Texture",
+  "modifiedAt": "2026-08-19T21:22:09.256+00:00",
+  "pocketed": []
+ },
+ "6fd51f987b2f4099a78bc6de": {
+  "name": "24:1 Ratio Worm Gear Set 3204-0001-0001",
+  "modifiedAt": "2026-07-18T13:31:30.494+00:00",
+  "pocketed": []
+ },
+ "b7a8e81779423190a472c9d1": {
+  "name": "main.py",
+  "modifiedAt": "2026-05-28T15:00:27.997+00:00",
+  "pocketed": []
+ },
+ "aa41e6d6515b5c51148fe998": {
+  "name": "WheelSpinner.py",
+  "modifiedAt": "2026-05-28T15:00:07.307+00:00",
+  "pocketed": []
+ },
+ "e95ebf9ccb00b7d64d5caf63": {
+  "name": "PCA9685.py",
+  "modifiedAt": "2026-05-28T15:00:00.398+00:00",
+  "pocketed": []
+ },
+ "9faadbdc45db0930f68c551b": {
+  "name": "Incrementer.py",
+  "modifiedAt": "2026-05-28T14:59:46.520+00:00",
+  "pocketed": []
+ },
+ "882a0bb16f7d7e39845817ec": {
+  "name": "CentreFinder.py",
+  "modifiedAt": "2026-05-28T14:59:39.678+00:00",
+  "pocketed": []
+ },
+ "f598f04d908b15f855bff894": {
+  "name": "DELETE ME",
+  "modifiedAt": "2026-04-28T20:24:03.916+00:00",
+  "pocketed": []
+ },
+ "d3f81a5321ef3a45b38229f1": {
+  "name": "DELETE ME",
+  "modifiedAt": "2026-04-28T20:23:56.397+00:00",
+  "pocketed": []
+ },
+ "f5c84b453322d06193d5790c": {
+  "name": "Delete Me",
+  "modifiedAt": "2026-04-23T19:42:37.156+00:00",
+  "pocketed": []
+ },
+ "450ac9955a0df4b95ae5bf9d": {
+  "name": "Coglet Evil (1).zip",
+  "modifiedAt": "2026-03-04T12:45:25.929+00:00",
+  "pocketed": []
+ },
+ "f49a52f28aa376ab5de99250": {
+  "name": "Coglet Cat (2).zip",
+  "modifiedAt": "2026-03-04T12:43:57.459+00:00",
+  "pocketed": []
+ },
+ "915eb2c0f334683e1ee8e479": {
+  "name": "2:1 Ratio Bevel Gear Set (8mm REX® Bore Pinion Gear) 3204-0002-0002",
+  "modifiedAt": "2026-03-02T21:15:56.196+00:00",
+  "pocketed": []
+ },
+ "e4ebac1ffc948c9cd1d9df8a": {
+  "name": "Worm Gear Set (28:1 Ratio, 8mm REX® Bore Worm) 3204-0001-0002",
+  "modifiedAt": "2026-03-01T21:40:45.597+00:00",
+  "pocketed": []
+ },
+ "d812073af605f98f4ff3db96": {
+  "name": "3204-0001-0002 Product Insight #3",
+  "modifiedAt": "2026-01-24T17:46:37.685+00:00",
+  "pocketed": []
+ },
+ "7c96ef4b664094e878317048": {
+  "name": "Mecanum with Pulley - Copy",
+  "modifiedAt": "2025-12-20T14:51:50.296+00:00",
+  "pocketed": []
+ },
+ "4af1ad164ae8774467395a0f": {
+  "name": "hero hiest",
+  "modifiedAt": "2025-12-04T22:12:00.268+00:00",
+  "pocketed": []
+ },
+ "216d55f31475c942a0861176": {
+  "name": "Intro to CAD - 5.1-5.4 - Putting CAD to Work",
+  "modifiedAt": "2025-11-08T18:02:50.331+00:00",
+  "pocketed": []
+ },
+ "840137b473725ba12e7ebb87": {
+  "name": "main.py.py",
+  "modifiedAt": "2025-10-16T19:45:28.612+00:00",
+  "pocketed": []
+ },
+ "fdece96f54ca70b060128695": {
+  "name": "README.txt",
+  "modifiedAt": "2025-09-25T11:27:46.986+00:00",
+  "pocketed": []
+ },
+ "be538c7fb203b5115774a1dc": {
+  "name": "CogletFullAI.py",
+  "modifiedAt": "2025-09-25T11:25:33.894+00:00",
+  "pocketed": []
+ },
+ "eb9cc0757df4b057922c1ebe": {
+  "name": "CogletPico.py",
+  "modifiedAt": "2025-09-25T11:25:25.483+00:00",
+  "pocketed": []
+ },
+ "27bd1b30ec44af0fc8c2edc5": {
+  "name": "cogt5.py",
+  "modifiedAt": "2025-09-25T11:25:17.348+00:00",
+  "pocketed": []
+ },
+ "9de33f139e014de39797c346": {
+  "name": "coglett5mic.py",
+  "modifiedAt": "2025-09-25T11:25:08.984+00:00",
+  "pocketed": []
+ },
+ "6a61ad32f3bebd9ec472e455": {
+  "name": "DECODE™ presented by RTX Full Field - am-5700_Full",
+  "modifiedAt": "2025-09-08T17:34:57.913+00:00",
+  "pocketed": []
+ },
+ "ce87d8a8a2cb8aee2530d17f": {
+  "name": "Ramp Assembly - am-5715",
+  "modifiedAt": "2025-08-31T15:32:20.558+00:00",
+  "pocketed": []
+ },
+ "b5b492f0d268e263a346cc6d": {
+  "name": "FIRST Tech Challenge Perimeter Kit am-0481b",
+  "modifiedAt": "2025-08-20T17:14:31.898+00:00",
+  "pocketed": []
+ },
+ "6f4ed6da4e9669c3f4dac288": {
+  "name": "mediapipetest.py",
+  "modifiedAt": "2025-08-15T10:53:18.892+00:00",
+  "pocketed": []
+ },
+ "1dcdaa932f57677fbf1d92a8": {
+  "name": "MainTrackerRP2040.py",
+  "modifiedAt": "2025-08-15T10:53:10.638+00:00",
+  "pocketed": []
+ },
+ "6bd3d7a5f39fc5a02fc80139": {
+  "name": "eyes_only_tracker.py",
+  "modifiedAt": "2025-08-15T10:53:02.334+00:00",
+  "pocketed": []
+ },
+ "85105d9b57880d2815d611e7": {
+  "name": "Mech-Nest-Hyperlink.pdf",
+  "modifiedAt": "2025-08-06T13:53:31.626+00:00",
+  "pocketed": []
+ },
+ "672262325e98c71da4b7a4dd": {
+  "name": "NeckUITest.py",
+  "modifiedAt": "2025-06-30T11:35:56.843+00:00",
+  "pocketed": []
+ },
+ "34543357c3360c9210b2cc22": {
+  "name": "NeckUITest copy.py",
+  "modifiedAt": "2025-06-30T11:35:48.620+00:00",
+  "pocketed": []
+ },
+ "b013b500c0152bcaee093127": {
+  "name": "NeckUITest copy 2.py",
+  "modifiedAt": "2025-06-30T11:35:40.945+00:00",
+  "pocketed": []
+ },
+ "37b86405320fb65fb8ddb889": {
+  "name": "NeckKinematics.py",
+  "modifiedAt": "2025-06-30T11:35:32.856+00:00",
+  "pocketed": []
+ },
+ "5b70c710cf42fc5b760cd387": {
+  "name": "NeckFullControlPanel.py",
+  "modifiedAt": "2025-06-30T11:35:24.738+00:00",
+  "pocketed": []
+ },
+ "3d1c32fb1d2b0cdc85566c6a": {
+  "name": "Neck.py",
+  "modifiedAt": "2025-06-30T11:35:16.152+00:00",
+  "pocketed": []
+ },
+ "6d49a4bd6adf482a190ea693": {
+  "name": "MouthMaster.py",
+  "modifiedAt": "2025-06-30T11:35:07.772+00:00",
+  "pocketed": []
+ },
+ "65f0665cc0b63da84e9a7293": {
+  "name": "Mouth.py",
+  "modifiedAt": "2025-06-30T11:34:59.771+00:00",
+  "pocketed": []
+ },
+ "b4eee04075cbd73e22632032": {
+  "name": "import tarfile.py",
+  "modifiedAt": "2025-06-30T11:34:52.035+00:00",
+  "pocketed": []
+ },
+ "28019ee653a37760575cf0a6": {
+  "name": "image.png",
+  "modifiedAt": "2025-06-30T11:34:43.893+00:00",
+  "pocketed": []
+ },
+ "b22465c384ce36847c051743": {
+  "name": "HeadControlUI.py",
+  "modifiedAt": "2025-06-30T11:34:35.846+00:00",
+  "pocketed": []
+ },
+ "31ae2e00a3cfaca39c22e8f6": {
+  "name": "eyes.py",
+  "modifiedAt": "2025-06-30T11:34:08.652+00:00",
+  "pocketed": []
+ },
+ "e9aa3f9975db85cf680d2ddf": {
+  "name": "Brows.py",
+  "modifiedAt": "2025-06-30T11:33:59.458+00:00",
+  "pocketed": []
+ },
+ "a0c79a79e3581cd078c25c0d": {
+  "name": "Mecanum with Pulley",
+  "modifiedAt": "2025-06-18T02:29:01.376+00:00",
+  "pocketed": []
+ },
+ "f0f83b4df31e108b893e47ba": {
+  "name": "Simplified Batteries",
+  "modifiedAt": "2025-06-18T01:57:38.147+00:00",
+  "pocketed": []
+ },
+ "2c7b51cf084b5aba2e8f8ae0": {
+  "name": "Configurable Misumi Sides",
+  "modifiedAt": "2025-05-30T22:07:36.440+00:00",
+  "pocketed": []
+ },
+ "8d365b631a08528f56107ac3": {
+  "name": "SG90 Eyemech 2019",
+  "modifiedAt": "2025-02-07T12:06:30.691+00:00",
+  "pocketed": []
+ },
+ "531754904dc6182f49701d2f": {
+  "name": "LoonyOdo",
+  "modifiedAt": "2025-02-02T02:18:51.388+00:00",
+  "pocketed": []
+ },
+ "d15ba046ea06b035128dd321": {
+  "name": "SB2264MG",
+  "modifiedAt": "2025-02-01T23:05:38.456+00:00",
+  "pocketed": []
+ },
+ "7498ddfff8d0ff3164e4a002": {
+  "name": "FaceSculpt Blender File",
+  "modifiedAt": "2024-12-05T10:43:58.381+00:00",
+  "pocketed": []
+ },
+ "66e855523d87863be38cab0f": {
+  "name": "Biomimetic Mechatronic Hand 2018 Report.pdf",
+  "modifiedAt": "2024-12-04T16:17:00.568+00:00",
+  "pocketed": []
+ },
+ "cbcedbc1b592c730f2344c80": {
+  "name": "Linear Actuator Kit (1120 Series, 201mm Stroke, 8mm Lead) 3212-0001-0001",
+  "modifiedAt": "2024-11-16T17:21:36.188+00:00",
+  "pocketed": []
+ },
+ "4576433eabb4d0f940f8f416": {
+  "name": "Linear Actuator Kit A (7.4\" Stroke X-Rail Piston) 637213",
+  "modifiedAt": "2024-10-30T00:16:48.756+00:00",
+  "pocketed": []
+ },
+ "e9d33da8ff5cd09e33de0eb0": {
+  "name": "Linear Actuator Kit A (7.4\" Stroke X-Rail Piston) 637213 - Copy",
+  "modifiedAt": "2024-10-29T23:30:26.203+00:00",
+  "pocketed": []
+ },
+ "0b0736f5ff2d87f12d6a4c53": {
+  "name": "Rhino Wheels",
+  "modifiedAt": "2024-10-26T04:32:10.009+00:00",
+  "pocketed": []
+ },
+ "f6bc1b881a3519a563a3f597": {
+  "name": "GB Mecanum Wheels",
+  "modifiedAt": "2024-10-26T04:32:00.657+00:00",
+  "pocketed": []
+ },
+ "ed9707c7b44b6d9f6c7c8e89": {
+  "name": "GB Omni Wheels",
+  "modifiedAt": "2024-10-26T04:28:06.926+00:00",
+  "pocketed": []
+ },
+ "c29472f6d0c86173cd165f9d": {
+  "name": "You're not helping it, allen",
+  "modifiedAt": "2024-10-10T21:58:27.968+00:00",
+  "pocketed": []
+ },
+ "7c57e0eed66143ea63a1151b": {
+  "name": "2814-0016-0250.zip",
+  "modifiedAt": "2024-10-01T00:08:47.679+00:00",
+  "pocketed": []
+ },
+ "1ecfc1642dcb19d446edb6eb": {
+  "name": "2811-0004-0007.zip",
+  "modifiedAt": "2024-10-01T00:01:54.529+00:00",
+  "pocketed": []
+ },
+ "6c47ebeec88e1b27484f101a": {
+  "name": "2811-0004-0007.zip",
+  "modifiedAt": "2024-10-01T00:00:57.281+00:00",
+  "pocketed": []
+ },
+ "755978e3a7376d66a8b308ec": {
+  "name": "BASKETS Assembly - am-5405",
+  "modifiedAt": "2024-09-07T17:50:21.475+00:00",
+  "pocketed": []
+ },
+ "be9b76a7f25b34ee759d401f": {
+  "name": "CENTERSTAGE℠ Truss Full Truss am-5102",
+  "modifiedAt": "2024-08-23T02:36:49.521+00:00",
+  "pocketed": []
+ },
+ "253958882a2c72ee9d4373b4": {
+  "name": "IGNORE",
+  "modifiedAt": "2024-08-19T21:18:28.599+00:00",
+  "pocketed": []
+ },
+ "786dd94116720580030372d9": {
+  "name": "Carousel am-4550",
+  "modifiedAt": "2024-06-22T15:02:14.348+00:00",
+  "pocketed": []
+ },
+ "76f35ca164c88dd76898289a": {
+  "name": "2109-4012-1200.SLDASM",
+  "modifiedAt": "2024-06-12T16:28:20.977+00:00",
+  "pocketed": []
+ },
+ "2a99f36585662e1ea4cd1f9f": {
+  "name": "2109-4012-0880.SLDASM",
+  "modifiedAt": "2024-06-12T16:27:17.914+00:00",
+  "pocketed": []
+ },
+ "2eb844ef14b73fb34c435350": {
+  "name": "3307-4008-0010 assembly.SLDASM",
+  "modifiedAt": "2024-06-12T15:16:17.643+00:00",
+  "pocketed": []
+ },
+ "4566f08c96311cb2f875500f": {
+  "name": "InsertTool-view attached file & INSTALL NOW!",
+  "modifiedAt": "2024-02-23T23:30:31.327+00:00",
+  "pocketed": []
+ },
+ "727bbe589dea3ee2b954a5fb": {
+  "name": "Robits Drop Block am-5028",
+  "modifiedAt": "2023-11-09T21:06:22.930+00:00",
+  "pocketed": []
+ },
+ "1fa56bc67a6b5822cbdc01fb": {
+  "name": "DELETME",
+  "modifiedAt": "2023-11-09T20:43:54.684+00:00",
+  "pocketed": []
+ },
+ "e1b0c7f1dcaa8958a24f2e96": {
+  "name": "CENTERSTAGE℠ Truss Alliance Half Truss am-5122",
+  "modifiedAt": "2023-09-09T15:58:13.348+00:00",
+  "pocketed": []
+ },
+ "5dac8a7b49082e9cdcddf057": {
+  "name": "CENTERSTAGE℠ Truss Stage Door am-5105",
+  "modifiedAt": "2023-08-31T16:31:17.982+00:00",
+  "pocketed": []
+ },
+ "14da89df8e1df60995d9e512": {
+  "name": "FIRST Tech Challenge FREIGHT FRENZY Remote Field",
+  "modifiedAt": "2023-08-18T22:42:31.344+00:00",
+  "pocketed": []
+ },
+ "118597898eef310457f39365": {
+  "name": "Onshape Associate Test Practice - Multi-part Examples",
+  "modifiedAt": "2023-05-04T19:58:58.574+00:00",
+  "pocketed": []
+ },
+ "435974ae3f96c50b32859346": {
+  "name": "Cone am-4801 - Copy",
+  "modifiedAt": "2022-12-22T21:02:01.617+00:00",
+  "pocketed": []
+ },
+ "0e601f5702c7d35fec81d49c": {
+  "name": "3604 Series Omni Wheel (14mm Bore, 120mm Diameter) 3604-0014-0120",
+  "modifiedAt": "2022-12-02T01:43:58.976+00:00",
+  "pocketed": []
+ },
+ "177ca5e3129397f2fd2c95dd": {
+  "name": "3604 Series Omni Wheel (14mm Bore, 96mm Diameter) 3604-0014-0096",
+  "modifiedAt": "2022-12-02T01:42:55.930+00:00",
+  "pocketed": []
+ },
+ "e2e3eafdad7fca2d6a7e05d7": {
+  "name": "3604 Series Omni Wheel (14mm Bore, 72mm Diameter) 3604-0014-0072",
+  "modifiedAt": "2022-12-02T01:41:38.785+00:00",
+  "pocketed": []
+ },
+ "b54ec4863fceb786a13b4145": {
+  "name": "Onshape Associate Test Practice - Part Examples",
+  "modifiedAt": "2022-10-01T15:33:27.431+00:00",
+  "pocketed": []
+ },
+ "fd5b6d898f0076904fdc6bd0": {
+  "name": "TETRIX® Robo-Rail Pack 92328",
+  "modifiedAt": "2022-09-22T00:53:34.252+00:00",
+  "pocketed": []
+ },
+ "4e9fd1ba8b4b5ecfd4005664": {
+  "name": "3.5mm Bullet Connector Pack (MH-FC x 5, FH-MC x 5) 3803-1213-0005",
+  "modifiedAt": "2022-09-06T20:37:44.639+00:00",
+  "pocketed": []
+ },
+ "f49237110fdb12b7ae32b94b": {
+  "name": "--TETRIX® MAX 288mm Flat Bar 39070",
+  "modifiedAt": "2022-07-01T02:08:18.560+00:00",
+  "pocketed": []
+ },
+ "e63f1fe08d3f15fc858d42f9": {
+  "name": "TETRIX R/C Components Mounting Kit 41928",
+  "modifiedAt": "2021-04-29T20:43:09.070+00:00",
+  "pocketed": []
+ },
+ "f21b0b9e5c27ed50f64615c0": {
+  "name": "USB A Male Connector",
+  "modifiedAt": "2021-01-05T16:39:33.560+00:00",
+  "pocketed": []
+ },
+ "757af13e83f2e96f33a178ec": {
+  "name": "75mm Mecanum Wheel Set REV-45-1655",
+  "modifiedAt": "2021-01-03T21:42:23.632+00:00",
+  "pocketed": []
+ },
+ "730fb8f8de4e99b9c612c6ed": {
+  "name": "Build Idea - 615466 Worm Gear",
+  "modifiedAt": "2020-12-29T22:47:44.368+00:00",
+  "pocketed": []
+ },
+ "93ce6540ea5b1846421724a8": {
+  "name": "2:1 Bevel Gear Set (6mm Bore Pinion, 1/4\" Bore Spur) 637223",
+  "modifiedAt": "2020-11-09T14:58:39.853+00:00",
+  "pocketed": []
+ },
+ "0bbb6b55ea788e3332c94e62": {
+  "name": "Tamiya Lead (MH-FC, 100mm Length) 3800-0003-0100",
+  "modifiedAt": "2020-11-05T03:00:22.849+00:00",
+  "pocketed": []
+ },
+ "a46d7ed00693bee678a9ceb7": {
+  "name": "2:1 Ratio Bevel Gear Set (6mm D-Bore Pinion Gear) 3204-0002-0001",
+  "modifiedAt": "2020-09-19T16:44:10.414+00:00",
+  "pocketed": []
+ },
+ "c0531d475e6d5924ba8c7151": {
+  "name": "Cascading Kit for 1121 Series Low-Side U-Channel 3210-0001-0001",
+  "modifiedAt": "2020-08-19T19:54:14.012+00:00",
+  "pocketed": []
+ },
+ "8e7f459a7c31184db9f8fe91": {
+  "name": "TETRIX FIRST Tech Challenge Competition Set 44706",
+  "modifiedAt": "2020-07-30T01:22:09.002+00:00",
+  "pocketed": []
+ },
+ "f046c68aaa6a256bef80ba3c": {
+  "name": "TETRIX MAX Gear Pack 31901",
+  "modifiedAt": "2020-07-27T01:56:47.463+00:00",
+  "pocketed": []
+ },
+ "e95102647a4088ec9a0603b0": {
+  "name": "4\" Stroke 560 lb Thrust Super Duty Linear Actuator sda4-263",
+  "modifiedAt": "2020-07-22T20:13:26.103+00:00",
+  "pocketed": []
+ },
+ "278edce1e898ab44dab9ac73": {
+  "name": "UltraPlanetary Cartridge - 5:1 REV-41-1603",
+  "modifiedAt": "2020-04-23T15:29:44.957+00:00",
+  "pocketed": []
+ },
+ "0e82883d315be87b2acb657f": {
+  "name": "UltraPlanetary Cartridge - 4:1 REV-41-1602",
+  "modifiedAt": "2020-04-23T11:57:38.752+00:00",
+  "pocketed": []
+ },
+ "7124bb9e58b15839a4103857": {
+  "name": "4.00\" Precision Disk Wheel 595731 (Yellow)",
+  "modifiedAt": "2020-04-16T15:47:46.662+00:00",
+  "pocketed": []
+ },
+ "91466d2bd539dc1c185782d4": {
+  "name": "4.00\" Precision Disk Wheel 595730 (Black)",
+  "modifiedAt": "2020-04-16T15:45:52.078+00:00",
+  "pocketed": []
+ },
+ "7a89986c65c7b4db78e82cd1": {
+  "name": "3.00\" Precision Disk Wheel 595728 (Orange)",
+  "modifiedAt": "2020-04-15T17:28:24.417+00:00",
+  "pocketed": []
+ },
+ "82917f8def3afeeddf700921": {
+  "name": "3.00\" Precision Disk Wheel 595729 (Red)",
+  "modifiedAt": "2020-04-15T17:28:05.053+00:00",
+  "pocketed": []
+ },
+ "a1627b89ddb6a8094eff8468": {
+  "name": "3.00\" Precision Disk Wheel 595727 (Clear Orange)",
+  "modifiedAt": "2020-04-15T17:26:22.688+00:00",
+  "pocketed": []
+ },
+ "4fdbbabac3c6f66de1aa9bd4": {
+  "name": "3.00\" Precision Disk Wheel 595726 (Blue)",
+  "modifiedAt": "2020-04-15T16:54:33.487+00:00",
+  "pocketed": []
+ },
+ "ed8b7c43dcd9b750b19a9cc4": {
+  "name": "3.00\" Precision Disk Wheel 595725 (Clear)",
+  "modifiedAt": "2020-04-15T16:53:26.776+00:00",
+  "pocketed": []
+ },
+ "49cabc510fc85ae0069d5c38": {
+  "name": "3.00\" Precision Disk Wheel 595723 (Clear Yellow)",
+  "modifiedAt": "2020-04-15T16:52:24.124+00:00",
+  "pocketed": []
+ },
+ "475dbfc47dbf48fafc024d21": {
+  "name": "3.00\" Precision Disk Wheel 595722 (White)",
+  "modifiedAt": "2020-04-15T16:51:12.921+00:00",
+  "pocketed": []
+ },
+ "c11676b1b7b310f96db23593": {
+  "name": "3.00\" Precision Disk Wheel 595721 (Yellow)",
+  "modifiedAt": "2020-04-15T16:50:23.287+00:00",
+  "pocketed": []
+ },
+ "0f1a07a36c63336f08c65ec1": {
+  "name": "3.00\" Precision Disk Wheel 595720 (Black)",
+  "modifiedAt": "2020-04-15T16:50:03.875+00:00",
+  "pocketed": []
+ },
+ "048f1c12ff7e2315bd2a4ed4": {
+  "name": "2.00\" Precision Disk Wheel 595719 (Red)",
+  "modifiedAt": "2020-04-15T00:34:26.418+00:00",
+  "pocketed": []
+ },
+ "a486be2730f8adfe3c289d92": {
+  "name": "2.00\" Precision Disk Wheel 595718 (Orange)",
+  "modifiedAt": "2020-04-15T00:30:32.744+00:00",
+  "pocketed": []
+ },
+ "7e030b89172eb241b0b54e00": {
+  "name": "2.00\" Precision Disk Wheel 595717 (Clear Orange)",
+  "modifiedAt": "2020-04-15T00:28:59.681+00:00",
+  "pocketed": []
+ },
+ "c18b68235ace48d95e46b200": {
+  "name": "2.00\" Precision Disk Wheel 595715 (Clear)",
+  "modifiedAt": "2020-04-15T00:26:33.310+00:00",
+  "pocketed": []
+ },
+ "76392c395ae8db227a02cac0": {
+  "name": "2.00\" Precision Disk Wheel 595716 (Blue)",
+  "modifiedAt": "2020-04-15T00:26:14.766+00:00",
+  "pocketed": []
+ },
+ "7f797e2ebfcbcaaf66be7e5c": {
+  "name": "2.00\" Precision Disk Wheel 595712 (White)",
+  "modifiedAt": "2020-04-15T00:06:18.727+00:00",
+  "pocketed": []
+ },
+ "b794cb29d205be75ed752666": {
+  "name": "2.00\" Precision Disk Wheel 595711 (Yellow)",
+  "modifiedAt": "2020-04-15T00:06:01.186+00:00",
+  "pocketed": []
+ },
+ "b188a53f16c172d0d40f1bac": {
+  "name": "2.00\" Precision Disk Wheel 595710 (Black)",
+  "modifiedAt": "2020-04-15T00:05:42.354+00:00",
+  "pocketed": []
+ },
+ "0f6fd98c2147f97272416808": {
+  "name": "2.00\" Precision Disk Wheel 595713 (Clear Yellow)",
+  "modifiedAt": "2020-04-15T00:04:16.565+00:00",
+  "pocketed": []
+ }
+}

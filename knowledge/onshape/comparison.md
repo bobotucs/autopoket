@@ -1,0 +1,18 @@
+# v2 vs your Onshape designs
+
+Same FEA for both (worst of 6 generic load cases); v2's target = the stiffness your design kept.
+
+| Plate | your pattern | yours: removed / stiffness | v2: removed / stiffness | v2 layout | difference |
+|---|---|---|---|---|---|
+| 𝙇𝙐𝙉𝘼𝙇𝘼_drivetrain_0 | ? | 17.7% / 34% | 37.1% / 35% | 24 mm hexagon turned | +19.4 pts |
+| 𝙇𝙐𝙉𝘼𝙇𝘼_intake v4_8 | ? | 9.7% / 79% | 6.8% / 83% | 24 mm triangles | -2.9 pts |
+| PEGASUS 1.2_Part Studio 1_1 | ? | 38.1% / 34% | 38.0% / 35% | 68 mm isogrid turned · pruned ×1 | -0.1 pts |
+| PEGASUS 1.2_Part Studio 1_3 | ? | 46.3% / 26% | 51.8% / 27% | 61 mm triangles guided · pruned ×2 | +5.5 pts |
+| PEGASUS 1.2_Part Studio 1_7 | ? | 37.9% / 36% | 34.1% / 37% | 24 mm Voronoi guided · pruned ×2 | -3.8 pts |
+| PEGASUS 1.2_Part Studio 1_8 | ? | 16.7% / 58% | 14.3% / 70% | 58 mm triangles · pruned ×1 | -2.4 pts |
+| PEGASUS 1.2_Part Studio 1_9 | ? | 33.3% / 35% | 36.3% / 37% | 53 mm isogrid turned · pruned ×1 | +3.0 pts |
+| PEGASUS 1.2_safa can touch_3 | ? | 35.3% / 35% | 41.4% / 37% | 42 mm isogrid turned · pruned ×2 | +6.1 pts |
+| PEGASUS 1.2_safa can touch_8 | ? | 16.7% / 58% | 14.3% / 70% | 58 mm triangles · pruned ×1 | -2.4 pts |
+| PEGASUS 1.2_safa can touch_9 | ? | 34.3% / 32% | 38.1% / 34% | 61 mm isogrid turned · pruned ×1 | +3.8 pts |
+
+Knowledge base after training: {'plates': 19, 'runs': 40, 'fea_designs': 2740, 'choices': 70, 'style_refs': 23}

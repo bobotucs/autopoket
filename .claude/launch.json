@@ -1,6 +1,7 @@
 {
   "version": "0.0.1",
   "configurations": [
-    { "name": "autopocket", "runtimeExecutable": "C:\\Users\\abdul\\.venvs\\autopocket\\Scripts\\python.exe", "runtimeArgs": ["C:\\Users\\abdul\\Documents\\autopoket\\run.py", "--no-browser"], "port": 8765 }
+    { "name": "autopocket", "runtimeExecutable": "C:\\Users\\abdul\\.venvs\\autopocket\\Scripts\\python.exe", "runtimeArgs": ["C:\\Users\\abdul\\Documents\\autopoket\\run.py", "--no-browser"], "port": 8765 },
+    { "name": "autopocket-v2", "runtimeExecutable": "C:\\Users\\abdul\\.venvs\\autopocket\\Scripts\\python.exe", "runtimeArgs": ["C:\\Users\\abdul\\Documents\\autopoket\\run_v2.py", "--no-browser"], "port": 8766 }
   ]
 }

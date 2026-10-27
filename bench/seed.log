@@ -1,0 +1,10 @@
+style references: 6
+blank_example.step         145s  61 mm isogrid turned · pruned ×1  38.1% lighter,  34% stiff | surrogate off, skipped 0 | order ['truss', 'guided', 'isogrid', 'isogrid-turned']
+blank_example1.step        123s  42 mm · pruned ×3                 40.9% lighter,  36% stiff | surrogate off, skipped 0 | order ['isogrid-turned', 'truss', 'guided', 'isogrid']
+blank_example2.step        101s  32 mm · pruned ×3                 46.0% lighter,  35% stiff | surrogate off, skipped 0 | order ['truss', 'isogrid-turned', 'guided', 'isogrid']
+blank_kiwi.step            273s  72 mm isogrid · pruned ×2         36.7% lighter,  54% stiff | surrogate off, skipped 0 | order ['truss', 'isogrid-turned', 'guided', 'isogrid']
+blank_supes.step           411s  48 mm · pruned ×2                 25.8% lighter,  40% stiff | surrogate off, skipped 0 | order ['truss', 'isogrid', 'isogrid-turned', 'guided']
+blank_top.step             104s  46 mm · pruned ×3                 26.2% lighter,  46% stiff | surrogate off, skipped 0 | order ['truss', 'isogrid-turned', 'guided', 'isogrid']
+round_plate.step            56s  24 mm · pruned ×3                 25.1% lighter,  39% stiff | surrogate off, skipped 0 | order ['truss', 'isogrid-turned', 'guided', 'isogrid']
+side_plate.step             79s  58 mm isogrid turned              40.1% lighter,  37% stiff | surrogate off, skipped 0 | order ['truss', 'isogrid-turned', 'guided', 'isogrid']
+{'plates': 8, 'runs': 8, 'fea_designs': 624, 'choices': 0, 'style_refs': 6}

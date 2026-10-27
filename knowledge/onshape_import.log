@@ -1,0 +1,74 @@
+𝙇𝙐𝙉𝘼𝙇𝘼
+  (2.5_ Diameter 7mm Hex) SR-INTAKEWHEEL-25-7mm
+  3422-4008-0020 assembly
+  GT2_2mm_15t_3.175mm_Bore_Pulley_Assembly
+  drivetrain
+    pocketed plate: 𝙇𝙐𝙉𝘼𝙇𝘼_drivetrain_0  {'name': '𝙇𝙐𝙉𝘼𝙇𝘼_drivetrain_0', 'pockets': 6, 'holes': 10, 'thickness': 3.174, 'removed_pct': 17.7, 'stiffness_kept_pct': 33.6}
+  TOWER
+  Blue Version
+  RODS V2
+  plates
+    pocketed plate: 𝙇𝙐𝙉𝘼𝙇𝘼_plates_1  {'name': '𝙇𝙐𝙉𝘼𝙇𝘼_plates_1', 'pockets': 2, 'holes': 37, 'thickness': 3.174, 'removed_pct': 2.3, 'stiffness_kept_pct': 73.9}
+  RODS
+  test
+  intake final
+r (Write)                 ******
+nsfer Mode = 0  I.E.  As Is       ******
+  Color-Rangefinder
+  indexer layout: export failed (HTTP Error 400: Bad Request)
+  intake v4
+ : Sending all data
+  Part Studio 11
+ Done
+  pulley
+  Pulleygen - [LS] Pulley 5mm Pitch 20T
+  Pulleygen - [LS] Pulley 5mm Pitch 21T
+  GEARS
+ansfer (Write)                 ******
+  Part Studio 13: export failed (HTTP Error 400: Bad Request)
+  (1.5_ Diameter 7mm Hex) SR-INTAKEWHEEL-15-7mm
+  2322-4008-0030
+  Part Studio 12
+  Part Studio 10
+  intake ramp
+  Part Studio 4
+  intake
+  8mm rex to 3/8in adapter
+  intake
+  Part Studio 2: export failed (HTTP Error 400: Bad Request)
+  layout: export failed (HTTP Error 400: Bad Request)
+  intake
+  1/2 to 3/8 shaft collar adapter
+  [LS] Pulley 2mm Pitch 30T (1)
+  pulley
+  [LS] Pulley 2mm Pitch 30T (1) (1)
+  POLLEN
+bdul\Documents\autopoket\knowledge\onshape\tmp\__Part_Studio_4_17.step(170 ents)  Write  Done
+  SPACER
+  SPACER Copy 1
+  Part Studio 16
+  Guides
+  2322-4008-0024
+  Part Studio 5
+  POLLEN TURRET
+  NECTAR TURRET
+  Pollen V2
+  NECTAR V2
+  I.E.  As Is       ******
+  POLLEN V2 GUIDES
+  nectar guides
+  Part Studio 6
+  Part Studio 8
+  turret plate
+  DIFF turret
+ret_plate_1.step(1660 ents)  Write  Done
+  turret plate: export failed (HTTP Error 400: Bad Request)
+  NECTAR 2.0
+  NECTAR
+rite)                 ******
+  GUIDES
+  Part Studio 6-Mirrored: export failed (HTTP Error 400: Bad Request)
+  cube
+2025-2026
+sfer Mode = 0  I.E.  As Is       ******
+Onshape refused the request (403): check the API key and its read permission.
