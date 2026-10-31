@@ -6,13 +6,13 @@
 <title>Exam Practice</title>
 <style>
   :root{
-    --bg:#f6f7f9; --card:#fff; --ink:#1d2330; --muted:#5f6b7a; --line:#e3e7ec;
-    --accent:#2f5bd3; --accent-soft:#e8eefc;
-    --good:#1f8a4c; --good-soft:#e5f5ec; --bad:#c23b3b; --bad-soft:#fbeaea; --warn:#b7791f; --warn-soft:#fdf3e1;
+    --bg:#fff; --card:#fff; --ink:#000; --muted:#6b6b6b; --line:#e2e2e2;
+    --accent:#000; --accent-soft:#f3f3f3;
+    --good:#000; --good-soft:#f3f3f3; --bad:#000; --bad-soft:#fff; --warn:#000; --warn-soft:#fff;
   }
   @media (prefers-color-scheme: dark){
-    :root{ --bg:#14171c; --card:#1d2129; --ink:#e7eaf0; --muted:#9aa4b2; --line:#2e3440;
-      --accent:#7d9cf5; --accent-soft:#25304a; --good:#5cc98a; --good-soft:#1c3327; --bad:#f07a7a; --bad-soft:#3a2224; --warn:#e8b55c; --warn-soft:#3a3020; }
+    :root{ --bg:#000; --card:#000; --ink:#fff; --muted:#9a9a9a; --line:#2a2a2a;
+      --accent:#fff; --accent-soft:#161616; --good:#fff; --good-soft:#161616; --bad:#fff; --bad-soft:#000; --warn:#fff; --warn-soft:#000; }
   }
   *{box-sizing:border-box}
   body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.5 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif}
@@ -23,7 +23,7 @@
   .sub{color:var(--muted);margin:0 0 20px}
   .card{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:20px;margin-bottom:16px}
   button{font:inherit;cursor:pointer;border-radius:8px;border:1px solid var(--line);background:var(--card);color:var(--ink);padding:10px 16px}
-  button.primary{background:var(--accent);border-color:var(--accent);color:#fff;font-weight:600}
+  button.primary{background:var(--ink);border-color:var(--ink);color:var(--bg);font-weight:600}
   button:disabled{opacity:.5;cursor:default}
   .row{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
   .modes{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:12px}
@@ -35,7 +35,7 @@
   .progress{height:6px;background:var(--line);border-radius:3px;overflow:hidden;margin:6px 0 18px}
   .progress div{height:100%;background:var(--accent);transition:width .2s}
   .meta{display:flex;justify-content:space-between;color:var(--muted);font-size:.9rem}
-  .tag{display:inline-block;font-size:.8rem;padding:2px 8px;border-radius:999px;background:var(--accent-soft);color:var(--accent)}
+  .tag{display:inline-block;font-size:.75rem;letter-spacing:.04em;text-transform:uppercase;color:var(--muted)}
   .q{font-size:1.15rem;font-weight:600;margin:12px 0 16px}
   .opt{display:block;width:100%;text-align:left;margin:0 0 10px;padding:12px 14px;line-height:1.4}
   .opt:hover:not(:disabled){border-color:var(--accent)}
@@ -46,7 +46,7 @@
   .fb.good{background:var(--good-soft)} .fb.bad{background:var(--bad-soft)}
   .big{font-size:2.6rem;font-weight:800;line-height:1}
   .stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:12px}
-  .stat{background:var(--bg);border-radius:10px;padding:14px}
+  .stat{border:1px solid var(--line);border-radius:10px;padding:14px}
   .stat .l{color:var(--muted);font-size:.85rem}
   table{width:100%;border-collapse:collapse;font-size:.95rem}
   th,td{text-align:left;padding:8px 6px;border-bottom:1px solid var(--line);vertical-align:middle}
@@ -54,17 +54,19 @@
   .bar{height:8px;background:var(--line);border-radius:4px;overflow:hidden;min-width:80px}
   .bar div{height:100%}
   .lvl{font-size:.8rem;padding:2px 8px;border-radius:999px;white-space:nowrap}
-  .lvl.s{background:var(--good-soft);color:var(--good)} .lvl.r{background:var(--warn-soft);color:var(--warn)} .lvl.w{background:var(--bad-soft);color:var(--bad)}
-  .miss{border-left:4px solid var(--bad);padding:10px 14px;margin:0 0 12px;background:var(--bg);border-radius:0 8px 8px 0}
-  .miss .yours{color:var(--bad)} .miss .right{color:var(--good)}
+  .lvl{border:1px solid var(--ink)}
+  .lvl.s{background:var(--ink);color:var(--bg)} .lvl.r{border-color:var(--muted);color:var(--muted)} .lvl.w{color:var(--ink)}
+  .miss{border-left:2px solid var(--ink);padding:10px 14px;margin:0 0 12px;background:var(--bg);border-radius:0 8px 8px 0}
+  .miss .yours{color:var(--muted);text-decoration:line-through} .miss .right{color:var(--ink);font-weight:600}
   .miss .ex{color:var(--muted);font-size:.92rem;margin-top:4px}
   .hist button{width:100%;text-align:left;margin-bottom:8px;display:flex;justify-content:space-between;gap:10px}
   .note{color:var(--muted);font-size:.88rem}
   .hidden{display:none}
   .mode.locked{opacity:.45;cursor:not-allowed}
-  .opt.sel{background:var(--accent-soft);border-color:var(--accent)}
+  .opt.sel{background:var(--ink);border-color:var(--ink);color:var(--bg)}
+  .opt.sel .k{color:var(--bg)}
   .inp{font:inherit;padding:10px 12px;border:1px solid var(--line);border-radius:8px;background:var(--card);color:var(--ink)}
-  .inp.need{border-color:var(--bad)}
+  .inp.need{border-color:var(--ink);border-width:2px}
   .gh{margin:10px 0 2px;font-weight:700}
   #rRight li{margin-bottom:6px}
   .mode.locked{opacity:.45;cursor:not-allowed}
@@ -651,7 +653,7 @@ function showResults(a, fresh){
 
   const ranked = a.topics.map((t,i)=>({i,c:t[0],n:t[1],p:t[1]?Math.round(100*t[0]/t[1]):0})).filter(x=>x.n).sort((x,y)=>x.p-y.p);
   $("rTable").innerHTML = `<tr><th>Topic</th><th>Score</th><th style="width:30%"></th><th></th></tr>` + ranked.map(x => {
-    const [c,l] = level(x.p), col = c==="s"?"var(--good)":c==="r"?"var(--warn)":"var(--bad)";
+    const [c,l] = level(x.p), col = "var(--ink)";
     return `<tr><td>${esc(TOPICS[x.i])}</td><td>${x.c}/${x.n}</td><td><div class="bar"><div style="width:${x.p}%;background:${col}"></div></div></td><td><span class="lvl ${c}">${l}</span></td></tr>`;
   }).join("");
 
