@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>BIO426 Practice Test: Respiratory & Digestive</title>
+<title>Exam Practice</title>
 <style>
   :root{
     --bg:#f6f7f9; --card:#fff; --ink:#1d2330; --muted:#5f6b7a; --line:#e3e7ec;
@@ -62,6 +62,12 @@
   .note{color:var(--muted);font-size:.88rem}
   .hidden{display:none}
   .mode.locked{opacity:.45;cursor:not-allowed}
+  .opt.sel{background:var(--accent-soft);border-color:var(--accent)}
+  .inp{font:inherit;padding:10px 12px;border:1px solid var(--line);border-radius:8px;background:var(--card);color:var(--ink)}
+  .inp.need{border-color:var(--bad)}
+  .gh{margin:10px 0 2px;font-weight:700}
+  #rRight li{margin-bottom:6px}
+  .mode.locked{opacity:.45;cursor:not-allowed}
   ul.study{margin:6px 0 0 18px;padding:0}
   ul.study li{margin-bottom:4px}
 </style>
@@ -69,62 +75,58 @@
 <body>
 <div class="wrap">
 
-<!-- START -->
 <section id="start">
-  <h1>BIO426 Practice Test</h1>
-  <p class="sub">Respiratory and digestive systems, metabolism, and temperature regulation. Every question comes from your review sheet (pages 1–9). No sign-in needed: your attempts are saved in this browser.</p>
+  <h1>Exam Practice</h1>
 
   <div class="card">
-    <h3>Core exam: 50 questions</h3>
-    <p class="note" style="margin:4px 0 12px">The 50 most important, most commonly tested points from your review sheet, across every section.</p>
-    <label class="note" for="taker" style="display:block;margin-bottom:4px">Your name (so your results show who took the test)</label>
-    <div class="row"><input id="taker" type="text" maxlength="60" placeholder="First and last name" style="font:inherit;padding:10px 12px;border:1px solid var(--line);border-radius:8px;background:var(--card);color:var(--ink);flex:1;min-width:200px">
-    <button class="primary" id="coreBtn">Start the 50-question exam</button></div>
+    <h3>Core Exam</h3>
+    <div class="row" style="margin-top:10px">
+      <input id="taker" type="text" maxlength="60" placeholder="Your name" class="inp" style="flex:1;min-width:200px">
+      <button class="primary" id="coreBtn">Start</button>
+    </div>
 
-    <h3 style="margin-top:22px">Extra practice <span id="lockTag" class="lvl w">🔒 Locked</span></h3>
-    <p class="note" id="lockNote" style="margin:4px 0 12px">Finish all 50 questions of the core exam to unlock these.</p>
-    <div class="modes">
-      <button class="mode locked" data-mode="missed" id="missedBtn"><b>Retry what I missed</b><span id="missedInfo">Only questions you got wrong last time</span></button>
-      <button class="mode locked" data-mode="quick"><b>Random 40</b><span id="bankCount">From the full question bank</span></button>
-      <button class="mode locked" data-mode="topics"><b>Topic drill</b><span>Drill specific sections from the full bank</span></button>
+    <h3 style="margin-top:24px">Extra practice <span id="lockTag" class="lvl w">🔒 Locked</span></h3>
+    <p class="note" id="lockNote" style="margin:4px 0 0">Finish the core exam to unlock.</p>
+    <div class="modes" style="margin-top:12px">
+      <button class="mode" data-mode="random"><b>Random 40</b></button>
+      <button class="mode" data-mode="topics"><b>Topic drill</b></button>
     </div>
     <div id="topicPick" class="hidden" style="margin-top:16px">
       <div class="topics" id="topicList"></div>
-      <div class="row"><button class="primary" id="startTopics">Start selected topics</button><button id="allTopics">Select all</button><button id="noTopics">Clear</button></div>
+      <div class="row"><button class="primary" id="startTopics">Start</button><button id="allTopics">Select all</button><button id="noTopics">Clear</button></div>
     </div>
-    <p class="note" style="margin-top:14px">You'll see whether each answer is right as you go, with a short explanation. Your results are saved when you finish.</p>
   </div>
 
-  <h2>Your saved attempts</h2>
-  <div id="history" class="hist"><p class="note">Loading saved attempts…</p></div>
-  <div id="weakOverall"></div>
+  <h2>Your attempts</h2>
+  <div id="history" class="hist"></div>
 
-  <h2 id="sent-results">Results people sent you</h2>
-  <div class="card">
-    <p class="note" style="margin:0 0 8px">When someone finishes the test, they get a results code to send you. Paste their whole message here to see exactly what they got right and wrong.</p>
-    <textarea id="importBox" rows="3" placeholder="Paste a results code here (it starts with BIO426:)" style="width:100%;font:inherit;font-size:.9rem;padding:10px;border:1px solid var(--line);border-radius:8px;background:var(--card);color:var(--ink)"></textarea>
-    <div class="row" style="margin-top:8px"><button class="primary" id="importBtn">View their results</button><span id="importMsg" class="note"></span></div>
-    <div id="received" class="hist" style="margin-top:14px"></div>
+  <div id="inbox" class="hidden">
+    <h2 id="sent-results">Results people sent you</h2>
+    <div class="card">
+      <div class="row">
+        <input id="importBox" type="text" placeholder="Paste a results link" class="inp" style="flex:1;min-width:200px">
+        <button class="primary" id="importBtn">Open</button>
+      </div>
+      <p id="importMsg" class="note" style="margin:6px 0 0"></p>
+      <div id="received" class="hist" style="margin-top:12px"></div>
+    </div>
   </div>
 </section>
 
-<!-- QUIZ -->
 <section id="quiz" class="hidden">
-  <div class="meta"><span id="qNum"></span><span id="qScore"></span></div>
+  <div class="meta"><span id="qNum"></span><span id="qMode"></span></div>
   <div class="progress"><div id="qBar"></div></div>
   <div class="card">
     <span class="tag" id="qTopic"></span>
     <div class="q" id="qText"></div>
     <div id="qOpts"></div>
-    <div id="qFb"></div>
-    <div class="row" style="justify-content:space-between">
-      <button id="quitBtn">Finish early</button>
+    <div class="row" style="justify-content:space-between;margin-top:6px">
+      <button id="backBtn">Back</button>
       <button class="primary" id="nextBtn" disabled>Next</button>
     </div>
   </div>
 </section>
 
-<!-- RESULTS -->
 <section id="results" class="hidden">
   <div class="row" style="justify-content:space-between">
     <h1 id="rTitle">Results</h1>
@@ -137,26 +139,27 @@
       <div class="stat"><div class="l">Correct</div><div class="big" id="rCorrect" style="color:var(--good)"></div></div>
       <div class="stat"><div class="l">Missed</div><div class="big" id="rWrong" style="color:var(--bad)"></div></div>
     </div>
-    <p id="rSave" class="note" style="margin:12px 0 0"></p>
   </div>
 
   <div class="card" id="rSend">
     <h3>Send your results</h3>
-    <p class="note" style="margin:4px 0 10px">Copy this and send it (text, email or chat) to the person who gave you this test. It lets them see your score and every answer.</p>
-    <textarea id="sendBox" rows="4" readonly style="width:100%;font:inherit;font-size:.85rem;padding:10px;border:1px solid var(--line);border-radius:8px;background:var(--bg);color:var(--ink)"></textarea>
-    <div class="row" style="margin-top:8px"><button class="primary" id="copyBtn">Copy my results</button><span id="copyMsg" class="note"></span></div>
+    <div class="row" style="margin-top:10px">
+      <input id="sendBox" type="text" readonly class="inp" style="flex:1;min-width:200px">
+      <button class="primary" id="copyBtn">Copy link</button>
+    </div>
+    <p id="copyMsg" class="note" style="margin:6px 0 0"></p>
   </div>
 
   <div class="card" id="rStudy"></div>
 
   <h2>By topic</h2>
-  <div class="card"><table id="rTable"></table>
-    <p class="note" style="margin:10px 0 0"><span class="lvl s">Strong</span> 80% or more &nbsp; <span class="lvl r">Review</span> 60–79% &nbsp; <span class="lvl w">Study this</span> under 60%</p>
-  </div>
+  <div class="card"><table id="rTable"></table></div>
 
-  <h2>Questions you missed</h2>
+  <h2>Questions missed</h2>
   <div id="rMissed"></div>
-  <div class="row" style="margin-top:10px"><button class="primary" id="retryMissed">Retry these missed questions</button></div>
+
+  <h2>Questions correct</h2>
+  <div class="card" id="rRight"></div>
 </section>
 
 </div>
@@ -469,12 +472,12 @@ const CORE_PREFIXES = [
 ];
 const CORE = CORE_PREFIXES.map(pre => Q.findIndex(q => q[1].startsWith(pre)));
 
-// ---------- State ----------
+// ---------- Setup ----------
+const ARTIFACT_URL = "https://claude.ai/artifact/CbsgQDA1o5TiGRJnAhfdhP";
 const LETTERS = "ABCD";
-let quiz = null;          // {items:[{i,opts,correctIdx}], pos, answers:[]}
-let attempts = [];        // saved attempts, newest first
-let db = null;
-const LS_KEY = "bio426_attempts_v1";
+const MODES = {c:"Core Exam", r:"Random 40", t:"Topic drill"};
+const LS_KEY = "bio426_attempts_v1", RX_KEY = "bio426_received_v1";
+let quiz = null, attempts = [], received = [], db = null, isOwner = false;
 
 const $ = id => document.getElementById(id);
 const show = id => ["start","quiz","results"].forEach(s => $(s).classList.toggle("hidden", s !== id));
@@ -482,306 +485,225 @@ const shuffle = a => { a = a.slice(); for (let i=a.length-1;i>0;i--){const j=Mat
 const esc = s => String(s).replace(/[&<>"]/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
 const fmtDate = ts => new Date(ts).toLocaleString([], {month:"short",day:"numeric",year:"numeric",hour:"numeric",minute:"2-digit"});
 const level = p => p >= 80 ? ["s","Strong"] : p >= 60 ? ["r","Review"] : ["w","Study this"];
+const lsGet = (k, d) => { try { return JSON.parse(localStorage.getItem(k)) || d; } catch(e){ return d; } };
+const lsSet = (k, v) => { try { localStorage.setItem(k, JSON.stringify(v)); } catch(e){} };
+const unlocked = () => attempts.some(a => a.core && a.complete);
 
 // ---------- Start screen ----------
-$("bankCount").textContent = `40 random questions from the full ${Q.length}-question bank`;
+$("topicList").innerHTML = TOPICS.map((t,i) =>
+  `<label><input type="checkbox" value="${i}" checked> ${esc(t)} <span class="note">(${Q.filter(q=>q[0]===i).length})</span></label>`).join("");
+
+try { $("taker").value = localStorage.getItem("bio426_name") || ""; } catch(e){}
 $("coreBtn").onclick = () => {
   const n = $("taker").value.trim();
-  if (!n) { $("taker").focus(); $("taker").placeholder = "Please enter your name first"; return; }
+  if (!n) { $("taker").focus(); $("taker").placeholder = "Enter your name first"; $("taker").classList.add("need"); return; }
   try { localStorage.setItem("bio426_name", n); } catch(e){}
-  startQuiz(CORE, "Core 50 exam", true);
+  startQuiz(CORE, "c");
 };
-try { $("taker").value = localStorage.getItem("bio426_name") || ""; } catch(e){}
-const unlocked = () => attempts.some(a => a.core && a.complete);
-$("topicList").innerHTML = TOPICS.map((t,i) => {
-  const n = Q.filter(q => q[0]===i).length;
-  return `<label><input type="checkbox" value="${i}" checked> ${esc(t)} <span class="note">(${n})</span></label>`;
-}).join("");
-
-document.querySelectorAll(".mode").forEach(b => b.addEventListener("click", () => {
+document.querySelectorAll(".mode").forEach(b => b.onclick = () => {
   if (!unlocked()) return;
-  const m = b.dataset.mode;
-  if (m === "topics") { $("topicPick").classList.toggle("hidden"); return; }
-  if (m === "quick") startQuiz(shuffle(Q.map((_,i)=>i)).slice(0,40), "Random 40");
-  if (m === "missed") {
-    const last = attempts[0];
-    if (last && last.missedIds && last.missedIds.length) startQuiz(last.missedIds.filter(i=>Q[i]), "Retry missed");
-  }
-}));
+  if (b.dataset.mode === "random") startQuiz(shuffle(Q.map((_,i)=>i)).slice(0,40), "r");
+  else $("topicPick").classList.toggle("hidden");
+});
 $("startTopics").onclick = () => {
   const sel = [...document.querySelectorAll("#topicList input:checked")].map(x=>+x.value);
-  if (!sel.length) return;
-  startQuiz(Q.map((_,i)=>i).filter(i => sel.includes(Q[i][0])), sel.length===TOPICS.length ? "All topics" : "Topic drill");
+  if (sel.length) startQuiz(Q.map((_,i)=>i).filter(i => sel.includes(Q[i][0])), "t");
 };
 $("allTopics").onclick = () => document.querySelectorAll("#topicList input").forEach(x=>x.checked=true);
 $("noTopics").onclick = () => document.querySelectorAll("#topicList input").forEach(x=>x.checked=false);
 
-function renderHistory(){
-  const h = $("history");
+function attemptRow(a, k, withName){
+  const p = Math.round(100*a.correct/a.total), [c,l] = level(p);
+  const label = withName ? `<b>${esc(a.name||"Someone")}</b> &nbsp;${p}% · ${a.correct}/${a.total} · ${esc(a.mode)}` : `<b>${p}%</b> &nbsp;${a.correct}/${a.total} · ${esc(a.mode)}`;
+  return `<button data-k="${k}"><span>${label}</span><span class="note">${fmtDate(a.ts)} &nbsp;<span class="lvl ${c}">${l}</span></span></button>`;
+}
+function renderStart(){
   const open = unlocked();
   document.querySelectorAll(".mode").forEach(b => { b.disabled = !open; b.classList.toggle("locked", !open); });
   $("lockTag").className = "lvl " + (open ? "s" : "w");
   $("lockTag").textContent = open ? "Unlocked" : "🔒 Locked";
-  $("lockNote").textContent = open ? "You finished the core exam. Use these to drill weak spots with the full question bank." : "Finish all 50 questions of the core exam to unlock these.";
+  $("lockNote").classList.toggle("hidden", open);
   if (!open) $("topicPick").classList.add("hidden");
-  const last = attempts[0];
-  const mb = $("missedBtn");
-  if (last && last.missedIds && last.missedIds.length) {
-    mb.disabled = !open; $("missedInfo").textContent = `${last.missedIds.length} questions you missed on ${fmtDate(last.ts)}`;
-  } else {
-    mb.disabled = true; $("missedInfo").textContent = attempts.length ? "You didn't miss any last time!" : "Finish a test first";
-  }
-  if (!attempts.length) { h.innerHTML = `<p class="note">No attempts yet. Take a test and your results will show up here.</p>`; $("weakOverall").innerHTML=""; return; }
-  h.innerHTML = attempts.map((a,k) => {
-    const p = Math.round(100*a.correct/a.total);
-    const [c,l] = level(p);
-    return `<button data-k="${k}"><span><b>${p}%</b> &nbsp;${a.correct}/${a.total} · ${esc(a.mode)}</span><span class="note">${fmtDate(a.ts)} &nbsp;<span class="lvl ${c}">${l}</span></span></button>`;
-  }).join("");
-  h.querySelectorAll("button").forEach(b => b.onclick = () => showResults(attempts[+b.dataset.k], false));
 
-  // Combined weak areas across all attempts
-  const agg = TOPICS.map(()=>[0,0]);
-  attempts.forEach(a => (a.topics||[]).forEach((t,i) => { if (t && agg[i]) { agg[i][0]+=t[0]; agg[i][1]+=t[1]; } }));
-  const ranked = agg.map((t,i)=>({i,c:t[0],n:t[1],p:t[1]?Math.round(100*t[0]/t[1]):null})).filter(x=>x.n).sort((a,b)=>a.p-b.p);
-  if (ranked.length) {
-    $("weakOverall").innerHTML = `<h2>All attempts combined</h2><div class="card"><table>${topicRows(ranked)}</table></div>`;
-  }
+  $("history").innerHTML = attempts.length ? attempts.map((a,k) => attemptRow(a,k,false)).join("") : `<p class="note">No attempts yet.</p>`;
+  $("history").querySelectorAll("button").forEach(b => b.onclick = () => showResults(attempts[+b.dataset.k], false));
+
+  $("inbox").classList.toggle("hidden", !(isOwner || received.length || location.hash === "#sent-results"));
+  $("received").innerHTML = received.length ? received.map((a,k) => attemptRow(a,k,true)).join("") : `<p class="note">Nothing yet.</p>`;
+  $("received").querySelectorAll("button").forEach(b => b.onclick = () => showResults(received[+b.dataset.k], false));
 }
 
-function topicRows(ranked){
-  return `<tr><th>Topic</th><th>Score</th><th style="width:30%"></th><th></th></tr>` + ranked.map(x => {
-    const [c,l] = level(x.p);
-    const col = c==="s"?"var(--good)":c==="r"?"var(--warn)":"var(--bad)";
-    return `<tr><td>${esc(TOPICS[x.i])}</td><td>${x.c}/${x.n} (${x.p}%)</td><td><div class="bar"><div style="width:${x.p}%;background:${col}"></div></div></td><td><span class="lvl ${c}">${l}</span></td></tr>`;
-  }).join("");
-}
-
-// ---------- Quiz ----------
-function startQuiz(ids, mode, core){
+// ---------- Quiz (no feedback until the end) ----------
+function startQuiz(ids, code){
   const items = shuffle(ids).map(i => {
-    const [, , right, wrong] = Q[i];
-    const opts = shuffle([right, ...wrong]);
-    return {i, opts, correctIdx: opts.indexOf(right)};
+    const opts = shuffle([Q[i][2], ...Q[i][3]]);
+    return {i, opts, pick: -1};
   });
-  $("quitBtn").textContent = "Finish early"; delete $("quitBtn").dataset.warned;
-  quiz = {mode, core: !!core, name: $("taker").value.trim(), items, pos:0, answers:[]};
-  show("quiz"); renderQ();
-  window.scrollTo(0,0);
+  quiz = {code, name: $("taker").value.trim(), items, pos: 0};
+  show("quiz"); renderQ(); window.scrollTo(0,0);
 }
-
 function renderQ(){
-  const it = quiz.items[quiz.pos], q = Q[it.i];
-  const right = quiz.answers.filter(a=>a.ok).length;
-  $("qNum").textContent = `Question ${quiz.pos+1} of ${quiz.items.length}`;
-  $("qScore").textContent = quiz.answers.length ? `${right}/${quiz.answers.length} correct so far` : "";
-  $("qBar").style.width = (100*quiz.pos/quiz.items.length) + "%";
+  const it = quiz.items[quiz.pos], q = Q[it.i], n = quiz.items.length;
+  $("qNum").textContent = `Question ${quiz.pos+1} of ${n}`;
+  $("qMode").textContent = MODES[quiz.code];
+  $("qBar").style.width = (100*quiz.pos/n) + "%";
   $("qTopic").textContent = TOPICS[q[0]];
   $("qText").textContent = q[1];
-  $("qFb").innerHTML = "";
-  $("nextBtn").disabled = true;
-  $("nextBtn").textContent = quiz.pos === quiz.items.length-1 ? "See results" : "Next";
-  $("qOpts").innerHTML = it.opts.map((o,k)=>`<button class="opt" data-k="${k}"><span class="k">${LETTERS[k]}</span>${esc(o)}</button>`).join("");
-  $("qOpts").querySelectorAll(".opt").forEach(b => b.onclick = () => answer(+b.dataset.k));
+  $("qOpts").innerHTML = it.opts.map((o,k)=>`<button class="opt${k===it.pick?" sel":""}" data-k="${k}"><span class="k">${LETTERS[k]}</span>${esc(o)}</button>`).join("");
+  $("qOpts").querySelectorAll(".opt").forEach(b => b.onclick = () => pick(+b.dataset.k));
+  $("backBtn").disabled = quiz.pos === 0;
+  $("nextBtn").disabled = it.pick < 0;
+  $("nextBtn").textContent = quiz.pos === n-1 ? "Finish" : "Next";
 }
-
-function answer(k){
-  const it = quiz.items[quiz.pos], q = Q[it.i];
-  if (quiz.answers.length > quiz.pos) return;
-  const ok = k === it.correctIdx;
-  quiz.answers.push({i:it.i, ok, your: it.opts[k]});
-  const btns = $("qOpts").querySelectorAll(".opt");
-  btns.forEach((b,j) => { b.disabled = true; if (j===it.correctIdx) b.classList.add("correct"); else if (j===k) b.classList.add("wrong"); });
-  $("qFb").innerHTML = `<div class="fb ${ok?"good":"bad"}"><b>${ok?"Correct!":"Not quite."}</b> ${ok?"":"Answer: <b>"+esc(q[2])+"</b>. "}${esc(q[4])}</div>`;
+function pick(k){
+  quiz.items[quiz.pos].pick = k;
+  $("qOpts").querySelectorAll(".opt").forEach((b,j) => b.classList.toggle("sel", j===k));
   $("nextBtn").disabled = false;
-  $("nextBtn").focus();
 }
-
 $("nextBtn").onclick = () => {
-  if (quiz.pos < quiz.items.length-1) { quiz.pos++; renderQ(); window.scrollTo(0,0); }
-  else finish();
+  if (quiz.pos < quiz.items.length-1) { quiz.pos++; renderQ(); window.scrollTo(0,0); } else finish();
 };
-$("quitBtn").onclick = () => {
-  if (!quiz.answers.length) { show("start"); return; }
-  if (quiz.core && !$("quitBtn").dataset.warned) { $("quitBtn").dataset.warned = "1"; $("quitBtn").textContent = "Finish early (won't unlock extras)"; return; }
-  finish();
-};
+$("backBtn").onclick = () => { if (quiz.pos > 0) { quiz.pos--; renderQ(); } };
 document.addEventListener("keydown", e => {
   if ($("quiz").classList.contains("hidden")) return;
   const k = "abcd1234".indexOf(e.key.toLowerCase());
-  if (k >= 0 && quiz.answers.length === quiz.pos) answer(k % 4);
+  if (k >= 0) pick(k % 4);
   else if (e.key === "Enter" && !$("nextBtn").disabled) $("nextBtn").click();
 });
 
-// ---------- Finish & results ----------
-function finish(){
-  const attempt = buildAttempt({
-    ts: Date.now(), name: quiz.name, core: quiz.core,
-    mode: quiz.mode + (quiz.answers.length < quiz.items.length ? " (finished early)" : ""),
-    complete: quiz.answers.length === quiz.items.length,
-    ans: quiz.answers
-  });
-  attempts.unshift(attempt);
-  showResults(attempt, true);
-  saveAttempt(attempt);
-}
-
-function buildAttempt({ts, name, mode, core, complete, ans}){
+// ---------- Scoring ----------
+function buildAttempt({ts, name, code, answers}){
+  // answers: [[questionIndex, choice]] where choice 0 = correct, 1-3 = wrong option
   const topics = TOPICS.map(()=>[0,0]);
-  ans.forEach(a => { const t = Q[a.i][0]; topics[t][1]++; if (a.ok) topics[t][0]++; });
-  const missed = ans.filter(a=>!a.ok);
-  return {
-    ts, name: name || "", mode, core: !!core, complete: !!complete,
-    answers: ans.map(a => [a.i, a.ok ? 0 : Q[a.i][3].indexOf(a.your) + 1]),
-    total: ans.length,
-    correct: ans.length - missed.length,
-    topics,
-    missedIds: missed.map(a=>a.i),
-    missed: missed.map(a=>({q:Q[a.i][1], your:a.your, right:Q[a.i][2], ex:Q[a.i][4], t:Q[a.i][0]}))
-  };
+  answers.forEach(([i,k]) => { topics[Q[i][0]][1]++; if (k===0) topics[Q[i][0]][0]++; });
+  const correct = answers.filter(([,k]) => k===0).length;
+  return {ts, name: name||"", code, mode: MODES[code]||"Test", core: code==="c", complete: true,
+          answers, total: answers.length, correct, topics};
+}
+function finish(){
+  const answers = quiz.items.map(it => {
+    const chosen = it.opts[it.pick];
+    return [it.i, chosen === Q[it.i][2] ? 0 : Q[it.i][3].indexOf(chosen) + 1];
+  });
+  const a = buildAttempt({ts: Date.now(), name: quiz.name, code: quiz.code, answers});
+  attempts.unshift(a);
+  lsSet(LS_KEY, attempts.slice(0,100));
+  if (db) db.collection("attempts").doc("a"+a.ts).set(a).catch(()=>{});
+  showResults(a, true);
 }
 
-// ---------- Results codes (for sharing with the test owner) ----------
-function encodeAttempt(a){
-  const body = {v:1, n:a.name, t:a.ts, m:a.mode, c:a.core?1:0, f:a.complete?1:0, a:a.answers.map(([i,k]) => (i*4+k).toString(36)).join(".")};
-  return "BIO426:" + btoa(unescape(encodeURIComponent(JSON.stringify(body))));
+// ---------- Results links ----------
+// Format: #r-<time>-<mode>-<answers, 2 base-36 chars each>-<name words>
+function resultLink(a){
+  const ans = a.answers.map(([i,k]) => (i*4+k).toString(36).padStart(2,"0")).join("");
+  const name = (a.name||"").normalize("NFKD").replace(/[^A-Za-z0-9 ]/g,"").trim().split(/\s+/).filter(Boolean).slice(0,4).join("-").slice(0,40);
+  return `${ARTIFACT_URL}#r-${a.ts.toString(36)}-${a.code}-${ans}${name ? "-"+name : ""}`;
 }
-function decodeAttempt(text){
-  const m = /BIO426:([A-Za-z0-9+\/=]+)/.exec(text.replace(/\s+/g,""));
+function parseResult(text){
+  const m = /#?(r-[a-z0-9]+-[crt]-[a-z0-9]+(?:-[A-Za-z0-9]+)*)/.exec(String(text).trim());
   if (!m) return null;
-  try {
-    const b = JSON.parse(decodeURIComponent(escape(atob(m[1]))));
-    const ans = String(b.a||"").split(".").filter(Boolean).map(x => {
-      const n = parseInt(x,36), i = Math.floor(n/4), k = n%4;
-      if (!Q[i] || (k>0 && !Q[i][3][k-1])) throw new Error("bad");
-      return {i, ok: k===0, your: k===0 ? Q[i][2] : Q[i][3][k-1]};
-    });
-    if (!ans.length) return null;
-    return buildAttempt({ts:+b.t||Date.now(), name:String(b.n||"Someone").slice(0,60), mode:String(b.m||"Test").slice(0,60), core:b.c, complete:b.f, ans});
-  } catch(e){ return null; }
+  const [, ts, code, ans, ...nameParts] = m[1].split("-");
+  if (ans.length % 2) return null;
+  const answers = [];
+  for (let p = 0; p < ans.length; p += 2) {
+    const n = parseInt(ans.slice(p,p+2),36), i = Math.floor(n/4), k = n%4;
+    if (!Q[i] || (k>0 && !Q[i][3][k-1])) return null;
+    answers.push([i,k]);
+  }
+  if (!answers.length) return null;
+  const a = buildAttempt({ts: parseInt(ts,36), name: nameParts.join(" "), code, answers});
+  a.received = true; a.id = m[1].slice(0,120);
+  return a;
 }
-function summaryText(a){
-  const p = Math.round(100*a.correct/a.total);
-  return `${a.name || "I"} scored ${a.correct}/${a.total} (${p}%) on the BIO426 practice test (${a.mode}).\nPaste this code into the test page to see every answer:\n${encodeAttempt(a)}`;
+function addReceived(a){
+  received = [a, ...received.filter(x => x.id !== a.id)].sort((x,y)=>y.ts-x.ts);
+  lsSet(RX_KEY, received.slice(0,300));
+  if (db) db.collection("shared").doc(a.id).set(a).catch(()=>{});
 }
+function openFromHash(){
+  if (location.hash === "#sent-results") { show("start"); renderStart(); $("sent-results").scrollIntoView(); return; }
+  const a = parseResult(location.hash);
+  if (a) { addReceived(a); showResults(a, false); }
+}
+$("importBtn").onclick = () => {
+  const a = parseResult($("importBox").value);
+  if (!a) { $("importMsg").textContent = "That doesn't look like a results link."; return; }
+  $("importBox").value = ""; $("importMsg").textContent = "";
+  addReceived(a); showResults(a, false);
+};
+$("copyBtn").onclick = async () => {
+  try { await navigator.clipboard.writeText($("sendBox").value); $("copyMsg").textContent = "✓ Copied"; }
+  catch(e){ $("sendBox").select(); $("copyMsg").textContent = "Press Ctrl+C (or ⌘+C) to copy."; }
+};
 
+// ---------- Results screen ----------
 function showResults(a, fresh){
   show("results"); window.scrollTo(0,0);
-  const p = a.total ? Math.round(100*a.correct/a.total) : 0;
-  $("rTitle").textContent = a.received ? `Results for ${a.name || "someone"}` : fresh ? "Your results" : "Saved attempt";
-  $("rSend").classList.toggle("hidden", !!a.received || !a.answers);
-  if (a.answers) $("sendBox").value = summaryText(a);
-  $("copyMsg").textContent = "";
-  $("rDate").textContent = `${a.mode} · ${fmtDate(a.ts)}`;
+  const p = Math.round(100*a.correct/a.total);
+  $("rTitle").textContent = a.received ? (a.name || "Someone") + "'s results" : "Results";
+  $("rDate").textContent = `${a.mode} · ${fmtDate(a.ts)}` + (fresh && a.core ? " · Extra practice unlocked" : "");
   $("rPct").textContent = p + "%";
   $("rCorrect").textContent = a.correct;
   $("rWrong").textContent = a.total - a.correct;
-  if (!fresh) $("rSave").textContent = "";
-  if (fresh && a.core && a.complete) $("rDate").textContent += " · Extra practice is now unlocked";
+  $("rSend").classList.toggle("hidden", !!a.received || !a.answers);
+  if (a.answers && !a.received) $("sendBox").value = resultLink(a);
+  $("copyMsg").textContent = "";
 
-  const ranked = a.topics.map((t,i)=>({i,c:t[0],n:t[1],p:t[1]?Math.round(100*t[0]/t[1]):null})).filter(x=>x.n).sort((x,y)=>x.p-y.p);
-  $("rTable").innerHTML = topicRows(ranked);
-
-  const weak = ranked.filter(x=>x.p<60), review = ranked.filter(x=>x.p>=60&&x.p<80), strong = ranked.filter(x=>x.p>=80).reverse();
-  let s = `<h3>What to study</h3>`;
-  if (weak.length) s += `<p style="margin:8px 0 2px"><b style="color:var(--bad)">Start studying these first:</b></p><ul class="study">${weak.map(x=>`<li>${esc(TOPICS[x.i])} (${x.p}%)</li>`).join("")}</ul>`;
-  if (review.length) s += `<p style="margin:10px 0 2px"><b style="color:var(--warn)">Review next:</b></p><ul class="study">${review.map(x=>`<li>${esc(TOPICS[x.i])} (${x.p}%)</li>`).join("")}</ul>`;
-  if (strong.length) s += `<p style="margin:10px 0 2px"><b style="color:var(--good)">You know these well:</b></p><ul class="study">${strong.map(x=>`<li>${esc(TOPICS[x.i])} (${x.p}%)</li>`).join("")}</ul>`;
-  $("rStudy").innerHTML = s;
-
-  $("rMissed").innerHTML = a.missed.length ? a.missed.map(m => `
-    <div class="miss">
-      <div class="note">${esc(TOPICS[m.t])}</div>
-      <div><b>${esc(m.q)}</b></div>
-      <div class="yours">✗ Your answer: ${esc(m.your)}</div>
-      <div class="right">✓ Correct: ${esc(m.right)}</div>
-      <div class="ex">${esc(m.ex)}</div>
-    </div>`).join("") : `<div class="card">You didn't miss any questions. Nice work!</div>`;
-  $("retryMissed").classList.toggle("hidden", !a.missedIds.length);
-  $("retryMissed").onclick = () => startQuiz(a.missedIds.filter(i=>Q[i]), "Retry missed");
-}
-
-$("homeBtn").onclick = () => { renderHistory(); show("start"); window.scrollTo(0,0); };
-
-$("copyBtn").onclick = async () => {
-  const box = $("sendBox");
-  try { await navigator.clipboard.writeText(box.value); $("copyMsg").textContent = "✓ Copied. Now paste it in a message to them."; }
-  catch(e){ box.focus(); box.select(); $("copyMsg").textContent = "Text selected. Press Ctrl+C (or ⌘+C) to copy."; }
-};
-
-let received = [];
-const RX_KEY = "bio426_received_v1";
-function rxSaveLocal(){ try { localStorage.setItem(RX_KEY, JSON.stringify(received.slice(0,300))); } catch(e){} }
-function renderReceived(){
-  const r = $("received");
-  if (!received.length) { r.innerHTML = `<p class="note">Nothing yet.</p>`; return; }
-  r.innerHTML = received.map((a,k) => {
-    const p = Math.round(100*a.correct/a.total); const [c,l] = level(p);
-    return `<button data-k="${k}"><span><b>${esc(a.name||"Someone")}</b> &nbsp;${p}% · ${a.correct}/${a.total}</span><span class="note">${fmtDate(a.ts)} &nbsp;<span class="lvl ${c}">${l}</span></span></button>`;
+  const ranked = a.topics.map((t,i)=>({i,c:t[0],n:t[1],p:t[1]?Math.round(100*t[0]/t[1]):0})).filter(x=>x.n).sort((x,y)=>x.p-y.p);
+  $("rTable").innerHTML = `<tr><th>Topic</th><th>Score</th><th style="width:30%"></th><th></th></tr>` + ranked.map(x => {
+    const [c,l] = level(x.p), col = c==="s"?"var(--good)":c==="r"?"var(--warn)":"var(--bad)";
+    return `<tr><td>${esc(TOPICS[x.i])}</td><td>${x.c}/${x.n}</td><td><div class="bar"><div style="width:${x.p}%;background:${col}"></div></div></td><td><span class="lvl ${c}">${l}</span></td></tr>`;
   }).join("");
-  r.querySelectorAll("button").forEach(b => b.onclick = () => showResults(received[+b.dataset.k], false));
+
+  const group = (f) => ranked.filter(f).map(x=>`<li>${esc(TOPICS[x.i])} (${x.p}%)</li>`).join("");
+  const weak = group(x=>x.p<60), review = group(x=>x.p>=60&&x.p<80), strong = group(x=>x.p>=80);
+  $("rStudy").innerHTML = `<h3>What to study</h3>` +
+    (weak ? `<p class="gh" style="color:var(--bad)">Start here</p><ul class="study">${weak}</ul>` : "") +
+    (review ? `<p class="gh" style="color:var(--warn)">Review next</p><ul class="study">${review}</ul>` : "") +
+    (strong ? `<p class="gh" style="color:var(--good)">Know well</p><ul class="study">${strong}</ul>` : "");
+
+  const answers = a.answers || [];
+  const missed = answers.filter(([,k])=>k>0), right = answers.filter(([,k])=>k===0);
+  $("rMissed").innerHTML = missed.length ? missed.map(([i,k]) => `
+    <div class="miss">
+      <div class="note">${esc(TOPICS[Q[i][0]])}</div>
+      <div><b>${esc(Q[i][1])}</b></div>
+      <div class="yours">✗ ${esc(Q[i][3][k-1])}</div>
+      <div class="right">✓ ${esc(Q[i][2])}</div>
+      <div class="ex">${esc(Q[i][4])}</div>
+    </div>`).join("") : `<div class="card">None. Perfect score!</div>`;
+  $("rRight").innerHTML = right.length ? `<ul class="study">${right.map(([i]) => `<li>${esc(Q[i][1])} <span class="right">✓ ${esc(Q[i][2])}</span></li>`).join("")}</ul>` : `<p class="note">None.</p>`;
 }
-$("importBtn").onclick = async () => {
-  const a = decodeAttempt($("importBox").value);
-  if (!a) { $("importMsg").textContent = "That doesn't look like a results code. Make sure you pasted the whole thing."; return; }
-  a.received = true;
-  const id = "r" + a.ts + "-" + (a.name||"").replace(/[^A-Za-z0-9]/g,"").slice(0,30);
-  a.id = id;
-  received = [a, ...received.filter(x => x.id !== id)].sort((x,y)=>y.ts-x.ts);
-  rxSaveLocal(); renderReceived();
-  $("importBox").value = ""; $("importMsg").textContent = "";
-  showResults(a, false);
-  if (db) { try { await db.collection("shared").doc(id).set(a); } catch(e){} }
+$("homeBtn").onclick = () => {
+  if (location.hash) try { history.replaceState(null, "", location.pathname + location.search); } catch(e){}
+  renderStart(); show("start"); window.scrollTo(0,0);
 };
-try { received = JSON.parse(localStorage.getItem(RX_KEY)||"[]"); } catch(e){ received = []; }
-renderReceived();
-function jumpToInbox(){ if (location.hash === "#sent-results") { show("start"); $("sent-results").scrollIntoView(); } }
-window.addEventListener("hashchange", jumpToInbox);
-setTimeout(jumpToInbox, 50);
 
-// ---------- Saving ----------
-function lsLoad(){ try { return JSON.parse(localStorage.getItem(LS_KEY)||"[]"); } catch(e){ return []; } }
-function lsSave(){ try { localStorage.setItem(LS_KEY, JSON.stringify(attempts.slice(0,100))); } catch(e){} }
-
-async function saveAttempt(a){
-  lsSave();
-  if (!db) { $("rSave").textContent = "Saved in this browser."; renderHistory(); return; }
-  $("rSave").textContent = "Saving to your account…";
-  try {
-    await db.collection("attempts").doc("a" + a.ts).set(a);
-    $("rSave").textContent = "✓ Saved to your account. It will show under Saved attempts on any device.";
-  } catch(e) {
-    $("rSave").textContent = "Couldn't save to your account, so it was saved in this browser only.";
-  }
-  renderHistory();
-}
-
-function mergeAttempts(list){
-  const byTs = new Map();
-  [...attempts, ...list].forEach(a => { if (a && a.ts) byTs.set(a.ts, a); });
-  attempts = [...byTs.values()].sort((x,y)=>y.ts-x.ts);
-}
-
-attempts = lsLoad();
-renderHistory();
+// ---------- Load ----------
+attempts = lsGet(LS_KEY, []).filter(a => a && a.ts && a.total);
+received = lsGet(RX_KEY, []).filter(a => a && a.id && a.answers);
+renderStart();
+openFromHash();
+window.addEventListener("hashchange", openFromHash);
 
 (async () => {
   try {
     if (!window.claude || !window.claude.use) return;
+    const user = await window.claude.use("user");
+    if (user) { try { isOwner = !!(await user.isOwner()); } catch(e){} renderStart(); }
     db = await window.claude.use("db");
     if (!db) return;
-    const timer = setTimeout(() => {
-      if (!attempts.length) $("history").innerHTML = `<p class="note">Couldn't reach your saved attempts yet. New results will still be saved.</p>`;
-    }, 10000);
     const snap = await db.collection("attempts").orderBy("ts","desc").limit(200).get();
-    clearTimeout(timer);
-    mergeAttempts(snap.docs.map(d => d.data()));
-    renderHistory();
+    const mine = new Map(attempts.map(a=>[a.ts,a]));
+    snap.docs.forEach(d => { const x = d.data(); if (x && x.ts && x.total) mine.set(x.ts, x); });
+    attempts = [...mine.values()].sort((x,y)=>y.ts-x.ts);
     const rs = await db.collection("shared").orderBy("ts","desc").limit(300).get();
-    const byId = new Map(received.map(x=>[x.id,x]));
-    rs.docs.forEach(d => { const x = d.data(); if (x && x.id) byId.set(x.id, x); });
+    const byId = new Map(rs.docs.map(d => d.data()).filter(x => x && x.id && x.answers).map(x => [x.id, x]));
+    for (const x of received) if (!byId.has(x.id)) { byId.set(x.id, x); db.collection("shared").doc(x.id).set(x).catch(()=>{}); }
     received = [...byId.values()].sort((x,y)=>y.ts-x.ts);
-    rxSaveLocal(); renderReceived();
-  } catch(e) { /* fall back to browser storage */ }
+    lsSet(RX_KEY, received.slice(0,300));
+    if (!$("start").classList.contains("hidden")) renderStart();
+  } catch(e) { /* keep browser-only storage */ }
 })();
 </script>
 </body>
