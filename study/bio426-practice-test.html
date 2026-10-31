@@ -77,7 +77,9 @@
   <div class="card">
     <h3>Core exam: 50 questions</h3>
     <p class="note" style="margin:4px 0 12px">The 50 most important, most commonly tested points from your review sheet, across every section.</p>
-    <div class="row"><button class="primary" id="coreBtn">Start the 50-question exam</button></div>
+    <label class="note" for="taker" style="display:block;margin-bottom:4px">Your name (so your results show who took the test)</label>
+    <div class="row"><input id="taker" type="text" maxlength="60" placeholder="First and last name" style="font:inherit;padding:10px 12px;border:1px solid var(--line);border-radius:8px;background:var(--card);color:var(--ink);flex:1;min-width:200px">
+    <button class="primary" id="coreBtn">Start the 50-question exam</button></div>
 
     <h3 style="margin-top:22px">Extra practice <span id="lockTag" class="lvl w">🔒 Locked</span></h3>
     <p class="note" id="lockNote" style="margin:4px 0 12px">Finish all 50 questions of the core exam to unlock these.</p>
@@ -96,6 +98,14 @@
   <h2>Your saved attempts</h2>
   <div id="history" class="hist"><p class="note">Loading saved attempts…</p></div>
   <div id="weakOverall"></div>
+
+  <h2>Results people sent you</h2>
+  <div class="card">
+    <p class="note" style="margin:0 0 8px">When someone finishes the test, they get a results code to send you. Paste their whole message here to see exactly what they got right and wrong.</p>
+    <textarea id="importBox" rows="3" placeholder="Paste a results code here (it starts with BIO426:)" style="width:100%;font:inherit;font-size:.9rem;padding:10px;border:1px solid var(--line);border-radius:8px;background:var(--card);color:var(--ink)"></textarea>
+    <div class="row" style="margin-top:8px"><button class="primary" id="importBtn">View their results</button><span id="importMsg" class="note"></span></div>
+    <div id="received" class="hist" style="margin-top:14px"></div>
+  </div>
 </section>
 
 <!-- QUIZ -->
@@ -128,6 +138,13 @@
       <div class="stat"><div class="l">Missed</div><div class="big" id="rWrong" style="color:var(--bad)"></div></div>
     </div>
     <p id="rSave" class="note" style="margin:12px 0 0"></p>
+  </div>
+
+  <div class="card" id="rSend">
+    <h3>Send your results</h3>
+    <p class="note" style="margin:4px 0 10px">Copy this and send it (text, email or chat) to the person who gave you this test. It lets them see your score and every answer.</p>
+    <textarea id="sendBox" rows="4" readonly style="width:100%;font:inherit;font-size:.85rem;padding:10px;border:1px solid var(--line);border-radius:8px;background:var(--bg);color:var(--ink)"></textarea>
+    <div class="row" style="margin-top:8px"><button class="primary" id="copyBtn">Copy my results</button><span id="copyMsg" class="note"></span></div>
   </div>
 
   <div class="card" id="rStudy"></div>
@@ -468,7 +485,13 @@ const level = p => p >= 80 ? ["s","Strong"] : p >= 60 ? ["r","Review"] : ["w","S
 
 // ---------- Start screen ----------
 $("bankCount").textContent = `40 random questions from the full ${Q.length}-question bank`;
-$("coreBtn").onclick = () => startQuiz(CORE, "Core 50 exam", true);
+$("coreBtn").onclick = () => {
+  const n = $("taker").value.trim();
+  if (!n) { $("taker").focus(); $("taker").placeholder = "Please enter your name first"; return; }
+  try { localStorage.setItem("bio426_name", n); } catch(e){}
+  startQuiz(CORE, "Core 50 exam", true);
+};
+try { $("taker").value = localStorage.getItem("bio426_name") || ""; } catch(e){}
 const unlocked = () => attempts.some(a => a.core && a.complete);
 $("topicList").innerHTML = TOPICS.map((t,i) => {
   const n = Q.filter(q => q[0]===i).length;
@@ -541,7 +564,7 @@ function startQuiz(ids, mode, core){
     return {i, opts, correctIdx: opts.indexOf(right)};
   });
   $("quitBtn").textContent = "Finish early"; delete $("quitBtn").dataset.warned;
-  quiz = {mode, core: !!core, items, pos:0, answers:[]};
+  quiz = {mode, core: !!core, name: $("taker").value.trim(), items, pos:0, answers:[]};
   show("quiz"); renderQ();
   window.scrollTo(0,0);
 }
@@ -591,30 +614,63 @@ document.addEventListener("keydown", e => {
 
 // ---------- Finish & results ----------
 function finish(){
-  const ans = quiz.answers;
+  const attempt = buildAttempt({
+    ts: Date.now(), name: quiz.name, core: quiz.core,
+    mode: quiz.mode + (quiz.answers.length < quiz.items.length ? " (finished early)" : ""),
+    complete: quiz.answers.length === quiz.items.length,
+    ans: quiz.answers
+  });
+  attempts.unshift(attempt);
+  showResults(attempt, true);
+  saveAttempt(attempt);
+}
+
+function buildAttempt({ts, name, mode, core, complete, ans}){
   const topics = TOPICS.map(()=>[0,0]);
   ans.forEach(a => { const t = Q[a.i][0]; topics[t][1]++; if (a.ok) topics[t][0]++; });
   const missed = ans.filter(a=>!a.ok);
-  const attempt = {
-    ts: Date.now(),
-    mode: quiz.mode + (ans.length < quiz.items.length ? " (finished early)" : ""),
-    core: quiz.core,
-    complete: ans.length === quiz.items.length,
+  return {
+    ts, name: name || "", mode, core: !!core, complete: !!complete,
+    answers: ans.map(a => [a.i, a.ok ? 0 : Q[a.i][3].indexOf(a.your) + 1]),
     total: ans.length,
     correct: ans.length - missed.length,
     topics,
     missedIds: missed.map(a=>a.i),
     missed: missed.map(a=>({q:Q[a.i][1], your:a.your, right:Q[a.i][2], ex:Q[a.i][4], t:Q[a.i][0]}))
   };
-  attempts.unshift(attempt);
-  showResults(attempt, true);
-  saveAttempt(attempt);
+}
+
+// ---------- Results codes (for sharing with the test owner) ----------
+function encodeAttempt(a){
+  const body = {v:1, n:a.name, t:a.ts, m:a.mode, c:a.core?1:0, f:a.complete?1:0, a:a.answers.map(([i,k]) => (i*4+k).toString(36)).join(".")};
+  return "BIO426:" + btoa(unescape(encodeURIComponent(JSON.stringify(body))));
+}
+function decodeAttempt(text){
+  const m = /BIO426:([A-Za-z0-9+\/=]+)/.exec(text.replace(/\s+/g,""));
+  if (!m) return null;
+  try {
+    const b = JSON.parse(decodeURIComponent(escape(atob(m[1]))));
+    const ans = String(b.a||"").split(".").filter(Boolean).map(x => {
+      const n = parseInt(x,36), i = Math.floor(n/4), k = n%4;
+      if (!Q[i] || (k>0 && !Q[i][3][k-1])) throw new Error("bad");
+      return {i, ok: k===0, your: k===0 ? Q[i][2] : Q[i][3][k-1]};
+    });
+    if (!ans.length) return null;
+    return buildAttempt({ts:+b.t||Date.now(), name:String(b.n||"Someone").slice(0,60), mode:String(b.m||"Test").slice(0,60), core:b.c, complete:b.f, ans});
+  } catch(e){ return null; }
+}
+function summaryText(a){
+  const p = Math.round(100*a.correct/a.total);
+  return `${a.name || "I"} scored ${a.correct}/${a.total} (${p}%) on the BIO426 practice test (${a.mode}).\nPaste this code into the test page to see every answer:\n${encodeAttempt(a)}`;
 }
 
 function showResults(a, fresh){
   show("results"); window.scrollTo(0,0);
   const p = a.total ? Math.round(100*a.correct/a.total) : 0;
-  $("rTitle").textContent = fresh ? "Your results" : "Saved attempt";
+  $("rTitle").textContent = a.received ? `Results for ${a.name || "someone"}` : fresh ? "Your results" : "Saved attempt";
+  $("rSend").classList.toggle("hidden", !!a.received || !a.answers);
+  if (a.answers) $("sendBox").value = summaryText(a);
+  $("copyMsg").textContent = "";
   $("rDate").textContent = `${a.mode} · ${fmtDate(a.ts)}`;
   $("rPct").textContent = p + "%";
   $("rCorrect").textContent = a.correct;
@@ -645,6 +701,39 @@ function showResults(a, fresh){
 }
 
 $("homeBtn").onclick = () => { renderHistory(); show("start"); window.scrollTo(0,0); };
+
+$("copyBtn").onclick = async () => {
+  const box = $("sendBox");
+  try { await navigator.clipboard.writeText(box.value); $("copyMsg").textContent = "✓ Copied. Now paste it in a message to them."; }
+  catch(e){ box.focus(); box.select(); $("copyMsg").textContent = "Text selected. Press Ctrl+C (or ⌘+C) to copy."; }
+};
+
+let received = [];
+const RX_KEY = "bio426_received_v1";
+function rxSaveLocal(){ try { localStorage.setItem(RX_KEY, JSON.stringify(received.slice(0,300))); } catch(e){} }
+function renderReceived(){
+  const r = $("received");
+  if (!received.length) { r.innerHTML = `<p class="note">Nothing yet.</p>`; return; }
+  r.innerHTML = received.map((a,k) => {
+    const p = Math.round(100*a.correct/a.total); const [c,l] = level(p);
+    return `<button data-k="${k}"><span><b>${esc(a.name||"Someone")}</b> &nbsp;${p}% · ${a.correct}/${a.total}</span><span class="note">${fmtDate(a.ts)} &nbsp;<span class="lvl ${c}">${l}</span></span></button>`;
+  }).join("");
+  r.querySelectorAll("button").forEach(b => b.onclick = () => showResults(received[+b.dataset.k], false));
+}
+$("importBtn").onclick = async () => {
+  const a = decodeAttempt($("importBox").value);
+  if (!a) { $("importMsg").textContent = "That doesn't look like a results code. Make sure you pasted the whole thing."; return; }
+  a.received = true;
+  const id = "r" + a.ts + "-" + (a.name||"").replace(/[^A-Za-z0-9]/g,"").slice(0,30);
+  a.id = id;
+  received = [a, ...received.filter(x => x.id !== id)].sort((x,y)=>y.ts-x.ts);
+  rxSaveLocal(); renderReceived();
+  $("importBox").value = ""; $("importMsg").textContent = "";
+  showResults(a, false);
+  if (db) { try { await db.collection("shared").doc(id).set(a); } catch(e){} }
+};
+try { received = JSON.parse(localStorage.getItem(RX_KEY)||"[]"); } catch(e){ received = []; }
+renderReceived();
 
 // ---------- Saving ----------
 function lsLoad(){ try { return JSON.parse(localStorage.getItem(LS_KEY)||"[]"); } catch(e){ return []; } }
@@ -684,6 +773,11 @@ renderHistory();
     clearTimeout(timer);
     mergeAttempts(snap.docs.map(d => d.data()));
     renderHistory();
+    const rs = await db.collection("shared").orderBy("ts","desc").limit(300).get();
+    const byId = new Map(received.map(x=>[x.id,x]));
+    rs.docs.forEach(d => { const x = d.data(); if (x && x.id) byId.set(x.id, x); });
+    received = [...byId.values()].sort((x,y)=>y.ts-x.ts);
+    rxSaveLocal(); renderReceived();
   } catch(e) { /* fall back to browser storage */ }
 })();
 </script>
