@@ -61,6 +61,7 @@
   .hist button{width:100%;text-align:left;margin-bottom:8px;display:flex;justify-content:space-between;gap:10px}
   .note{color:var(--muted);font-size:.88rem}
   .hidden{display:none}
+  .mode.locked{opacity:.45;cursor:not-allowed}
   ul.study{margin:6px 0 0 18px;padding:0}
   ul.study li{margin-bottom:4px}
 </style>
@@ -71,15 +72,19 @@
 <!-- START -->
 <section id="start">
   <h1>BIO426 Practice Test</h1>
-  <p class="sub">Respiratory and digestive systems, metabolism, and temperature regulation. Every question comes from your review sheet (pages 1–9).</p>
+  <p class="sub">Respiratory and digestive systems, metabolism, and temperature regulation. Every question comes from your review sheet (pages 1–9). No sign-in needed: your attempts are saved in this browser.</p>
 
   <div class="card">
-    <h3>Choose a test</h3>
-    <div class="modes" style="margin-top:12px">
-      <button class="mode" data-mode="full"><b>Full test</b><span id="fullCount">All questions, shuffled</span></button>
-      <button class="mode" data-mode="quick"><b>Quick 40</b><span>40 random questions from every topic</span></button>
-      <button class="mode" data-mode="missed" id="missedBtn"><b>Retry what I missed</b><span id="missedInfo">Only questions you got wrong last time</span></button>
-      <button class="mode" data-mode="topics"><b>Pick topics</b><span>Drill specific sections</span></button>
+    <h3>Core exam: 50 questions</h3>
+    <p class="note" style="margin:4px 0 12px">The 50 most important, most commonly tested points from your review sheet, across every section.</p>
+    <div class="row"><button class="primary" id="coreBtn">Start the 50-question exam</button></div>
+
+    <h3 style="margin-top:22px">Extra practice <span id="lockTag" class="lvl w">🔒 Locked</span></h3>
+    <p class="note" id="lockNote" style="margin:4px 0 12px">Finish all 50 questions of the core exam to unlock these.</p>
+    <div class="modes">
+      <button class="mode locked" data-mode="missed" id="missedBtn"><b>Retry what I missed</b><span id="missedInfo">Only questions you got wrong last time</span></button>
+      <button class="mode locked" data-mode="quick"><b>Random 40</b><span id="bankCount">From the full question bank</span></button>
+      <button class="mode locked" data-mode="topics"><b>Topic drill</b><span>Drill specific sections from the full bank</span></button>
     </div>
     <div id="topicPick" class="hidden" style="margin-top:16px">
       <div class="topics" id="topicList"></div>
@@ -426,6 +431,27 @@ const Q = [
 [15,"A deficiency of vitamin K (normally partly made by colon bacteria) mainly affects:","Blood clotting",["Vision","Bone calcium only","Collagen formation"],"Vitamin K is needed for clotting factors."]
 ];
 
+
+// ---------- Core 50: the highest-yield, most commonly tested points ----------
+const CORE_PREFIXES = [
+"External respiration is gas exchange between","Internal respiration takes place at","What do the nasal conchae do?",
+"Which is NOT one of the 3 main functions of the larynx?","The largest, shield-shaped","All laryngeal cartilages are hyaline cartilage EXCEPT",
+"Why are the tracheal cartilage rings C-shaped?","Where is the FIRST site of gas exchange?","The respiratory membrane, the site of gas exchange",
+"What is the role of the serous fluid in the pleural space?","During inspiration, the volume of the lungs increases","Where is the primary respiratory center?",
+"Peripheral chemoreceptors are located in the","Which change would STIMULATE an increase in breathing?","How is most oxygen carried in the blood?",
+"How is MOST carbon dioxide carried in the blood?","The Bohr effect","The chloride shift describes",
+"What is the order of the tunics","How does the muscle of the esophagus change","Parietal cells produce","Chief cells produce",
+"What extra layer of muscularis externa","What is the correct order of the 3 sections","Which 3 structures increase the surface area",
+"A lacteal is","Peyer's patches are","Secretin stimulates","Cholecystokinin (CCK) controls","What does enterokinase do?",
+"Intestinal bacteria (E. coli)","In the large intestine, the longitudinal muscle","Which salivary gland lies anterior to the ear",
+"How many permanent teeth","What forms the bulk of the tooth?","The portal triad found","Kupffer cells are","The liver produces bile, which",
+"Pancreatic juice is very alkaline","What is the correct order of the bile pathway",
+"Which hormone controls the absorptive (fed) state?","Glycogenolysis is","Gluconeogenesis is","Which hormone does NOT promote the post-absorptive",
+"For every 1 L of O₂ used","Basal metabolic rate (BMR) is","When body temperature drops BELOW","A fever occurs when",
+"In uncontrolled diabetes","Which lipoprotein is considered 'good cholesterol'"
+];
+const CORE = CORE_PREFIXES.map(pre => Q.findIndex(q => q[1].startsWith(pre)));
+
 // ---------- State ----------
 const LETTERS = "ABCD";
 let quiz = null;          // {items:[{i,opts,correctIdx}], pos, answers:[]}
@@ -441,17 +467,19 @@ const fmtDate = ts => new Date(ts).toLocaleString([], {month:"short",day:"numeri
 const level = p => p >= 80 ? ["s","Strong"] : p >= 60 ? ["r","Review"] : ["w","Study this"];
 
 // ---------- Start screen ----------
-$("fullCount").textContent = `All ${Q.length} questions, shuffled`;
+$("bankCount").textContent = `40 random questions from the full ${Q.length}-question bank`;
+$("coreBtn").onclick = () => startQuiz(CORE, "Core 50 exam", true);
+const unlocked = () => attempts.some(a => a.core && a.complete);
 $("topicList").innerHTML = TOPICS.map((t,i) => {
   const n = Q.filter(q => q[0]===i).length;
   return `<label><input type="checkbox" value="${i}" checked> ${esc(t)} <span class="note">(${n})</span></label>`;
 }).join("");
 
 document.querySelectorAll(".mode").forEach(b => b.addEventListener("click", () => {
+  if (!unlocked()) return;
   const m = b.dataset.mode;
   if (m === "topics") { $("topicPick").classList.toggle("hidden"); return; }
-  if (m === "full") startQuiz(Q.map((_,i)=>i), "Full test");
-  if (m === "quick") startQuiz(shuffle(Q.map((_,i)=>i)).slice(0,40), "Quick 40");
+  if (m === "quick") startQuiz(shuffle(Q.map((_,i)=>i)).slice(0,40), "Random 40");
   if (m === "missed") {
     const last = attempts[0];
     if (last && last.missedIds && last.missedIds.length) startQuiz(last.missedIds.filter(i=>Q[i]), "Retry missed");
@@ -467,10 +495,16 @@ $("noTopics").onclick = () => document.querySelectorAll("#topicList input").forE
 
 function renderHistory(){
   const h = $("history");
+  const open = unlocked();
+  document.querySelectorAll(".mode").forEach(b => { b.disabled = !open; b.classList.toggle("locked", !open); });
+  $("lockTag").className = "lvl " + (open ? "s" : "w");
+  $("lockTag").textContent = open ? "Unlocked" : "🔒 Locked";
+  $("lockNote").textContent = open ? "You finished the core exam. Use these to drill weak spots with the full question bank." : "Finish all 50 questions of the core exam to unlock these.";
+  if (!open) $("topicPick").classList.add("hidden");
   const last = attempts[0];
   const mb = $("missedBtn");
   if (last && last.missedIds && last.missedIds.length) {
-    mb.disabled = false; $("missedInfo").textContent = `${last.missedIds.length} questions you missed on ${fmtDate(last.ts)}`;
+    mb.disabled = !open; $("missedInfo").textContent = `${last.missedIds.length} questions you missed on ${fmtDate(last.ts)}`;
   } else {
     mb.disabled = true; $("missedInfo").textContent = attempts.length ? "You didn't miss any last time!" : "Finish a test first";
   }
@@ -500,13 +534,14 @@ function topicRows(ranked){
 }
 
 // ---------- Quiz ----------
-function startQuiz(ids, mode){
+function startQuiz(ids, mode, core){
   const items = shuffle(ids).map(i => {
     const [, , right, wrong] = Q[i];
     const opts = shuffle([right, ...wrong]);
     return {i, opts, correctIdx: opts.indexOf(right)};
   });
-  quiz = {mode, items, pos:0, answers:[]};
+  $("quitBtn").textContent = "Finish early"; delete $("quitBtn").dataset.warned;
+  quiz = {mode, core: !!core, items, pos:0, answers:[]};
   show("quiz"); renderQ();
   window.scrollTo(0,0);
 }
@@ -544,6 +579,7 @@ $("nextBtn").onclick = () => {
 };
 $("quitBtn").onclick = () => {
   if (!quiz.answers.length) { show("start"); return; }
+  if (quiz.core && !$("quitBtn").dataset.warned) { $("quitBtn").dataset.warned = "1"; $("quitBtn").textContent = "Finish early (won't unlock extras)"; return; }
   finish();
 };
 document.addEventListener("keydown", e => {
@@ -562,6 +598,8 @@ function finish(){
   const attempt = {
     ts: Date.now(),
     mode: quiz.mode + (ans.length < quiz.items.length ? " (finished early)" : ""),
+    core: quiz.core,
+    complete: ans.length === quiz.items.length,
     total: ans.length,
     correct: ans.length - missed.length,
     topics,
@@ -582,6 +620,7 @@ function showResults(a, fresh){
   $("rCorrect").textContent = a.correct;
   $("rWrong").textContent = a.total - a.correct;
   if (!fresh) $("rSave").textContent = "";
+  if (fresh && a.core && a.complete) $("rDate").textContent += " · Extra practice is now unlocked";
 
   const ranked = a.topics.map((t,i)=>({i,c:t[0],n:t[1],p:t[1]?Math.round(100*t[0]/t[1]):null})).filter(x=>x.n).sort((x,y)=>x.p-y.p);
   $("rTable").innerHTML = topicRows(ranked);
