@@ -69,6 +69,9 @@
   .inp.need{border-color:var(--ink);border-width:2px}
   .gh{margin:10px 0 2px;font-weight:700}
   #rRight li{margin-bottom:6px}
+  .vids{display:flex;flex-direction:column;gap:2px;margin:4px 0 10px;font-size:.9rem}
+  .vids a{color:var(--ink);text-decoration:underline;text-underline-offset:2px}
+  .vids a:hover{color:var(--muted)}
   .mode.locked{opacity:.45;cursor:not-allowed}
   ul.study{margin:6px 0 0 18px;padding:0}
   ul.study li{margin-bottom:4px}
@@ -638,6 +641,42 @@ $("copyBtn").onclick = async () => {
   catch(e){ $("sendBox").select(); $("copyMsg").textContent = "Press Ctrl+C (or ⌘+C) to copy."; }
 };
 
+// ---------- Study videos for weak topics ----------
+const YT = id => "https://www.youtube.com/watch?v=" + id;
+const VID = {
+  r1: ["Crash Course: Respiratory System, Part 1", YT("bHZsvBdUC2I")],
+  r2: ["Crash Course: Respiratory System, Part 2 (Gas Exchange)", YT("Cqt4LjHnMEA")],
+  d1: ["Crash Course: Digestive System, Part 1", YT("yIoTRGfcMqM")],
+  d2: ["Crash Course: Digestive System, Part 2 (Mouth to Stomach)", YT("pqgcEIaXGME")],
+  d3: ["Crash Course: Digestive System, Part 3 (Intestines & Accessory Organs)", YT("jGme7BRkpuQ")],
+  m1: ["Crash Course: Metabolism & Nutrition, Part 1", YT("fR3NxCR9z2U")],
+  m2: ["Crash Course: Metabolism & Nutrition, Part 2", YT("kb146Y1igTQ")]
+};
+// [Crash Course episode, YouTube search for this exact topic]
+const TOPIC_VIDEOS = [
+  ["r1","upper respiratory tract anatomy nasal conchae paranasal sinuses"],
+  ["r1","larynx cartilages anatomy thyroid cricoid epiglottis vocal folds"],
+  ["r1","bronchial tree alveoli respiratory membrane pleura anatomy"],
+  ["r1","mechanics of breathing respiratory centers chemoreceptors lung volumes"],
+  ["r2","oxygen and carbon dioxide transport in blood Bohr effect chloride shift"],
+  ["d1","layers of the GI tract mucosa submucosa muscularis externa serosa"],
+  ["d2","pharynx and esophagus anatomy swallowing"],
+  ["d2","stomach anatomy parietal cells chief cells gastric pits"],
+  ["d3","small intestine villi microvilli secretin cholecystokinin"],
+  ["d3","large intestine anatomy teniae coli haustra greater lesser omentum"],
+  ["d2","tooth anatomy dental formula salivary glands"],
+  ["d3","liver lobule portal triad Kupffer cells anatomy"],
+  ["d3","bile duct pathway pancreas exocrine enzymes ampulla of Vater"],
+  ["m1","absorptive state metabolism insulin cellular respiration"],
+  ["m1","postabsorptive state glycogenolysis gluconeogenesis basal metabolic rate"],
+  ["m2","body temperature regulation hypothalamus fever"]
+];
+function videoLinks(t){
+  const [ep, q] = TOPIC_VIDEOS[t], [title, url] = VID[ep];
+  const search = "https://www.youtube.com/results?search_query=" + encodeURIComponent(q);
+  return `<div class="vids"><a href="${url}" target="_blank" rel="noopener">▶ ${esc(title)}</a><a href="${search}" target="_blank" rel="noopener">▶ More videos on this topic</a></div>`;
+}
+
 // ---------- Results screen ----------
 function showResults(a, fresh){
   show("results"); window.scrollTo(0,0);
@@ -657,8 +696,8 @@ function showResults(a, fresh){
     return `<tr><td>${esc(TOPICS[x.i])}</td><td>${x.c}/${x.n}</td><td><div class="bar"><div style="width:${x.p}%;background:${col}"></div></div></td><td><span class="lvl ${c}">${l}</span></td></tr>`;
   }).join("");
 
-  const group = (f) => ranked.filter(f).map(x=>`<li>${esc(TOPICS[x.i])} (${x.p}%)</li>`).join("");
-  const weak = group(x=>x.p<60), review = group(x=>x.p>=60&&x.p<80), strong = group(x=>x.p>=80);
+  const group = (f, vids) => ranked.filter(f).map(x=>`<li>${esc(TOPICS[x.i])} (${x.p}%)${vids ? videoLinks(x.i) : ""}</li>`).join("");
+  const weak = group(x=>x.p<60, true), review = group(x=>x.p>=60&&x.p<80, true), strong = group(x=>x.p>=80, false);
   $("rStudy").innerHTML = `<h3>What to study</h3>` +
     (weak ? `<p class="gh" style="color:var(--bad)">Start here</p><ul class="study">${weak}</ul>` : "") +
     (review ? `<p class="gh" style="color:var(--warn)">Review next</p><ul class="study">${review}</ul>` : "") +
