@@ -99,7 +99,7 @@
   <div id="history" class="hist"><p class="note">Loading saved attempts…</p></div>
   <div id="weakOverall"></div>
 
-  <h2>Results people sent you</h2>
+  <h2 id="sent-results">Results people sent you</h2>
   <div class="card">
     <p class="note" style="margin:0 0 8px">When someone finishes the test, they get a results code to send you. Paste their whole message here to see exactly what they got right and wrong.</p>
     <textarea id="importBox" rows="3" placeholder="Paste a results code here (it starts with BIO426:)" style="width:100%;font:inherit;font-size:.9rem;padding:10px;border:1px solid var(--line);border-radius:8px;background:var(--card);color:var(--ink)"></textarea>
@@ -734,6 +734,9 @@ $("importBtn").onclick = async () => {
 };
 try { received = JSON.parse(localStorage.getItem(RX_KEY)||"[]"); } catch(e){ received = []; }
 renderReceived();
+function jumpToInbox(){ if (location.hash === "#sent-results") { show("start"); $("sent-results").scrollIntoView(); } }
+window.addEventListener("hashchange", jumpToInbox);
+setTimeout(jumpToInbox, 50);
 
 // ---------- Saving ----------
 function lsLoad(){ try { return JSON.parse(localStorage.getItem(LS_KEY)||"[]"); } catch(e){ return []; } }
