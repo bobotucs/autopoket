@@ -1,0 +1,691 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>BIO426 Practice Test: Respiratory & Digestive</title>
+<style>
+  :root{
+    --bg:#f6f7f9; --card:#fff; --ink:#1d2330; --muted:#5f6b7a; --line:#e3e7ec;
+    --accent:#2f5bd3; --accent-soft:#e8eefc;
+    --good:#1f8a4c; --good-soft:#e5f5ec; --bad:#c23b3b; --bad-soft:#fbeaea; --warn:#b7791f; --warn-soft:#fdf3e1;
+  }
+  @media (prefers-color-scheme: dark){
+    :root{ --bg:#14171c; --card:#1d2129; --ink:#e7eaf0; --muted:#9aa4b2; --line:#2e3440;
+      --accent:#7d9cf5; --accent-soft:#25304a; --good:#5cc98a; --good-soft:#1c3327; --bad:#f07a7a; --bad-soft:#3a2224; --warn:#e8b55c; --warn-soft:#3a3020; }
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.5 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif}
+  .wrap{max-width:820px;margin:0 auto;padding:24px 16px 64px}
+  h1{font-size:1.6rem;margin:0 0 4px}
+  h2{font-size:1.2rem;margin:28px 0 10px}
+  h3{font-size:1rem;margin:0 0 6px}
+  .sub{color:var(--muted);margin:0 0 20px}
+  .card{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:20px;margin-bottom:16px}
+  button{font:inherit;cursor:pointer;border-radius:8px;border:1px solid var(--line);background:var(--card);color:var(--ink);padding:10px 16px}
+  button.primary{background:var(--accent);border-color:var(--accent);color:#fff;font-weight:600}
+  button:disabled{opacity:.5;cursor:default}
+  .row{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
+  .modes{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:12px}
+  .mode{text-align:left;padding:16px}
+  .mode b{display:block;margin-bottom:2px}
+  .mode span{color:var(--muted);font-size:.9rem}
+  .topics{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:6px 16px;margin:10px 0}
+  .topics label{display:flex;gap:8px;align-items:center;font-size:.95rem}
+  .progress{height:6px;background:var(--line);border-radius:3px;overflow:hidden;margin:6px 0 18px}
+  .progress div{height:100%;background:var(--accent);transition:width .2s}
+  .meta{display:flex;justify-content:space-between;color:var(--muted);font-size:.9rem}
+  .tag{display:inline-block;font-size:.8rem;padding:2px 8px;border-radius:999px;background:var(--accent-soft);color:var(--accent)}
+  .q{font-size:1.15rem;font-weight:600;margin:12px 0 16px}
+  .opt{display:block;width:100%;text-align:left;margin:0 0 10px;padding:12px 14px;line-height:1.4}
+  .opt:hover:not(:disabled){border-color:var(--accent)}
+  .opt.correct{background:var(--good-soft);border-color:var(--good);opacity:1}
+  .opt.wrong{background:var(--bad-soft);border-color:var(--bad);opacity:1}
+  .opt .k{display:inline-block;width:1.6em;font-weight:700;color:var(--muted)}
+  .fb{border-radius:8px;padding:12px 14px;margin:6px 0 14px}
+  .fb.good{background:var(--good-soft)} .fb.bad{background:var(--bad-soft)}
+  .big{font-size:2.6rem;font-weight:800;line-height:1}
+  .stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:12px}
+  .stat{background:var(--bg);border-radius:10px;padding:14px}
+  .stat .l{color:var(--muted);font-size:.85rem}
+  table{width:100%;border-collapse:collapse;font-size:.95rem}
+  th,td{text-align:left;padding:8px 6px;border-bottom:1px solid var(--line);vertical-align:middle}
+  th{color:var(--muted);font-weight:600;font-size:.85rem}
+  .bar{height:8px;background:var(--line);border-radius:4px;overflow:hidden;min-width:80px}
+  .bar div{height:100%}
+  .lvl{font-size:.8rem;padding:2px 8px;border-radius:999px;white-space:nowrap}
+  .lvl.s{background:var(--good-soft);color:var(--good)} .lvl.r{background:var(--warn-soft);color:var(--warn)} .lvl.w{background:var(--bad-soft);color:var(--bad)}
+  .miss{border-left:4px solid var(--bad);padding:10px 14px;margin:0 0 12px;background:var(--bg);border-radius:0 8px 8px 0}
+  .miss .yours{color:var(--bad)} .miss .right{color:var(--good)}
+  .miss .ex{color:var(--muted);font-size:.92rem;margin-top:4px}
+  .hist button{width:100%;text-align:left;margin-bottom:8px;display:flex;justify-content:space-between;gap:10px}
+  .note{color:var(--muted);font-size:.88rem}
+  .hidden{display:none}
+  .mode.locked{opacity:.45;cursor:not-allowed}
+  ul.study{margin:6px 0 0 18px;padding:0}
+  ul.study li{margin-bottom:4px}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<!-- START -->
+<section id="start">
+  <h1>BIO426 Practice Test</h1>
+  <p class="sub">Respiratory and digestive systems, metabolism, and temperature regulation. Every question comes from your review sheet (pages 1–9). No sign-in needed: your attempts are saved in this browser.</p>
+
+  <div class="card">
+    <h3>Core exam: 50 questions</h3>
+    <p class="note" style="margin:4px 0 12px">The 50 most important, most commonly tested points from your review sheet, across every section.</p>
+    <div class="row"><button class="primary" id="coreBtn">Start the 50-question exam</button></div>
+
+    <h3 style="margin-top:22px">Extra practice <span id="lockTag" class="lvl w">🔒 Locked</span></h3>
+    <p class="note" id="lockNote" style="margin:4px 0 12px">Finish all 50 questions of the core exam to unlock these.</p>
+    <div class="modes">
+      <button class="mode locked" data-mode="missed" id="missedBtn"><b>Retry what I missed</b><span id="missedInfo">Only questions you got wrong last time</span></button>
+      <button class="mode locked" data-mode="quick"><b>Random 40</b><span id="bankCount">From the full question bank</span></button>
+      <button class="mode locked" data-mode="topics"><b>Topic drill</b><span>Drill specific sections from the full bank</span></button>
+    </div>
+    <div id="topicPick" class="hidden" style="margin-top:16px">
+      <div class="topics" id="topicList"></div>
+      <div class="row"><button class="primary" id="startTopics">Start selected topics</button><button id="allTopics">Select all</button><button id="noTopics">Clear</button></div>
+    </div>
+    <p class="note" style="margin-top:14px">You'll see whether each answer is right as you go, with a short explanation. Your results are saved when you finish.</p>
+  </div>
+
+  <h2>Your saved attempts</h2>
+  <div id="history" class="hist"><p class="note">Loading saved attempts…</p></div>
+  <div id="weakOverall"></div>
+</section>
+
+<!-- QUIZ -->
+<section id="quiz" class="hidden">
+  <div class="meta"><span id="qNum"></span><span id="qScore"></span></div>
+  <div class="progress"><div id="qBar"></div></div>
+  <div class="card">
+    <span class="tag" id="qTopic"></span>
+    <div class="q" id="qText"></div>
+    <div id="qOpts"></div>
+    <div id="qFb"></div>
+    <div class="row" style="justify-content:space-between">
+      <button id="quitBtn">Finish early</button>
+      <button class="primary" id="nextBtn" disabled>Next</button>
+    </div>
+  </div>
+</section>
+
+<!-- RESULTS -->
+<section id="results" class="hidden">
+  <div class="row" style="justify-content:space-between">
+    <h1 id="rTitle">Results</h1>
+    <button id="homeBtn">Back to start</button>
+  </div>
+  <p class="sub" id="rDate"></p>
+  <div class="card">
+    <div class="stats">
+      <div class="stat"><div class="l">Score</div><div class="big" id="rPct"></div></div>
+      <div class="stat"><div class="l">Correct</div><div class="big" id="rCorrect" style="color:var(--good)"></div></div>
+      <div class="stat"><div class="l">Missed</div><div class="big" id="rWrong" style="color:var(--bad)"></div></div>
+    </div>
+    <p id="rSave" class="note" style="margin:12px 0 0"></p>
+  </div>
+
+  <div class="card" id="rStudy"></div>
+
+  <h2>By topic</h2>
+  <div class="card"><table id="rTable"></table>
+    <p class="note" style="margin:10px 0 0"><span class="lvl s">Strong</span> 80% or more &nbsp; <span class="lvl r">Review</span> 60–79% &nbsp; <span class="lvl w">Study this</span> under 60%</p>
+  </div>
+
+  <h2>Questions you missed</h2>
+  <div id="rMissed"></div>
+  <div class="row" style="margin-top:10px"><button class="primary" id="retryMissed">Retry these missed questions</button></div>
+</section>
+
+</div>
+
+<script>
+// ---------- Topics ----------
+const TOPICS = [
+  "Respiratory processes & upper airway",      //0
+  "Larynx & cartilages",                       //1
+  "Lower respiratory tract & pleura",          //2
+  "Breathing mechanics & control",             //3
+  "Gas transport & lung disorders",            //4
+  "Digestive overview & GI tunics",            //5
+  "Mouth, pharynx & esophagus",                //6
+  "Stomach",                                   //7
+  "Small intestine",                           //8
+  "Large intestine & peritoneal folds",        //9
+  "Salivary glands & teeth",                   //10
+  "Liver & gallbladder",                       //11
+  "Pancreas & bile pathway",                   //12
+  "Energy production & absorptive state",      //13
+  "Post-absorptive state & metabolic rate",    //14
+  "Temperature regulation & complications"     //15
+];
+
+// ---------- Questions: [topic, question, correct answer, [wrong answers], explanation] ----------
+const Q = [
+// 0 Respiratory processes & upper airway
+[0,"What is the major function of the respiratory system?","Supply the body with oxygen and dispose of carbon dioxide",["Produce sound for speech","Filter toxins from the blood","Regulate body temperature"],"Main function: supply O₂ and get rid of CO₂."],
+[0,"Pulmonary ventilation is best defined as:","Movement of air into and out of the lungs",["Gas exchange between blood and alveoli","Gas exchange at systemic capillaries","Transport of gases in the blood"],"Pulmonary ventilation = breathing (air moving in and out)."],
+[0,"External respiration is gas exchange between:","Blood in the pulmonary circulation and the alveoli",["Blood in systemic capillaries and tissue cells","The atmosphere and the nasal cavity","Red blood cells and plasma"],"External respiration happens in the lungs: O₂ loads into the blood and CO₂ unloads into the alveoli."],
+[0,"Internal respiration takes place at:","The systemic capillaries, between blood and tissue cells",["The alveoli","The respiratory bronchioles","The pulmonary capillaries"],"Internal respiration = gas exchange in the body's tissues (systemic circulation)."],
+[0,"Which system carries out the transport of respiratory gases between the lungs and tissue cells?","Cardiovascular system (blood)",["Respiratory system","Lymphatic system","Nervous system"],"Transport is done by the blood, which is why the respiratory and circulatory systems are closely related."],
+[0,"Which TWO of the 4 respiratory processes are the responsibility of the respiratory system itself?","Pulmonary ventilation and external respiration",["External and internal respiration","Gas transport and internal respiration","Pulmonary ventilation and gas transport"],"The first two processes belong to the respiratory system, but all four must happen for tissues to get O₂."],
+[0,"The external nares are:","The nostrils (external openings of the nose)",["The paranasal sinuses","The openings into the pharynx","The nasal conchae"],"External nares = nostrils."],
+[0,"What do the nasal conchae do?","Increase air turbulence and mucosal surface area, warming and moistening air",["Produce sound","Separate the nasal and oral cavities","Exchange gases with the blood"],"The conchae are mucosa-covered projections that churn air and expose it to more mucosa."],
+[0,"How many nasal conchae are on each side of the nasal cavity?","3 (superior, middle, inferior)",["2 (upper and lower)","4","1"],"There are 3 conchae: superior, middle and inferior."],
+[0,"Which structures surround the nasal cavity, act as resonance chambers in speech, and warm and moisten air?","Paranasal sinuses",["Nasal conchae","Vestibular folds","External nares"],"Paranasal sinuses: resonance for speech, and they warm and moisten air."],
+[0,"The nasal passages are separated from the oral cavity by:","The hard palate anteriorly and the soft palate posteriorly",["The soft palate anteriorly and the hard palate posteriorly","The epiglottis","The nasal conchae"],"Hard palate in front, soft palate in back."],
+[0,"The pharynx (throat) connects the nasal and oral cavities to the:","Larynx",["Trachea directly","Bronchi","Stomach directly"],"Pharynx (naso-, oro-, laryngo-) connects the nasal and oral cavities to the larynx."],
+
+// 1 Larynx
+[1,"Which is NOT one of the 3 main functions of the larynx?","Gas exchange",["Provide an open airway","Switch between the air and food channels","Voice production"],"Larynx: open airway, switching air and food, and voice. Gas exchange happens in the alveoli."],
+[1,"How many cartilages make up the larynx?","9",["6","3","12"],"The larynx has 9 cartilages."],
+[1,"The largest, shield-shaped laryngeal cartilage that forms the Adam's apple is the:","Thyroid cartilage",["Cricoid cartilage","Arytenoid cartilage","Epiglottis"],"Thyroid = largest, shield-shaped, laryngeal prominence."],
+[1,"Which cartilage is ring-shaped and inferior to the thyroid cartilage?","Cricoid",["Cuneiform","Epiglottis","Corniculate"],"Cricoid = ring-shaped, below the thyroid."],
+[1,"Which laryngeal cartilages anchor the vocal cords?","Arytenoids",["Cricoid","Thyroid","Cuneiforms"],"The arytenoids anchor the vocal cords."],
+[1,"Which 3 PAIRS of small cartilages make up cartilages 3–8 of the larynx?","Arytenoid, cuneiform and corniculate",["Thyroid, cricoid and epiglottis","Arytenoid, cricoid and thyroid","Cuneiform, epiglottis and hyoid"],"Cartilages 3–8 are the paired arytenoid, cuneiform and corniculate."],
+[1,"All laryngeal cartilages are hyaline cartilage EXCEPT the epiglottis, which is:","Elastic cartilage",["Fibrocartilage","Bone","Hyaline cartilage too"],"The epiglottis is flexible elastic cartilage."],
+[1,"What happens during swallowing?","The larynx rises and the epiglottis tips to cover the glottis",["The larynx drops and the epiglottis opens","The vocal folds open wide","The soft palate moves down to close the mouth"],"Larynx rises and the epiglottis covers the glottis so food doesn't enter the airway."],
+[1,"The vestibular folds are also called the:","False vocal cords, which do not produce sound",["True vocal cords, which produce sound","Rugae","Conchae"],"Vestibular folds = false vocal cords: superior to the vocal folds, no sound production."],
+[1,"Which folds vibrate as air rushes from the lungs, producing sound?","Vocal folds (true vocal cords)",["Vestibular folds (false vocal cords)","Plicae circulares","Nasal conchae"],"True vocal cords produce sound."],
+[1,"Where are the vestibular folds located relative to the vocal folds?","Superior to them",["Inferior to them","Lateral to them","In the trachea"],"Vestibular (false) folds sit above the true vocal folds."],
+
+// 2 Lower respiratory
+[2,"The trachea is lined with:","Pseudostratified columnar epithelium with goblet cells and cilia",["Simple squamous epithelium","Stratified squamous epithelium","Simple columnar epithelium with microvilli"],"Trachea: pseudostratified columnar epithelium with mucus-secreting goblet cells."],
+[2,"Cilia in the trachea propel mucus containing dust and bacteria:","Away from the lungs, toward the pharynx",["Down into the lungs","Into the esophagus directly","Toward the alveoli to be absorbed"],"Mucus moves up toward the pharynx to be coughed up or swallowed."],
+[2,"Why are the tracheal cartilage rings C-shaped?","So the esophagus can expand when a food bolus is swallowed",["To allow the trachea to produce sound","To let air leak into the esophagus","Because the trachea has no cartilage posteriorly to save weight"],"The open part of the C faces the esophagus so it can expand."],
+[2,"The trachea extends from the larynx through the neck into the ______, where it divides.","Mediastinum",["Pleural cavity","Abdominal cavity","Pericardial cavity"],"The trachea goes into the mediastinum and divides into the R and L primary bronchi."],
+[2,"Secondary bronchi go to the lobes of the lungs. How many lobes does each lung have?","Right 3, left 2",["Right 2, left 3","Both have 3","Both have 2"],"Right lung 3 lobes, left lung 2 (space for the heart)."],
+[2,"What is the last site of small hyaline cartilage plates in the airway?","Terminal bronchioles",["Respiratory bronchioles","Tertiary bronchi","Alveolar ducts"],"Terminal bronchioles are the last place with cartilage plates."],
+[2,"Where is the FIRST site of gas exchange?","Respiratory bronchioles",["Terminal bronchioles","Trachea","Tertiary bronchi"],"Respiratory bronchioles are the 1st site of gas exchange."],
+[2,"Alveoli are composed of:","A very thin single layer of squamous epithelium over a thin basal lamina",["Pseudostratified ciliated columnar epithelium","Stratified squamous epithelium","Hyaline cartilage plates"],"The thin simple squamous wall allows rapid diffusion."],
+[2,"The respiratory membrane, the site of gas exchange, is formed by:","The basal laminae of the alveoli and capillaries joined by connective tissue",["The parietal and visceral pleura","The vocal folds","The walls of the bronchi"],"Alveolar and capillary basal laminae fused together = respiratory membrane."],
+[2,"Alveolar sacs are often described as looking like:","Clusters of grapes",["A tree trunk","An apron","A shield"],"Alveolar sacs = clusters of grapes made of alveoli."],
+[2,"What allows the lungs to expand and recoil?","Elastic connective tissue",["Skeletal muscle in the lung","Hyaline cartilage","Smooth muscle of the alveoli"],"Lungs contain elastic connective tissue."],
+[2,"The parietal pleura:","Is the outer layer that attaches to the thoracic walls and diaphragm",["Is the inner layer covering the lung tissue","Lines the trachea","Covers the heart"],"Parietal = outer (wall); visceral = inner (on the organ)."],
+[2,"The visceral pleura:","Is the inner layer covering the lung tissue",["Attaches to the diaphragm","Is the outer layer on the thoracic wall","Lines the alveoli"],"Visceral pleura covers the lung itself."],
+[2,"What is the role of the serous fluid in the pleural space?","Creates a frictionless environment and makes the lungs adhere to the thoracic wall",["Exchanges gases with the blood","Traps dust and bacteria","Produces surfactant to fight infection"],"Pleural fluid reduces friction and keeps the lungs stuck to the chest wall."],
+
+// 3 Breathing mechanics & control
+[3,"Which muscles are the inspiratory muscles?","External intercostals and the diaphragm",["Internal intercostals and abdominals","Diaphragm only","Pectoralis major and trapezius"],"External intercostals lift the ribcage; the diaphragm flattens."],
+[3,"During inspiration, the diaphragm:","Contracts and moves from a dome shape to a flattened position",["Relaxes into a dome shape","Moves upward into the thorax","Does not move"],"Contraction flattens the dome and enlarges the thoracic cavity."],
+[3,"During inspiration, the volume of the lungs increases, so the air pressure inside the lungs:","Decreases below atmospheric pressure, so air flows in",["Increases above atmospheric pressure","Stays equal to atmospheric pressure","Becomes zero"],"Bigger volume means lower pressure, creating a partial vacuum that pulls air in."],
+[3,"Why does lung volume increase when the thoracic cavity enlarges?","The lungs adhere to the thoracic walls",["The alveoli actively pump air","The trachea lengthens","The lungs contain skeletal muscle"],"Because of the pleural fluid, the lungs follow the chest wall."],
+[3,"During quiet expiration:","Muscles relax and the elastic lung tissue recoils, raising lung pressure above atmospheric",["Muscles contract to push air out","Lung pressure drops below atmospheric","The diaphragm flattens"],"Smaller volume pushes gas molecules closer together, raising the pressure and forcing air out."],
+[3,"Where is the primary respiratory center?","Medulla",["Pons","Hypothalamus","Cerebellum"],"The medulla is the primary respiratory (and expiratory) center."],
+[3,"The pons contains which respiratory centers?","Apneustic and pneumotaxic",["Inspiratory and expiratory","Cardiac and vasomotor","Thermoregulatory"],"Pons = apneustic and pneumotaxic centers (secondary centers)."],
+[3,"Peripheral chemoreceptors are located in the:","Aortic arch and carotid sinus",["Medulla","Pons","Alveolar walls"],"Peripheral chemoreceptors sense O₂ and CO₂ in the aortic arch and carotid sinus."],
+[3,"Central chemoreceptors in the brain mainly respond to changes in:","H⁺ (from CO₂ + H₂O → H₂CO₃ → H⁺ + HCO₃⁻)",["Blood glucose","Body temperature","Blood pressure"],"CO₂ crosses into brain fluid, forms carbonic acid, and releases H⁺, which the central receptors detect."],
+[3,"Which change would STIMULATE an increase in breathing?","An increase in blood CO₂",["An increase in blood O₂","A decrease in blood H⁺","A decrease in blood CO₂"],"Stimuli: increased CO₂ or H⁺, or decreased O₂."],
+[3,"Vital capacity is:","The maximum amount of air that can be exhaled after a maximum inhalation",["The air left in the lungs after a forced exhale","The air in the conducting passages","Total air the lungs can hold including residual volume"],"Vital capacity = tidal + inspiratory reserve + expiratory reserve volumes."],
+[3,"Residual volume is:","Air that remains in the lungs after a maximal forced exhalation",["Air moved in a normal breath","Extra air forcibly exhaled after a normal exhale","Air in the trachea and bronchi"],"Residual volume can't be exhaled; it keeps the alveoli open."],
+[3,"Expiratory reserve volume is:","Extra air that can be forcibly exhaled after a normal exhalation",["Air remaining after maximal exhalation","Extra air inhaled after a normal inhalation","Air in a normal breath"],"ERV = what you can still push out after a normal breath out."],
+[3,"Anatomical dead space refers to:","Air in the conducting passages that does not take part in gas exchange",["Air left in the lungs after forced exhalation","Collapsed alveoli","The pleural space"],"Dead space air never reaches the alveoli; alveolar ventilation subtracts it."],
+[3,"Total lung capacity equals:","Vital capacity + residual volume",["Tidal volume + residual volume","Vital capacity − residual volume","Inspiratory reserve + expiratory reserve"],"TLC = all volumes added together, including residual volume."],
+
+// 4 Gas transport & disorders
+[4,"How is most oxygen carried in the blood?","About 97% bound to hemoglobin as oxyhemoglobin",["About 97% dissolved in plasma","About 70% as bicarbonate","Mostly as carbaminohemoglobin"],"O₂: 3% in plasma, 97% as oxyhemoglobin."],
+[4,"What percent of oxygen is dissolved in plasma?","3%",["7%","23%","70%"],"Only about 3% of O₂ travels dissolved in plasma."],
+[4,"How is MOST carbon dioxide carried in the blood?","About 70% as bicarbonate (HCO₃⁻) in plasma",["About 70% dissolved in plasma","About 70% as carbaminohemoglobin","About 97% bound to hemoglobin"],"CO₂: 7% dissolved, 23% carbaminohemoglobin, 70% bicarbonate."],
+[4,"About what percent of CO₂ is carried as carbaminohemoglobin?","23%",["7%","70%","3%"],"23% of CO₂ binds to hemoglobin as carbaminohemoglobin."],
+[4,"About what percent of CO₂ is dissolved directly in plasma?","7%",["3%","23%","70%"],"7% of CO₂ is dissolved in plasma."],
+[4,"Which enzyme speeds up CO₂ + H₂O ⇌ H₂CO₃ inside red blood cells?","Carbonic anhydrase",["Pepsin","Lipase","Enterokinase"],"Carbonic anhydrase is part of the chloride shift."],
+[4,"The chloride shift describes:","Bicarbonate leaving red blood cells in exchange for chloride ions entering",["Chloride being secreted into the stomach","Chloride binding to hemoglobin","Oxygen replacing chloride on hemoglobin"],"HCO₃⁻ moves out of the RBC into plasma and Cl⁻ moves in to keep the charges balanced."],
+[4,"The Bohr effect states that a lower pH (more H⁺/CO₂) causes hemoglobin to:","Release O₂ more readily (lower affinity)",["Hold O₂ more tightly","Carry more CO₂ as bicarbonate","Stop binding O₂ entirely"],"Active tissues are acidic, so hemoglobin unloads more O₂ there (curve shifts right)."],
+[4,"A hemoglobin dissociation curve shows the relationship between:","Oxygen partial pressure (PO₂) and percent hemoglobin saturation",["Blood pressure and heart rate","Lung volume and time","pH and temperature"],"It plots % O₂ saturation of hemoglobin against PO₂."],
+[4,"Gas transport in the blood occurs between which two processes?","External and internal respiration",["Inspiration and expiration","Ventilation and digestion","Glycolysis and the Krebs cycle"],"Blood carries gases from the lungs (external) to the tissues (internal)."],
+[4,"Asthma and chronic bronchitis/emphysema (COPD) are examples of:","Obstructive disorders: increased airway resistance",["Restrictive disorders","Metabolic disorders","Temperature disorders"],"Obstructive = trouble getting air OUT because the airways are narrowed."],
+[4,"Pulmonary fibrosis, which reduces how much the lungs can expand, is a(n):","Restrictive disorder",["Obstructive disorder","Digestive disorder","Hormonal disorder"],"Restrictive = reduced lung expansion, which lowers total lung capacity."],
+
+// 5 Digestive overview & tunics
+[5,"The major function of the digestive system is to provide the body with:","Nutrients, water and electrolytes",["Oxygen and hormones","Blood cells","Antibodies"],"Digestive system: nutrients, water, electrolytes."],
+[5,"Absorption is defined as:","Passage of nutrients from the GI tract into the blood",["Breaking food into smaller pieces","Taking food into the mouth","Removing waste via defecation"],"Absorption = GI tract to blood."],
+[5,"Chemical digestion occurs by:","Enzymatic hydrolysis",["Mastication","Churning","Peristalsis"],"Chemical breakdown uses enzymes (hydrolysis); physical breakdown is chewing and churning."],
+[5,"Mechanical (physical) digestion includes:","Mastication (chewing) and churning",["Enzymatic hydrolysis","Absorption into lacteals","Bile production"],"Chewing in the mouth and churning in the stomach."],
+[5,"Elimination of waste occurs via:","Defecation",["Absorption","Ingestion","Emulsification"],"Elimination = waste via defecation."],
+[5,"What is the correct order of the alimentary canal?","Mouth → pharynx → esophagus → stomach → small intestine → large intestine → rectum → anus",["Mouth → esophagus → pharynx → stomach → small intestine → large intestine → anus","Mouth → pharynx → stomach → esophagus → large intestine → small intestine → anus","Mouth → pharynx → esophagus → stomach → large intestine → small intestine → rectum → anus"],"Mouth, pharynx, esophagus, stomach, SI, LI, rectum, anus."],
+[5,"Which is NOT an accessory digestive organ?","Stomach",["Liver","Pancreas","Gallbladder"],"Accessory organs: salivary glands, gallbladder, liver, pancreas. The stomach is part of the alimentary canal."],
+[5,"What is the order of the tunics of the alimentary canal from innermost to outermost?","Mucosa → submucosa → muscularis externa → serosa",["Serosa → muscularis externa → submucosa → mucosa","Submucosa → mucosa → serosa → muscularis externa","Mucosa → muscularis externa → submucosa → serosa"],"Inside to out: mucosa, submucosa, muscularis externa, serosa."],
+[5,"The surface epithelium of the mucosa is mostly:","Simple columnar",["Simple squamous","Pseudostratified columnar","Stratified cuboidal"],"GI mucosa surface = simple columnar epithelium."],
+[5,"The lamina propria of the mucosa is made of:","Connective tissue",["Smooth muscle","Skeletal muscle","Epithelium"],"Lamina propria = connective tissue."],
+[5,"The muscularis mucosae is made of:","Smooth muscle",["Connective tissue","Skeletal muscle","Epithelium"],"Muscularis mucosae = smooth muscle layer of the mucosa."],
+[5,"Which layer is connective tissue containing blood and lymphatic vessels, lymph nodes and nerves?","Submucosa",["Mucosa","Serosa","Muscularis externa"],"Submucosa holds the vessels and nerves."],
+[5,"The muscularis externa is a bilayer of smooth muscle arranged as:","Circular and longitudinal layers",["Two circular layers","Oblique and transverse layers","Skeletal and smooth layers"],"Inner circular and outer longitudinal (the stomach adds an oblique layer)."],
+[5,"The serosa is also called the:","Visceral peritoneum",["Parietal pleura","Adventitia","Mesentery"],"Serosa = visceral peritoneum: mesothelium plus connective tissue."],
+[5,"Outside the abdominopelvic cavity (e.g., the esophagus), the serosa is replaced by:","Adventitia (coarse fibrous connective tissue)",["Mucosa","Skeletal muscle","Peritoneum"],"The esophagus has an adventitia instead of a serosa."],
+
+// 6 Mouth, pharynx, esophagus
+[6,"The uvula is a projection of the:","Soft palate",["Hard palate","Tongue","Epiglottis"],"Uvula = projection of the soft palate."],
+[6,"Which structures are part of the oral cavity?","Hard palate, soft palate, tongue and teeth",["Epiglottis and larynx","Nasal conchae","Vestibular folds"],"Oral cavity: hard palate, soft palate, tongue, teeth."],
+[6,"What is the order of structures at the origin of the alimentary canal?","Labia → vestibule → oral cavity",["Oral cavity → vestibule → labia","Vestibule → labia → oral cavity","Labia → oral cavity → vestibule"],"Labia (lips), then vestibule (between lips/cheeks and teeth), then oral cavity."],
+[6,"The pharynx is described as:","A common passageway for food and air",["A passageway for air only","A passageway for food only","A gland that secretes enzymes"],"The pharynx carries both food and air."],
+[6,"Which part of the pharynx lies behind the nasal cavity?","Nasopharynx",["Oropharynx","Laryngopharynx","Esophagus"],"Nasopharynx = behind the nasal cavity."],
+[6,"The oropharynx extends from the:","Soft palate to the epiglottis",["Epiglottis to the base of the larynx","Nasal cavity to the soft palate","Larynx to the stomach"],"Oropharynx: soft palate to epiglottis."],
+[6,"The laryngopharynx extends from the:","Epiglottis to the base of the larynx",["Soft palate to the epiglottis","Nasal cavity to the soft palate","Esophagus to the stomach"],"Laryngopharynx: epiglottis to base of larynx."],
+[6,"The esophagus lies ______ the trachea.","Behind (posterior to)",["In front of (anterior to)","Lateral to","Inside"],"The esophagus is behind the trachea."],
+[6,"The esophagus runs from the pharynx, through the ______, to the stomach.","Diaphragm",["Larynx","Liver","Pleura"],"It passes through the diaphragm to reach the stomach."],
+[6,"How does the muscle of the esophagus change as it approaches the stomach?","Skeletal muscle is replaced by smooth muscle",["Smooth muscle is replaced by skeletal muscle","It is cardiac muscle throughout","It loses all muscle"],"Upper esophagus is skeletal (voluntary), lower is smooth."],
+[6,"Food moves down the esophagus by:","Peristalsis",["Gravity only","Churning","Segmentation by villi"],"Peristaltic waves move the bolus."],
+
+// 7 Stomach
+[7,"The stomach's main role is the:","Storage and breakdown of food",["Absorption of nearly all nutrients","Reclamation of water","Production of bile"],"Stomach = site for storage and breakdown of food."],
+[7,"Which stomach region contains the sphincter through which food enters from the esophagus?","Cardiac region",["Pylorus","Fundus","Body"],"Cardiac region has the cardiac sphincter."],
+[7,"The expanded (dome-shaped) portion of the stomach is the:","Fundus",["Pylorus","Cardiac region","Body"],"Fundus = expanded portion."],
+[7,"The midportion of the stomach, below the fundus, is the:","Body",["Pylorus","Cardia","Rugae"],"Body = midportion below the fundus."],
+[7,"Which region surrounds the pyloric sphincter and is where most activity occurs?","Pylorus",["Fundus","Cardiac region","Lesser curvature"],"Pylorus: most activity, leads into the duodenum."],
+[7,"The lesser curvature of the stomach is:","Concave and superior",["Convex and inferior","Concave and inferior","Convex and superior"],"Lesser = concave, superior. Greater = convex, inferior."],
+[7,"The greater curvature of the stomach is:","Convex and inferior",["Concave and superior","Convex and superior","Flat and posterior"],"Greater curvature = convex, inferior."],
+[7,"What extra layer of muscularis externa does the stomach have, and why?","An innermost oblique layer that allows churning of food",["An outer skeletal layer for swallowing","A second circular layer for peristalsis","A cartilage layer for support"],"The 3rd oblique layer lets the stomach churn."],
+[7,"The folds of the stomach lining are called:","Rugae",["Villi","Haustra","Plicae circulares"],"Rugae = stomach folds that let it expand."],
+[7,"Which gastric pit cells produce mucus that protects the stomach from self-digestion?","Mucous neck cells",["Parietal cells","Chief cells","Goblet cells of the colon"],"Mucous neck cells make protective mucus."],
+[7,"Parietal cells produce:","HCl and intrinsic factor",["Pepsinogen","Mucus","Gastrin and secretin"],"Parietal = HCl + intrinsic factor (needed for B12 absorption)."],
+[7,"Chief cells produce:","Pepsinogen (protein-digesting enzyme)",["HCl","Intrinsic factor","Amylase"],"Chief cells make pepsinogen, which becomes pepsin."],
+
+// 8 Small intestine
+[8,"The small intestine extends from the:","Pyloric sphincter to the ileocecal valve",["Cardiac sphincter to the pyloric sphincter","Ileocecal valve to the anus","Esophagus to the cecum"],"SI: pyloric sphincter to ileocecal valve."],
+[8,"Where does nearly all nutrient absorption take place?","Small intestine, mostly the proximal end",["Stomach","Large intestine","Esophagus"],"Nearly all absorption happens in the SI, mostly proximally."],
+[8,"The small intestine is suspended by the:","Mesentery (double layer of peritoneum)",["Falciform ligament","Greater omentum","Teniae coli"],"Mesentery suspends the small intestine."],
+[8,"What is the correct order of the 3 sections of the small intestine?","Duodenum → jejunum → ileum",["Jejunum → duodenum → ileum","Ileum → jejunum → duodenum","Duodenum → ileum → jejunum"],"Duodenum, jejunum, ileum (\"DJI\")."],
+[8,"Plicae circulares are:","Deep folds of mucosa and submucosa, most abundant in the duodenum",["Finger-like projections of mucosa","Minute projections on villi","Folds of the stomach lining"],"Plicae circulares = circular folds; they increase surface area."],
+[8,"Villi are:","Finger-like projections of the mucosa",["Deep folds of submucosa","Projections on individual cell membranes","Lymphoid nodules"],"Villi = finger-like projections of the mucosa."],
+[8,"Microvilli are:","Minute projections of the villi (the brush border)",["Finger-like projections of the submucosa","Folds in the stomach","Mucus glands"],"Microvilli are tiny projections on the villus cells."],
+[8,"Which 3 structures increase the surface area of the small intestine?","Plicae circulares, villi and microvilli",["Rugae, haustra and teniae coli","Villi, rugae and crypts","Haustra, villi and Peyer's patches"],"Folds, then villi, then microvilli."],
+[8,"Peyer's patches are:","Lymphoid tissue in the submucosa, most abundant in the ileum",["Mucus glands in the duodenum","Enzyme-producing cells","Fat-absorbing vessels"],"Peyer's patches = immune (lymphoid) tissue, mostly in the ileum."],
+[8,"Duodenal (Brunner's) glands are:","Mucus-producing glands in the submucosa",["Lymphoid tissue in the ileum","Enzyme glands in the pancreas","Acid-producing glands in the stomach"],"Brunner's glands make mucus (alkaline) to protect the duodenum."],
+[8,"A lacteal is:","An extension of a lymphatic vessel in a villus (absorbs fats)",["A milk-digesting enzyme","A mucus-secreting cell","A blood capillary"],"Lacteals are lymphatic capillaries that pick up absorbed fats."],
+[8,"Goblet cells:","Secrete mucus",["Secrete HCl","Produce bile","Produce insulin"],"Goblet cells = mucus."],
+[8,"Intestinal glands (crypts of Lieberkühn) are:","Invaginated mucosa between villi where cells produce intestinal juice",["Mucus glands in the submucosa","Lymphoid patches","Folds of the submucosa"],"Crypts sit between villi and make intestinal juice."],
+[8,"Brush border enzymes are:","Hydrolytic enzymes bound to the microvilli",["Enzymes secreted by the parotid gland","Enzymes made by chief cells","Enzymes stored in the gallbladder"],"Brush border enzymes are attached to the microvilli."],
+[8,"Which of these is a small intestine (brush border) enzyme?","Lactase",["Pepsin","Salivary amylase","Trypsinogen"],"SI enzymes: aminopeptidase, dipeptidase, maltase, lactase, sucrase."],
+[8,"Which enzyme set is produced by the small intestine?","Aminopeptidase, dipeptidase, maltase, lactase, sucrase",["Pepsinogen, HCl, intrinsic factor","Lipase, amylase, trypsinogen, chymotrypsinogen","Salivary amylase and mucin"],"These are the small intestine enzymes from your notes."],
+[8,"The small intestine absorbs vitamins, water and:","Salts",["Bile pigments only","Cellulose","Hemoglobin"],"Absorption: vitamins, water, salts (plus nutrients)."],
+[8,"What does enterokinase do?","Activates trypsinogen into trypsin",["Stimulates bicarbonate secretion","Emulsifies fats","Contracts the gallbladder"],"Enterokinase (from the duodenum) turns on trypsinogen."],
+[8,"Secretin stimulates the pancreas to release:","Sodium bicarbonate",["Digestive enzymes","Insulin","Bile"],"Secretin controls sodium bicarbonate."],
+[8,"Cholecystokinin (CCK) controls:","Release of pancreatic digestive enzymes and gallbladder contraction",["Release of sodium bicarbonate only","HCl secretion","Insulin release"],"CCK = pancreatic enzymes + gallbladder contraction."],
+[8,"Enterogastrone's role is to:","Inhibit gastric secretion and motility",["Stimulate HCl secretion","Activate trypsinogen","Stimulate bile production"],"Enterogastrones slow the stomach down when chyme enters the duodenum."],
+[8,"Intestinal gastrin's role is to:","Stimulate gastric secretion and motility",["Inhibit gastric secretion","Stimulate bile release","Activate pepsinogen in the intestine"],"Gastrin stimulates the stomach (acid secretion and motility)."],
+[8,"The sphincter of Oddi controls:","The flow of bile and pancreatic juice from the ampulla of Vater into the duodenum",["Food entering the stomach","Food leaving the stomach","Feces leaving the rectum"],"The sphincter of Oddi guards the ampulla's opening into the duodenum."],
+
+// 9 Large intestine & peritoneal folds
+[9,"The large intestine extends from the:","Ileocecal valve to the anus",["Pyloric sphincter to the anus","Duodenum to the rectum","Cecum to the sigmoid colon only"],"LI: ileocecal valve to anus."],
+[9,"Intestinal bacteria (E. coli) in the large intestine manufacture which vitamins?","B and K",["A and D","C and E","D and K"],"LI bacteria make vitamins B and K."],
+[9,"Which is NOT a function of the large intestine?","Absorption of nearly all nutrients",["Elimination of fecal matter","Reclaiming remaining water","Making vitamins B and K via bacteria"],"Nutrient absorption is mainly the small intestine's job."],
+[9,"What is the correct order of the colon?","Ascending → hepatic flexure → transverse → splenic flexure → descending → sigmoid",["Ascending → splenic flexure → transverse → hepatic flexure → descending → sigmoid","Descending → transverse → ascending → sigmoid","Sigmoid → ascending → transverse → descending"],"Right side up, across, left side down, then the sigmoid."],
+[9,"The right colic flexure is also called the:","Hepatic flexure",["Splenic flexure","Sigmoid flexure","Cecal flexure"],"Right colic = hepatic (near the liver); left colic = splenic."],
+[9,"The left colic flexure is also called the:","Splenic flexure",["Hepatic flexure","Ileocecal flexure","Rectal flexure"],"Left colic = splenic (near the spleen)."],
+[9,"The vermiform appendix is attached to the:","Cecum",["Sigmoid colon","Duodenum","Rectum"],"The appendix hangs from the cecum."],
+[9,"The internal anal sphincter is:","Smooth muscle, involuntary",["Skeletal muscle, voluntary","Smooth muscle, voluntary","Skeletal muscle, involuntary"],"Internal = smooth, involuntary."],
+[9,"The external anal sphincter is:","Skeletal muscle, voluntary",["Smooth muscle, involuntary","Cardiac muscle","Smooth muscle, voluntary"],"External = skeletal, voluntary."],
+[9,"In the large intestine, the longitudinal muscle of the muscularis externa is reduced to 3 bands called:","Teniae coli",["Haustra","Rugae","Plicae circulares"],"The 3 longitudinal bands are the teniae coli."],
+[9,"Haustra are:","Pocket-like sacs formed because the teniae coli are shorter than the large intestine",["Folds of the stomach","Lymphoid patches in the ileum","Finger-like projections of the mucosa"],"Teniae coli pucker the colon into haustra."],
+[9,"The lesser omentum runs from the:","Liver to the lesser curvature of the stomach",["Greater curvature down over the abdominal organs","Transverse colon to the posterior body wall","Diaphragm to the liver"],"Lesser omentum: liver to lesser curvature."],
+[9,"Which peritoneal fold hangs from the greater curvature like an apron over the abdominal organs?","Greater omentum",["Lesser omentum","Mesocolon","Falciform ligament"],"Greater omentum = apron; blends with the mesocolon."],
+[9,"The mesocolon attaches the:","Transverse colon to the posterior body wall",["Liver to the stomach","Small intestine to the anterior wall","Liver to the diaphragm"],"Mesocolon: transverse colon to posterior body wall."],
+
+// 10 Salivary glands & teeth
+[10,"How many pairs of major salivary glands are there?","3",["2","4","6"],"Parotid, sublingual and submandibular."],
+[10,"Which salivary gland lies anterior to the ear and produces amylase?","Parotid",["Sublingual","Submandibular","Pancreas"],"Parotid = in front of the ear."],
+[10,"Salivary amylase digests:","Starch into sugars",["Proteins into amino acids","Fats into fatty acids","Nucleic acids"],"Amylase: starch to sugars."],
+[10,"Which salivary gland is under the tongue toward the FRONT?","Sublingual",["Submandibular","Parotid","Palatine"],"Sublingual = under the tongue, in front."],
+[10,"Which salivary gland is under the tongue toward the BACK (also called submaxillary)?","Submandibular",["Sublingual","Parotid","Thyroid"],"Submandibular (submaxillary) = under the tongue, in back."],
+[10,"What does mucin in saliva do?","Moistens food and helps bind it into a bolus",["Digests starch","Kills all bacteria","Neutralizes stomach acid"],"Mucin makes the food slippery and holds it together as a bolus."],
+[10,"How many deciduous (milk) teeth are there in total?","20",["32","28","24"],"Formula 2,1,0,2 × 2 (sides) × 2 (jaws) = 20."],
+[10,"How many permanent teeth are there in total?","32",["20","28","30"],"Formula 2,1,2,3 × 2 × 2 = 32."],
+[10,"The deciduous dental formula (incisors, canine, premolars, molars) for one side of one jaw is:","2, 1, 0, 2",["2, 1, 2, 3","2, 1, 2, 2","1, 1, 0, 2"],"Kids have no premolars."],
+[10,"The permanent dental formula (incisors, canine, premolars, molars) for one side of one jaw is:","2, 1, 2, 3",["2, 1, 0, 2","2, 2, 2, 2","3, 1, 2, 2"],"Adults: 2 incisors, 1 canine, 2 premolars, 3 molars."],
+[10,"Which tooth type is ABSENT in the deciduous set?","Premolars (bicuspids)",["Incisors","Canines","Molars"],"Deciduous premolars = 0."],
+[10,"The canine tooth is also called the:","Eyetooth",["Bicuspid","Wisdom tooth","Incisor"],"Canine = eyetooth; premolar = bicuspid."],
+[10,"The dental formula describes the teeth in:","One side of one jaw",["The entire mouth","Both sides of one jaw","The upper jaw only, both sides"],"The formula shows one side of the jaw, which is why you multiply."],
+[10,"The hardest substance in the body is:","Enamel",["Dentin","Cementum","Compact bone"],"Enamel covers the crown and is the hardest substance in the body."],
+[10,"The part of the tooth covered by enamel is the:","Crown",["Root","Neck","Pulp cavity"],"The crown is covered by enamel."],
+[10,"The constricted area of a tooth between crown and root is the:","Neck",["Apical foramen","Gingiva","Root canal"],"Neck = constricted area."],
+[10,"What forms the bulk of the tooth?","Dentin (a bone-like material)",["Enamel","Cementum","Pulp"],"Dentin is the bulk of the tooth."],
+[10,"Which cells at the outer margin of the pulp cavity produce dentin?","Odontoblasts",["Osteoclasts","Ameloblasts","Kupffer cells"],"Odontoblasts make dentin."],
+[10,"What holds a tooth in its socket?","Periodontal ligament",["Gingiva","Enamel","Apical foramen"],"The periodontal ligament anchors the tooth."],
+[10,"Cementum:","Covers the root and attaches the tooth to the periodontal ligament",["Covers the crown","Forms the bulk of the tooth","Fills the pulp cavity"],"Cementum is on the root."],
+[10,"The pulp cavity contains:","Connective tissue with blood vessels, nerves and lymphatics",["Enamel","Only dentin","Air"],"Pulp = soft tissue with vessels and nerves."],
+[10,"The opening at the apex of the root is the:","Apical foramen",["Root canal","Gingival sulcus","Pulp chamber"],"Apical foramen = opening at the root tip."],
+[10,"The gingiva is the:","Gum",["Root covering","Tooth crown","Pulp"],"Gingiva = gum."],
+
+// 11 Liver & gallbladder
+[11,"The largest gland in the body is the:","Liver",["Pancreas","Thyroid","Parotid gland"],"The liver is the largest gland."],
+[11,"The liver produces bile, which:","Emulsifies fat",["Digests protein","Digests starch","Neutralizes bicarbonate"],"Bile breaks fat into small droplets (emulsification); it is not an enzyme."],
+[11,"The 4 lobes of the human liver are:","Left, right, caudate and quadrate",["Superior, middle, inferior and caudate","Left, right, anterior and posterior","Right, left, hepatic and portal"],"Left, right, caudate, quadrate."],
+[11,"The liver is suspended from the diaphragm and anterior abdominal wall by the:","Falciform ligament",["Lesser omentum","Mesentery","Periodontal ligament"],"Falciform ligament."],
+[11,"The functional unit of the liver is the:","Lobule",["Nephron","Acinus of the pancreas","Alveolus"],"Liver lobule = functional unit."],
+[11,"The portal triad found at each of the 6 corners of a liver lobule contains:","A hepatic artery branch, a hepatic portal vein branch and a bile duct",["A central vein, a sinusoid and a lacteal","Three hepatic veins","A hepatic artery, a central vein and a lymph node"],"Portal triad = hepatic artery, hepatic portal vein, bile duct."],
+[11,"The hepatic artery carries ______ to the liver.","Oxygen-rich (functional) blood",["Nutrient-rich blood from the digestive organs","Bile","Deoxygenated blood from the heart"],"The hepatic artery supplies oxygenated blood to the liver tissue itself."],
+[11,"The hepatic portal vein carries:","Nutrient-rich blood from the digestive viscera to the liver",["Oxygen-rich blood from the aorta","Bile to the gallbladder","Blood from the liver to the heart"],"The portal vein brings absorbed nutrients to the liver first."],
+[11,"Glucose brought to the liver via the hepatic portal vein is stored as:","Glycogen",["Fat only","Protein","Bile"],"The liver stores glucose as glycogen."],
+[11,"Bile canaliculi:","Drain bile from liver cells into the bile ducts",["Carry blood to the central vein","Are phagocytic cells","Store bile"],"Canaliculi = tiny bile channels between liver cells."],
+[11,"Sinusoids in the liver:","Run between liver cells, carry blood from the portal vein and hepatic artery, and drain into the central vein",["Carry bile to the gallbladder","Are lymphatic vessels","Produce bile"],"Sinusoids drain into the central vein."],
+[11,"Kupffer cells are:","Phagocytic cells lining the sinusoids that remove debris such as bacteria",["Cells that produce bile","Cells that produce insulin","Mucus-secreting cells"],"Kupffer cells = liver macrophages."],
+[11,"The gallbladder is responsible for:","Storage of bile",["Production of bile","Production of insulin","Absorption of fat"],"The liver makes bile; the gallbladder stores it."],
+[11,"The gallbladder is located on the:","Inferior surface of the liver",["Superior surface of the liver","Posterior wall of the stomach","Head of the pancreas"],"Inferior surface of the liver."],
+[11,"What causes the gallbladder to contract and release bile?","A hormonal stimulus (CCK) when fat-rich food enters the duodenum",["Starch entering the mouth","Low blood glucose","Nervous signal from the medulla only"],"Fatty food in the duodenum triggers CCK, so the gallbladder contracts."],
+
+// 12 Pancreas & bile pathway
+[12,"The pancreas is both:","An endocrine and an exocrine gland",["Only an endocrine gland","Only an exocrine gland","A lymphoid organ"],"Endocrine: insulin and glucagon. Exocrine: digestive enzymes."],
+[12,"Insulin and glucagon are produced by the:","Islets of Langerhans",["Acinar cells of the liver","Chief cells","Crypts of Lieberkühn"],"Pancreatic islets make the hormones."],
+[12,"Which group is all pancreatic enzymes?","Lipase, amylase, trypsinogen, chymotrypsinogen, procarboxypeptidase",["Pepsinogen, HCl, intrinsic factor","Lactase, sucrase, maltase","Salivary amylase and mucin"],"The pancreas also makes ribonuclease and deoxyribonuclease."],
+[12,"Pancreatic lipase digests:","Fats",["Starch","Proteins","DNA"],"Lipase = fat."],
+[12,"Ribonuclease and deoxyribonuclease digest:","Nucleic acids (RNA and DNA)",["Proteins","Fats","Carbohydrates"],"Nucleases break down nucleic acids."],
+[12,"Trypsinogen, chymotrypsinogen and procarboxypeptidase are inactive forms of enzymes that digest:","Proteins",["Fats","Carbohydrates","Nucleic acids"],"They are protein-digesting enzymes released in inactive form."],
+[12,"Pancreatic juice is very alkaline because of:","Sodium bicarbonate",["HCl","Bile salts","Pepsin"],"Sodium bicarbonate neutralizes acidic chyme."],
+[12,"Chyme is:","The acidic, creamy food mass coming from the stomach",["Saliva mixed with food in the mouth","Bile stored in the gallbladder","Feces in the colon"],"Chyme = creamy food mass from the stomach."],
+[12,"Pancreatic enzymes travel through the ______ into the duodenum.","Pancreatic duct",["Cystic duct","Hepatic duct","Thoracic duct"],"Enzymes go through the pancreatic duct."],
+[12,"Bile made in the liver first flows through the bile canaliculi into the:","Hepatic duct",["Cystic duct","Pancreatic duct","Ampulla of Vater"],"Liver → bile canaliculi → hepatic duct."],
+[12,"Bile reaches the gallbladder for storage through the:","Cystic duct",["Pancreatic duct","Common hepatic artery","Sphincter of Oddi"],"Hepatic duct → cystic duct → gallbladder."],
+[12,"The hepatic duct and cystic duct join to form the:","Common bile duct",["Pancreatic duct","Ampulla of Vater","Thoracic duct"],"Hepatic + cystic = common bile duct."],
+[12,"The common bile duct and the pancreatic duct join to form the:","Hepatopancreatic duct / ampulla of Vater",["Cystic duct","Hepatic duct","Ileocecal valve"],"They merge at the hepatopancreatic ampulla (ampulla of Vater)."],
+[12,"What is the correct order of the bile pathway after the common bile duct?","Hepatopancreatic duct → ampulla of Vater → sphincter of Oddi → duodenum",["Sphincter of Oddi → ampulla of Vater → hepatopancreatic duct → duodenum","Cystic duct → hepatic duct → duodenum","Ampulla of Vater → pancreatic duct → stomach"],"Common bile duct → hepatopancreatic duct → ampulla of Vater → sphincter of Oddi → duodenum."],
+
+// 13 Energy production & absorptive state
+[13,"The main product of cellular respiration used to do the work of the cell is:","ATP",["Glucose","Glycogen","Bile"],"Cellular respiration makes ATP."],
+[13,"Which stage of cellular respiration splits glucose and does NOT require oxygen?","Glycolysis",["Krebs cycle","Electron transport chain","Oxidative phosphorylation"],"Glycolysis is the first step and is anaerobic."],
+[13,"Oxidative phosphorylation, which makes most ATP and requires O₂, occurs during:","The Krebs cycle / electron transport chain",["Glycolysis","Glycogenesis","Deamination"],"Krebs cycle + electron transport + O₂ = oxidative phosphorylation."],
+[13,"Energy is stored in fats in the form of:","Glycerol and fatty acids (triglycerides)",["Glycogen","Amino acids","Glucose"],"Fats = glycerol + fatty acids."],
+[13,"In the absorptive state, carbohydrates (glucose) are stored as glycogen in the:","Liver and skeletal muscles",["Pancreas and stomach","Adipose tissue only","Brain"],"Glycogen is stored in the liver and skeletal muscles."],
+[13,"In the absorptive state, excess carbohydrates can be converted to fat in the:","Liver and adipose tissue",["Skeletal muscle and brain","Stomach","Kidneys"],"Carb to fat conversion: liver and adipose tissue."],
+[13,"In the absorptive state, absorbed lipids are mainly used for:","Synthesis of fat in adipose tissue",["Glycogen storage","Making hemoglobin","Producing bile in the gallbladder"],"Lipids are mostly stored as fat in adipose tissue."],
+[13,"Which lipoprotein carries dietary lipids from the intestine into the lymph?","Chylomicrons",["HDL","LDL","VLDL"],"Chylomicrons are made in intestinal cells and enter the lacteals."],
+[13,"In the absorptive state, amino acids are mainly used to:","Build body proteins (structural and enzymatic)",["Make glycogen","Make bile","Produce ketones"],"Amino acids build proteins; excess can be converted to fat."],
+[13,"Which hormone controls the absorptive (fed) state?","Insulin",["Glucagon","Epinephrine","Cortisol"],"Insulin promotes uptake and storage of nutrients."],
+[13,"Which of these lists the 6 nutrient classes?","Carbohydrates, lipids, proteins, water, vitamins, minerals",["Carbohydrates, lipids, ATP, glucose, vitamins, bile","Proteins, enzymes, hormones, vitamins, minerals, water","Glucose, glycogen, fat, protein, oxygen, CO₂"],"Vitamins (fat- and water-soluble) and minerals finish the list."],
+[13,"Which vitamins are fat-soluble?","A, D, E and K",["B and C","C and K","B, D and E"],"Fat-soluble: A, D, E, K. Water-soluble: B vitamins and C."],
+
+// 14 Post-absorptive & metabolic rate
+[14,"Glycogenolysis is:","The breakdown of glycogen into glucose",["The formation of glycogen from glucose","Making new glucose from non-carbohydrates","Breaking down fatty acids"],"-lysis = splitting; glycogen to glucose."],
+[14,"In the post-absorptive state, which organ releases glucose into the blood for systemic use?","Liver",["Skeletal muscle","Adipose tissue","Brain"],"Liver glycogen is released as blood glucose; skeletal muscle uses its glycogen for itself."],
+[14,"Gluconeogenesis is:","Making new glucose from non-carbohydrate sources (glycerol, amino acids)",["Breaking down glycogen","Storing glucose as fat","Breaking glucose into pyruvate"],"Gluco-neo-genesis = new glucose."],
+[14,"During fat mobilization, glycerol is:","Used by cells in cellular respiration (and converted to glucose)",["Stored as glycogen in muscle","Converted directly to bile","Excreted unchanged"],"Glycerol enters cellular respiration and gluconeogenesis."],
+[14,"Fatty acids released during fat mobilization undergo:","Beta oxidation to acetyl CoA / ketones",["Glycolysis","Deamination","Emulsification"],"Beta oxidation makes acetyl CoA; excess forms ketones."],
+[14,"Deamination of amino acids (removing the amino group) takes place in the:","Liver",["Stomach","Pancreas","Lungs"],"The liver deaminates amino acids so they can be used for energy."],
+[14,"Which hormone does NOT promote the post-absorptive (fasting) state?","Insulin",["Glucagon","Epinephrine","Glucocorticoids"],"Post-absorptive: glucagon, epinephrine, glucocorticoids, thyroxine, growth hormone. Insulin runs the fed state."],
+[14,"Which list of hormones controls the post-absorptive state?","Glucagon, epinephrine, glucocorticoids, thyroxine, growth hormone",["Insulin, secretin, CCK","Insulin, gastrin, glucagon","Aldosterone, ADH, insulin"],"Straight from your notes."],
+[14,"Anabolism refers to:","Building larger molecules from smaller ones (uses energy)",["Breaking molecules down to release energy","Removing amino groups","Heat loss through sweating"],"Anabolism builds; catabolism breaks down."],
+[14,"Catabolism refers to:","Breaking down molecules, releasing energy",["Building proteins from amino acids","Storing glycogen","Absorbing nutrients"],"Catabolism = breakdown."],
+[14,"A food Calorie (capital C) is equal to:","1,000 calories (1 kilocalorie)",["1 calorie","100 calories","10 calories"],"Calorie (kcal) = 1,000 calories."],
+[14,"For every 1 L of O₂ used, the body produces/consumes about:","4.8 Calories",["1 Calorie","9 Calories","48 Calories"],"1 L O₂ ≈ 4.8 Cal, which is how metabolic rate is measured from O₂ consumption."],
+[14,"Which relationship lets metabolic rate be measured indirectly?","Food/calorie intake : oxygen consumption : heat production",["Heart rate : blood pressure : urine output","Bile production : fat absorption","Tidal volume : vital capacity"],"O₂ consumed in cellular respiration is proportional to heat (Calories) produced."],
+[14,"Basal metabolic rate (BMR) is:","The energy used at rest, awake, after fasting, at a comfortable temperature",["The energy used during maximal exercise","The rate of glycogen storage","The amount of food eaten per day"],"BMR = minimum energy to keep the body alive at rest."],
+
+// 15 Temperature regulation & complications
+[15,"Which brain region acts as the body's thermostat?","Hypothalamus",["Medulla","Pons","Cerebellum"],"The hypothalamus holds the temperature set point."],
+[15,"The normal temperature set point is:","98.6 °F / 37 °C",["99.6 °F / 38 °C","96.8 °F / 36 °C","100.4 °F / 38 °C"],"Set point: 98.6 °F / 37 °C."],
+[15,"When body temperature drops BELOW the set point, the body responds with:","Shivering and vasoconstriction of superficial vessels",["Sweating and vasodilation","Sweating and vasoconstriction","Shivering and vasodilation"],"Too cold: make heat (shiver) and keep it (constrict skin vessels)."],
+[15,"When body temperature rises ABOVE the set point, the body responds with:","Sweating and vasodilation of superficial vessels",["Shivering and vasoconstriction","Shivering and vasodilation","Vasoconstriction only"],"Too hot: lose heat by sweating and dilating skin vessels."],
+[15,"A fever occurs when:","Pyrogens raise the hypothalamus' set point",["The hypothalamus is destroyed","Sweating stops permanently","The body loses its set point"],"Pyrogens reset the thermostat higher."],
+[15,"Sweating cools the body mainly by which mechanism of heat loss?","Evaporation",["Conduction","Radiation","Convection"],"Heat is lost as sweat evaporates. Other mechanisms: radiation, conduction, convection."],
+[15,"Heat transfer by direct contact with a cooler object (e.g., sitting on cold metal) is:","Conduction",["Radiation","Evaporation","Convection"],"Conduction = direct contact."],
+[15,"Vasoconstriction of superficial vessels helps the body:","Conserve heat",["Lose heat","Produce sweat","Raise the set point"],"Less blood to the skin means less heat lost."],
+[15,"Diabetes mellitus results from:","Lack of insulin or resistance to insulin, causing high blood glucose",["Too much insulin","Lack of glucagon","Lack of bile"],"Without insulin action, glucose cannot enter cells."],
+[15,"In uncontrolled diabetes, excessive fat breakdown produces ketones, which can lead to:","Metabolic acidosis",["Metabolic alkalosis","Respiratory alkalosis","Hypothermia"],"Ketones are acids, so blood pH drops."],
+[15,"Which lipoprotein is considered 'good cholesterol' because it carries cholesterol back to the liver?","HDL",["LDL","VLDL","Chylomicron"],"HDL = good (carries cholesterol away to the liver). LDL = 'bad' (deposits cholesterol in arteries)."],
+[15,"High levels of which lipoprotein are linked to atherosclerosis (plaque in arteries)?","LDL",["HDL","Albumin","Hemoglobin"],"LDL delivers cholesterol to tissues and arteries."],
+[15,"Loss of parietal cells (no intrinsic factor) leads to a deficiency of:","Vitamin B12 (pernicious anemia)",["Vitamin K","Vitamin D","Vitamin C"],"Intrinsic factor is needed to absorb B12."],
+[15,"A deficiency of vitamin K (normally partly made by colon bacteria) mainly affects:","Blood clotting",["Vision","Bone calcium only","Collagen formation"],"Vitamin K is needed for clotting factors."]
+];
+
+
+// ---------- Core 50: the highest-yield, most commonly tested points ----------
+const CORE_PREFIXES = [
+"External respiration is gas exchange between","Internal respiration takes place at","What do the nasal conchae do?",
+"Which is NOT one of the 3 main functions of the larynx?","The largest, shield-shaped","All laryngeal cartilages are hyaline cartilage EXCEPT",
+"Why are the tracheal cartilage rings C-shaped?","Where is the FIRST site of gas exchange?","The respiratory membrane, the site of gas exchange",
+"What is the role of the serous fluid in the pleural space?","During inspiration, the volume of the lungs increases","Where is the primary respiratory center?",
+"Peripheral chemoreceptors are located in the","Which change would STIMULATE an increase in breathing?","How is most oxygen carried in the blood?",
+"How is MOST carbon dioxide carried in the blood?","The Bohr effect","The chloride shift describes",
+"What is the order of the tunics","How does the muscle of the esophagus change","Parietal cells produce","Chief cells produce",
+"What extra layer of muscularis externa","What is the correct order of the 3 sections","Which 3 structures increase the surface area",
+"A lacteal is","Peyer's patches are","Secretin stimulates","Cholecystokinin (CCK) controls","What does enterokinase do?",
+"Intestinal bacteria (E. coli)","In the large intestine, the longitudinal muscle","Which salivary gland lies anterior to the ear",
+"How many permanent teeth","What forms the bulk of the tooth?","The portal triad found","Kupffer cells are","The liver produces bile, which",
+"Pancreatic juice is very alkaline","What is the correct order of the bile pathway",
+"Which hormone controls the absorptive (fed) state?","Glycogenolysis is","Gluconeogenesis is","Which hormone does NOT promote the post-absorptive",
+"For every 1 L of O₂ used","Basal metabolic rate (BMR) is","When body temperature drops BELOW","A fever occurs when",
+"In uncontrolled diabetes","Which lipoprotein is considered 'good cholesterol'"
+];
+const CORE = CORE_PREFIXES.map(pre => Q.findIndex(q => q[1].startsWith(pre)));
+
+// ---------- State ----------
+const LETTERS = "ABCD";
+let quiz = null;          // {items:[{i,opts,correctIdx}], pos, answers:[]}
+let attempts = [];        // saved attempts, newest first
+let db = null;
+const LS_KEY = "bio426_attempts_v1";
+
+const $ = id => document.getElementById(id);
+const show = id => ["start","quiz","results"].forEach(s => $(s).classList.toggle("hidden", s !== id));
+const shuffle = a => { a = a.slice(); for (let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]];} return a; };
+const esc = s => String(s).replace(/[&<>"]/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+const fmtDate = ts => new Date(ts).toLocaleString([], {month:"short",day:"numeric",year:"numeric",hour:"numeric",minute:"2-digit"});
+const level = p => p >= 80 ? ["s","Strong"] : p >= 60 ? ["r","Review"] : ["w","Study this"];
+
+// ---------- Start screen ----------
+$("bankCount").textContent = `40 random questions from the full ${Q.length}-question bank`;
+$("coreBtn").onclick = () => startQuiz(CORE, "Core 50 exam", true);
+const unlocked = () => attempts.some(a => a.core && a.complete);
+$("topicList").innerHTML = TOPICS.map((t,i) => {
+  const n = Q.filter(q => q[0]===i).length;
+  return `<label><input type="checkbox" value="${i}" checked> ${esc(t)} <span class="note">(${n})</span></label>`;
+}).join("");
+
+document.querySelectorAll(".mode").forEach(b => b.addEventListener("click", () => {
+  if (!unlocked()) return;
+  const m = b.dataset.mode;
+  if (m === "topics") { $("topicPick").classList.toggle("hidden"); return; }
+  if (m === "quick") startQuiz(shuffle(Q.map((_,i)=>i)).slice(0,40), "Random 40");
+  if (m === "missed") {
+    const last = attempts[0];
+    if (last && last.missedIds && last.missedIds.length) startQuiz(last.missedIds.filter(i=>Q[i]), "Retry missed");
+  }
+}));
+$("startTopics").onclick = () => {
+  const sel = [...document.querySelectorAll("#topicList input:checked")].map(x=>+x.value);
+  if (!sel.length) return;
+  startQuiz(Q.map((_,i)=>i).filter(i => sel.includes(Q[i][0])), sel.length===TOPICS.length ? "All topics" : "Topic drill");
+};
+$("allTopics").onclick = () => document.querySelectorAll("#topicList input").forEach(x=>x.checked=true);
+$("noTopics").onclick = () => document.querySelectorAll("#topicList input").forEach(x=>x.checked=false);
+
+function renderHistory(){
+  const h = $("history");
+  const open = unlocked();
+  document.querySelectorAll(".mode").forEach(b => { b.disabled = !open; b.classList.toggle("locked", !open); });
+  $("lockTag").className = "lvl " + (open ? "s" : "w");
+  $("lockTag").textContent = open ? "Unlocked" : "🔒 Locked";
+  $("lockNote").textContent = open ? "You finished the core exam. Use these to drill weak spots with the full question bank." : "Finish all 50 questions of the core exam to unlock these.";
+  if (!open) $("topicPick").classList.add("hidden");
+  const last = attempts[0];
+  const mb = $("missedBtn");
+  if (last && last.missedIds && last.missedIds.length) {
+    mb.disabled = !open; $("missedInfo").textContent = `${last.missedIds.length} questions you missed on ${fmtDate(last.ts)}`;
+  } else {
+    mb.disabled = true; $("missedInfo").textContent = attempts.length ? "You didn't miss any last time!" : "Finish a test first";
+  }
+  if (!attempts.length) { h.innerHTML = `<p class="note">No attempts yet. Take a test and your results will show up here.</p>`; $("weakOverall").innerHTML=""; return; }
+  h.innerHTML = attempts.map((a,k) => {
+    const p = Math.round(100*a.correct/a.total);
+    const [c,l] = level(p);
+    return `<button data-k="${k}"><span><b>${p}%</b> &nbsp;${a.correct}/${a.total} · ${esc(a.mode)}</span><span class="note">${fmtDate(a.ts)} &nbsp;<span class="lvl ${c}">${l}</span></span></button>`;
+  }).join("");
+  h.querySelectorAll("button").forEach(b => b.onclick = () => showResults(attempts[+b.dataset.k], false));
+
+  // Combined weak areas across all attempts
+  const agg = TOPICS.map(()=>[0,0]);
+  attempts.forEach(a => (a.topics||[]).forEach((t,i) => { if (t && agg[i]) { agg[i][0]+=t[0]; agg[i][1]+=t[1]; } }));
+  const ranked = agg.map((t,i)=>({i,c:t[0],n:t[1],p:t[1]?Math.round(100*t[0]/t[1]):null})).filter(x=>x.n).sort((a,b)=>a.p-b.p);
+  if (ranked.length) {
+    $("weakOverall").innerHTML = `<h2>All attempts combined</h2><div class="card"><table>${topicRows(ranked)}</table></div>`;
+  }
+}
+
+function topicRows(ranked){
+  return `<tr><th>Topic</th><th>Score</th><th style="width:30%"></th><th></th></tr>` + ranked.map(x => {
+    const [c,l] = level(x.p);
+    const col = c==="s"?"var(--good)":c==="r"?"var(--warn)":"var(--bad)";
+    return `<tr><td>${esc(TOPICS[x.i])}</td><td>${x.c}/${x.n} (${x.p}%)</td><td><div class="bar"><div style="width:${x.p}%;background:${col}"></div></div></td><td><span class="lvl ${c}">${l}</span></td></tr>`;
+  }).join("");
+}
+
+// ---------- Quiz ----------
+function startQuiz(ids, mode, core){
+  const items = shuffle(ids).map(i => {
+    const [, , right, wrong] = Q[i];
+    const opts = shuffle([right, ...wrong]);
+    return {i, opts, correctIdx: opts.indexOf(right)};
+  });
+  $("quitBtn").textContent = "Finish early"; delete $("quitBtn").dataset.warned;
+  quiz = {mode, core: !!core, items, pos:0, answers:[]};
+  show("quiz"); renderQ();
+  window.scrollTo(0,0);
+}
+
+function renderQ(){
+  const it = quiz.items[quiz.pos], q = Q[it.i];
+  const right = quiz.answers.filter(a=>a.ok).length;
+  $("qNum").textContent = `Question ${quiz.pos+1} of ${quiz.items.length}`;
+  $("qScore").textContent = quiz.answers.length ? `${right}/${quiz.answers.length} correct so far` : "";
+  $("qBar").style.width = (100*quiz.pos/quiz.items.length) + "%";
+  $("qTopic").textContent = TOPICS[q[0]];
+  $("qText").textContent = q[1];
+  $("qFb").innerHTML = "";
+  $("nextBtn").disabled = true;
+  $("nextBtn").textContent = quiz.pos === quiz.items.length-1 ? "See results" : "Next";
+  $("qOpts").innerHTML = it.opts.map((o,k)=>`<button class="opt" data-k="${k}"><span class="k">${LETTERS[k]}</span>${esc(o)}</button>`).join("");
+  $("qOpts").querySelectorAll(".opt").forEach(b => b.onclick = () => answer(+b.dataset.k));
+}
+
+function answer(k){
+  const it = quiz.items[quiz.pos], q = Q[it.i];
+  if (quiz.answers.length > quiz.pos) return;
+  const ok = k === it.correctIdx;
+  quiz.answers.push({i:it.i, ok, your: it.opts[k]});
+  const btns = $("qOpts").querySelectorAll(".opt");
+  btns.forEach((b,j) => { b.disabled = true; if (j===it.correctIdx) b.classList.add("correct"); else if (j===k) b.classList.add("wrong"); });
+  $("qFb").innerHTML = `<div class="fb ${ok?"good":"bad"}"><b>${ok?"Correct!":"Not quite."}</b> ${ok?"":"Answer: <b>"+esc(q[2])+"</b>. "}${esc(q[4])}</div>`;
+  $("nextBtn").disabled = false;
+  $("nextBtn").focus();
+}
+
+$("nextBtn").onclick = () => {
+  if (quiz.pos < quiz.items.length-1) { quiz.pos++; renderQ(); window.scrollTo(0,0); }
+  else finish();
+};
+$("quitBtn").onclick = () => {
+  if (!quiz.answers.length) { show("start"); return; }
+  if (quiz.core && !$("quitBtn").dataset.warned) { $("quitBtn").dataset.warned = "1"; $("quitBtn").textContent = "Finish early (won't unlock extras)"; return; }
+  finish();
+};
+document.addEventListener("keydown", e => {
+  if ($("quiz").classList.contains("hidden")) return;
+  const k = "abcd1234".indexOf(e.key.toLowerCase());
+  if (k >= 0 && quiz.answers.length === quiz.pos) answer(k % 4);
+  else if (e.key === "Enter" && !$("nextBtn").disabled) $("nextBtn").click();
+});
+
+// ---------- Finish & results ----------
+function finish(){
+  const ans = quiz.answers;
+  const topics = TOPICS.map(()=>[0,0]);
+  ans.forEach(a => { const t = Q[a.i][0]; topics[t][1]++; if (a.ok) topics[t][0]++; });
+  const missed = ans.filter(a=>!a.ok);
+  const attempt = {
+    ts: Date.now(),
+    mode: quiz.mode + (ans.length < quiz.items.length ? " (finished early)" : ""),
+    core: quiz.core,
+    complete: ans.length === quiz.items.length,
+    total: ans.length,
+    correct: ans.length - missed.length,
+    topics,
+    missedIds: missed.map(a=>a.i),
+    missed: missed.map(a=>({q:Q[a.i][1], your:a.your, right:Q[a.i][2], ex:Q[a.i][4], t:Q[a.i][0]}))
+  };
+  attempts.unshift(attempt);
+  showResults(attempt, true);
+  saveAttempt(attempt);
+}
+
+function showResults(a, fresh){
+  show("results"); window.scrollTo(0,0);
+  const p = a.total ? Math.round(100*a.correct/a.total) : 0;
+  $("rTitle").textContent = fresh ? "Your results" : "Saved attempt";
+  $("rDate").textContent = `${a.mode} · ${fmtDate(a.ts)}`;
+  $("rPct").textContent = p + "%";
+  $("rCorrect").textContent = a.correct;
+  $("rWrong").textContent = a.total - a.correct;
+  if (!fresh) $("rSave").textContent = "";
+  if (fresh && a.core && a.complete) $("rDate").textContent += " · Extra practice is now unlocked";
+
+  const ranked = a.topics.map((t,i)=>({i,c:t[0],n:t[1],p:t[1]?Math.round(100*t[0]/t[1]):null})).filter(x=>x.n).sort((x,y)=>x.p-y.p);
+  $("rTable").innerHTML = topicRows(ranked);
+
+  const weak = ranked.filter(x=>x.p<60), review = ranked.filter(x=>x.p>=60&&x.p<80), strong = ranked.filter(x=>x.p>=80).reverse();
+  let s = `<h3>What to study</h3>`;
+  if (weak.length) s += `<p style="margin:8px 0 2px"><b style="color:var(--bad)">Start studying these first:</b></p><ul class="study">${weak.map(x=>`<li>${esc(TOPICS[x.i])} (${x.p}%)</li>`).join("")}</ul>`;
+  if (review.length) s += `<p style="margin:10px 0 2px"><b style="color:var(--warn)">Review next:</b></p><ul class="study">${review.map(x=>`<li>${esc(TOPICS[x.i])} (${x.p}%)</li>`).join("")}</ul>`;
+  if (strong.length) s += `<p style="margin:10px 0 2px"><b style="color:var(--good)">You know these well:</b></p><ul class="study">${strong.map(x=>`<li>${esc(TOPICS[x.i])} (${x.p}%)</li>`).join("")}</ul>`;
+  $("rStudy").innerHTML = s;
+
+  $("rMissed").innerHTML = a.missed.length ? a.missed.map(m => `
+    <div class="miss">
+      <div class="note">${esc(TOPICS[m.t])}</div>
+      <div><b>${esc(m.q)}</b></div>
+      <div class="yours">✗ Your answer: ${esc(m.your)}</div>
+      <div class="right">✓ Correct: ${esc(m.right)}</div>
+      <div class="ex">${esc(m.ex)}</div>
+    </div>`).join("") : `<div class="card">You didn't miss any questions. Nice work!</div>`;
+  $("retryMissed").classList.toggle("hidden", !a.missedIds.length);
+  $("retryMissed").onclick = () => startQuiz(a.missedIds.filter(i=>Q[i]), "Retry missed");
+}
+
+$("homeBtn").onclick = () => { renderHistory(); show("start"); window.scrollTo(0,0); };
+
+// ---------- Saving ----------
+function lsLoad(){ try { return JSON.parse(localStorage.getItem(LS_KEY)||"[]"); } catch(e){ return []; } }
+function lsSave(){ try { localStorage.setItem(LS_KEY, JSON.stringify(attempts.slice(0,100))); } catch(e){} }
+
+async function saveAttempt(a){
+  lsSave();
+  if (!db) { $("rSave").textContent = "Saved in this browser."; renderHistory(); return; }
+  $("rSave").textContent = "Saving to your account…";
+  try {
+    await db.collection("attempts").doc("a" + a.ts).set(a);
+    $("rSave").textContent = "✓ Saved to your account. It will show under Saved attempts on any device.";
+  } catch(e) {
+    $("rSave").textContent = "Couldn't save to your account, so it was saved in this browser only.";
+  }
+  renderHistory();
+}
+
+function mergeAttempts(list){
+  const byTs = new Map();
+  [...attempts, ...list].forEach(a => { if (a && a.ts) byTs.set(a.ts, a); });
+  attempts = [...byTs.values()].sort((x,y)=>y.ts-x.ts);
+}
+
+attempts = lsLoad();
+renderHistory();
+
+(async () => {
+  try {
+    if (!window.claude || !window.claude.use) return;
+    db = await window.claude.use("db");
+    if (!db) return;
+    const timer = setTimeout(() => {
+      if (!attempts.length) $("history").innerHTML = `<p class="note">Couldn't reach your saved attempts yet. New results will still be saved.</p>`;
+    }, 10000);
+    const snap = await db.collection("attempts").orderBy("ts","desc").limit(200).get();
+    clearTimeout(timer);
+    mergeAttempts(snap.docs.map(d => d.data()));
+    renderHistory();
+  } catch(e) { /* fall back to browser storage */ }
+})();
+</script>
+</body>
+</html>
